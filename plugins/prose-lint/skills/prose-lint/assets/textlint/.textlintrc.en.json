@@ -1,0 +1,21 @@
+{
+  "plugins": {
+    "html": {
+      "extensions": [".htm"]
+    }
+  },
+  "rules": {
+    "write-good": {
+      "passive": false,
+      "adverb": false,
+      "so": false,
+      "thereIs": false,
+      "tooWordy": false
+    },
+    "terminology": true,
+    "en-max-word-count": {
+      "max": 40
+    },
+    "no-start-duplicated-conjunction": true
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "plugins": {
+    "html": {
+      "extensions": [".htm", ".html"]
+    }
+  },
+  "rules": {
+    "@textlint-ja/preset-ai-writing": {
+      "no-ai-list-formatting": false,
+      "no-ai-emphasis-patterns": false,
+      "no-ai-colon-continuation": false,
+      "ai-tech-writing-guideline": {
+        "disableStructureGuidance": true,
+        "enableDocumentAnalysis": false
+      }
+    },
+    "ja-keishikimeishi": {
+      "detection_hou_kata": false,
+      "detection_ue": false
+    },
+    "ja-hiragana-hojodoushi": true,
+    "ja-hiragana-daimeishi": true,
+    "preset-ja-technical-writing": {
+      "sentence-length": {
+        "max": 90
+      },
+      "no-mix-dearu-desumasu": {
+        "preferInHeader": "",
+        "preferInBody": "",
+        "preferInList": ""
+      }
+    },
+    "preset-jtf-style": {
+      "1.1.1.本文": false,
+      "3.1.1.全角文字と半角文字の間": false,
+      "2.2.2.算用数字と漢数字の使い分け": false,
+      "4.1.1.句点(。)": false,
+      "4.2.1.感嘆符(！)": false,
+      "4.2.2.疑問符(？)": false
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "prose-lint",
+  "displayName": "Prose Lint",
+  "version": "1.0.0",
+  "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs, a register of rejected wordings that you grow row by row (including definition by negation), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and two house rules), and vale with proselint.",
+  "author": {
+    "name": "tomkd555",
+    "url": "https://github.com/tomkd555"
+  },
+  "homepage": "https://github.com/tomkd555/prose-lint",
+  "repository": "https://github.com/tomkd555/prose-lint",
+  "license": "MIT",
+  "keywords": [
+    "lint",
+    "textlint",
+    "vale",
+    "proselint",
+    "japanese",
+    "proofreading",
+    "writing",
+    "koyobun",
+    "sudachipy"
+  ]
+}
