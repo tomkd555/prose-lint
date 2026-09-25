@@ -13,11 +13,15 @@ each suspicion with a line number. Every hit is a suspicion; the ruling belongs
 to the caller.
 
 Checks (id - rule). The first four paraphrase items of 「公用文作成の考え方」
-(文化審議会建議, 2022-01-07); the last two are house rules.
-    passive          use the passive sparingly
-    clause_chain     avoid long chains of conjunctive particles and continuative forms (3 or more)
-    kanji_suru       limit verbs made of one kanji and する
-    etc              use 等 and など with care
+(文化審議会建議, 2022-01-07); the other five are house rules, each with the
+item of the 建議 it leans on.
+    passive          use the passive sparingly (Ⅲ-3 ケ)
+    clause_chain     avoid long chains of conjunctive particles and continuative forms, 3 or more (Ⅲ-3 カ)
+    kanji_suru       limit verbs made of one kanji and する (Ⅱ-8)
+    etc              use 等 and など with care (Ⅱ-5 イ)
+    ga_conjunction   house rule: every conjunctive が, for the reader to keep the contrastive ones (after Ⅲ-3 カ)
+    tari_single      house rule: a たり with no partner; standard usage pairs it (AたりBたり)
+    sasete_itadaku   house rule: させていただく where no permission is being asked (after Ⅱ-6 ウ)
     nominal_ending   house rule: 体言止め in body sentences (after JTF style guide 1.1.2/1.1.3)
     negated_predicate house rule: the sentence's final predicate is negated
 
@@ -88,6 +92,9 @@ HINTS = {
     "kanji_suru": "漢字１字＋する。二字の熟語か訓読みの動詞で書く",
     "nominal_ending": "本文の体言止め。述語で終える",
     "etc": "「等」「など」。前に代表的・典型的なものを挙げる",
+    "ga_conjunction": "接続助詞「が」。逆接でなければ文を切るか、「ので」「ため」で続ける",
+    "tari_single": "「たり」が一つ。「AたりBたり」と繰り返すか、「たり」を使わずに書く",
+    "sasete_itadaku": "「させていただく」。相手の許可を得る場面でなければ「します」「いたします」で書く",
     "negated_predicate": "文末の述語が否定。何であるかを書く（動詞を単に打ち消した文は残る）",
 }
 
@@ -107,10 +114,31 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
         return out
 
     chain = 0
+    tari = 0
     for i, m in enumerate(ms):
         pos = _pos(m)
         surf = m.surface()
         lemma = m.dictionary_form()
+
+        # が as a 接続助詞 joins two clauses; the guideline keeps it for
+        # contrast. Whether the clauses contrast is the caller's reading.
+        if pos[0] == "助詞" and pos[1] == "接続助詞" and surf == "が":
+            add("ga_conjunction", "".join(x.surface() for x in ms[max(0, i - 6) : i + 1]))
+
+        # たり/だり as a 副助詞, counted per sentence and judged after the loop.
+        if pos[0] == "助詞" and pos[1] == "副助詞" and lemma in {"たり", "だり"}:
+            tari += 1
+
+        # させていただく: する(未然)+せる+て+いただく, in any spelling of いただく.
+        if (
+            lemma == "せる"
+            and i >= 1
+            and ms[i - 1].dictionary_form() == "する"
+            and i + 2 < len(ms)
+            and ms[i + 1].surface() == "て"
+            and ms[i + 2].dictionary_form() in {"いただく", "頂く"}
+        ):
+            add("sasete_itadaku", "".join(x.surface() for x in ms[max(0, i - 2) : i + 3]))
 
         # passive: れる/られる right after a verb (possible, honorific and
         # spontaneous readings share the form, so the ruling is the caller's).
@@ -148,6 +176,8 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
 
     if chain >= CHAIN_THRESHOLD:
         add("clause_chain", raw, n=chain)
+    if tari == 1:
+        add("tari_single", raw)
 
     # nominal ending: the last content morpheme is a noun and the sentence is
     # closed (a 。, or the last line of its paragraph). A hard-wrapped line that

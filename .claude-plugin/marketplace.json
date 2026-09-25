@@ -4,13 +4,13 @@
     "name": "tomkd555",
     "url": "https://github.com/tomkd555"
   },
-  "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs, a register of rejected wordings that you grow row by row (including definition by negation), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and two house rules), and vale with proselint.",
+  "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs (the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー, the AI-writing preset), a register of rejected wordings that you grow row by row (definition by negation, the spoken register, the stock phrases of generated Japanese), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and five house rules), and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written English.",
   "plugins": [
     {
       "name": "prose-lint",
       "source": "./plugins/prose-lint",
-      "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs, a register of rejected wordings that you grow row by row (including definition by negation), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and two house rules), and vale with proselint.",
-      "version": "1.0.0",
+      "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs (the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー, the AI-writing preset), a register of rejected wordings that you grow row by row (definition by negation, the spoken register, the stock phrases of generated Japanese), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and five house rules), and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written English.",
+      "version": "1.1.0",
       "author": {
         "name": "tomkd555",
         "url": "https://github.com/tomkd555"
@@ -24,11 +24,14 @@
         "textlint",
         "vale",
         "proselint",
+        "ai-tells",
+        "prh",
         "japanese",
         "proofreading",
         "writing",
         "koyobun",
-        "sudachipy"
+        "sudachipy",
+        "ai-writing"
       ]
     }
   ]
