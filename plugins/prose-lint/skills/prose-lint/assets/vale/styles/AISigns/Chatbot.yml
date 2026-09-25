@@ -1,0 +1,21 @@
+# House rule: what the ai-tells package leaves out. ai-tells reports the
+# closing pleasantries ("I hope this helps") and the openers ("Certainly!");
+# this rule reports the model talking about itself, and the tokens a chat
+# interface pastes into copied text.
+extends: existence
+message: "'%s' is the model talking about itself, or a token the chat interface pasted; delete it."
+link: https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing
+level: error
+ignorecase: true
+nonword: true
+tokens:
+  - '\bas an AI(?: language model| assistant| model)?\b'
+  - '\bas a (?:large )?language model\b'
+  - '\bI(?:''m| am) (?:an AI|a language model|not able to browse|unable to browse)\b'
+  - '\bas of my (?:last|latest|most recent) (?:update|training|knowledge)\b'
+  - '\b(?:my )?knowledge cut-?off\b'
+  - '\b(?:my )?training data\b'
+  - '\bI (?:do not|don''t) have (?:access to|information) (?:real-time|beyond|after)\b'
+  - '\bup to my last training update\b'
+  - '(?:contentReference|oaicite|oai_citation)\[?[^\]\s]{0,40}\]?'
+  - '\bturn\d+(?:search|view|file)\d+\b'

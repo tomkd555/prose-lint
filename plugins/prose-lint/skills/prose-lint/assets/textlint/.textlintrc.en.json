@@ -4,6 +4,9 @@
       "extensions": [".htm"]
     }
   },
+  "filters": {
+    "comments": true
+  },
   "rules": {
     "write-good": {
       "passive": false,
@@ -16,6 +19,13 @@
     "en-max-word-count": {
       "max": 40
     },
-    "no-start-duplicated-conjunction": true
+    "no-start-duplicated-conjunction": true,
+    "@textlint-ja/preset-ai-writing": {
+      "no-ai-list-formatting": true,
+      "no-ai-emphasis-patterns": true,
+      "no-ai-colon-continuation": false,
+      "no-ai-hype-expressions": false,
+      "ai-tech-writing-guideline": false
+    }
   }
 }

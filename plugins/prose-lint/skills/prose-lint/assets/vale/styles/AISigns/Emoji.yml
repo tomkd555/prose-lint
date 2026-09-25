@@ -1,0 +1,13 @@
+# House rule: an emoji in a heading or a list item. ai-tells has no rule for
+# it; the textlint preset-ai-writing has one, but the English config does
+# not load that preset.
+extends: existence
+message: "Emoji in a heading or list item; drop it."
+link: https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing
+level: warning
+nonword: true
+scope:
+  - heading
+  - list
+tokens:
+  - '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B50}\x{2705}\x{2B06}\x{2B07}\x{2934}\x{2935}\x{3030}\x{303D}\x{3297}\x{3299}]'
