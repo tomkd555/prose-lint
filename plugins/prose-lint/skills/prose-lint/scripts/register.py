@@ -15,10 +15,12 @@ a space goes between two Latin characters, and a list item starts a new
 paragraph. A row whose pattern does not compile is reported on stderr.
 
 Usage:
-    uv run register.py [--register <vocabulary.md>] [--json] <file>
+    uv run register.py [--register <vocabulary.md> | --academic] [--json] <file>
 
 The register is --register, else $PROSE_LINT_REGISTER, else
 vocabulary.md in $PROSE_LINT_HOME or ~/.prose-lint, else assets/vocabulary.sample.md next to this script.
+--academic reads the academic register instead: $PROSE_LINT_ACADEMIC_REGISTER, else
+academic.md in the same home, else assets/academic.sample.md.
 Exit code 0 on any number of hits; 1 on an input error.
 """
 from __future__ import annotations
@@ -32,15 +34,21 @@ from pathlib import Path
 import regex
 
 SEP = "\x1f"  # stands in for an escaped pipe while the row is split
-SAMPLE = Path(__file__).resolve().parent.parent / "assets" / "vocabulary.sample.md"
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+# (environment variable, file in the home directory, sample in assets/)
+REGISTERS = {
+    "general": ("PROSE_LINT_REGISTER", "vocabulary.md", "vocabulary.sample.md"),
+    "academic": ("PROSE_LINT_ACADEMIC_REGISTER", "academic.md", "academic.sample.md"),
+}
 
 
-def default_register() -> Path:
-    env = os.environ.get("PROSE_LINT_REGISTER")
+def default_register(kind: str = "general") -> Path:
+    var, name, sample = REGISTERS[kind]
+    env = os.environ.get(var)
     if env:
         return Path(env)
-    home = Path(os.environ.get("PROSE_LINT_HOME") or Path.home() / ".prose-lint") / "vocabulary.md"
-    return home if home.is_file() else SAMPLE
+    home = Path(os.environ.get("PROSE_LINT_HOME") or Path.home() / ".prose-lint") / name
+    return home if home.is_file() else ASSETS / sample
 
 
 def load_entries(text: str) -> list[dict]:
@@ -98,10 +106,12 @@ def find_hits(content: str, entries: list[dict]) -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("file")
-    ap.add_argument("--register", type=Path)
+    group = ap.add_mutually_exclusive_group()
+    group.add_argument("--register", type=Path)
+    group.add_argument("--academic", action="store_true", help="read the academic register")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    reg = args.register or default_register()
+    reg = args.register or default_register("academic" if args.academic else "general")
     try:
         entries = load_entries(reg.read_text(encoding="utf-8"))
         content = Path(args.file).read_text(encoding="utf-8")
