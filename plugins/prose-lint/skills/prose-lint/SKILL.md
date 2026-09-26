@@ -1,6 +1,6 @@
 ---
 name: prose-lint
-description: Runs the wording linters on a file or pasted text and picks the ones the text's language calls for - for Japanese, textlint with the Japanese config (technical-writing and JTF presets, the AI-writing preset, the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー), a register of rejected wordings including definition by negation and the AI stock phrases, natural-japanese's lint in both lanes with its naturalness score and baseline rerun, and a sudachipy morphology lint (passive, clause chains, 漢字１字＋する and 等/など from 公用文作成の考え方; conjunctive が, lone たり, させていただく, body 体言止め and negated predicates as house rules); for English, textlint with the English config, the register's English negation row, and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written text. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+description: Runs the wording linters on a file or pasted text and picks the ones the text's language calls for - for Japanese, textlint with the Japanese config (technical-writing and JTF presets, the AI-writing preset, the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー), a register of rejected wordings including definition by negation and the AI stock phrases, natural-japanese's lint in both lanes with its naturalness score and baseline rerun, and a sudachipy morphology lint (passive, clause chains, 漢字１字＋する and 等/など from 公用文作成の考え方; conjunctive が, lone たり, させていただく, body 体言止め and negated predicates as house rules), and an academic mode for papers, theses and reports that adds a register of 47 spoken or over-stiff wordings drawn from university writing guides, lab guides and corpus studies, two morphology checks and a review for the academic register; for English, textlint with the English config, the register's English negation row, and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written text. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -51,6 +51,13 @@ holding a dozen Japanese terms still routes to English.
 
 A mixed document runs once, under its majority language. Findings that land on a
 quotation in the other language get dropped.
+
+A Japanese text also runs in **academic mode** when the user asks for the
+register of a paper, thesis or report (論文調, 論文向け, レポートの文体,
+学術的な表現, 口語表現を直して), or when the text is plainly one: a 参考文献 or
+引用文献 section together with 本研究, 本稿 or 本論文 in the body. The report
+says which of the two put the run in academic mode. Academic mode adds one
+step to 3a and changes some rulings; the other layers run as usual.
 
 ## Step 3a - Japanese
 
@@ -226,11 +233,68 @@ reports one line per suspicion. Each id carries its rule and its ruling:
 
 `--json` gives the same findings for the ledger.
 
+### Academic mode
+
+Only in academic mode. Read `{SKILL_DIR}/references/academic-japanese.md` first:
+it gives each rule, the passage it rests on and the sources' disagreements. Then
+run:
+
+```
+uv run {SKILL_DIR}/scripts/register.py --academic <file>
+uv run {SKILL_DIR}/scripts/koyobun.py --academic <file>
+```
+
+The academic register is `$PROSE_LINT_ACADEMIC_REGISTER`, else
+`{HOME}/academic.md`, else `assets/academic.sample.md`. Its rows fall in seven
+groups; the Why of each hit ends with the sources in 〔〕, which the report
+keeps.
+
+- Fixed - 文体と文末 (です・ます, だ, じゃ, んだ, ちゃう, ？！), 接続の言葉
+  (でも, けど, それで, 正直), 程度と量の副詞 (すごく, ちょっと, いっぱい,
+  全然, 多分, 一番), 指示の言葉と名詞 (こんな, とか, みたい, 私, 今回は,
+  卒論), 述語と判断の示し方 (と思う, と考えた, てみた, ないといけない,
+  ないで, 図を見ると) and 文語調 (ごとく, べく, するべき). Rewrite each with
+  the row's Instead, in the words of the text around it. A hit inside a
+  quotation, a term of art or a corpus example stays, with that reason.
+- Advisory - 判断が要る言い方: 文中の なので/だから, とても, 完全に/必ず,
+  と思われる, ことが分かる, することができる, を行う, しかしながら. The
+  sources split on these or keep them in some uses; section 3 of the reference
+  says how to rule. Fix the ones that hold and say why the others stay.
+
+`koyobun.py --academic` adds two ids to the nine above: `tte` (って as a
+particle) and `tara` (the conditional たら/だら), both fixed. Rewrite って as
+は, とは or と/という, and たら as と, ば or 場合.
+
+Academic mode changes these rulings in the other layers:
+
+- `passive`: 「と考えられる」「と思われる」「と見られる」 are 自発 and stay; they
+  are the forms the register itself recommends.
+- The general register's breadth row (様々な): the academic rows give 様々な
+  and 種々の as the written form of いろんな. List the items when the text can;
+  otherwise the word stays, with that reason. A paper's statement of its
+  contribution keeps に寄与 when it names what changes.
+- `ja-no-weak-phrase` on かもしれない and the kana rules: as section 3 and 4
+  of the reference say. A journal's author guide, when the user names one, wins
+  over every rule here, punctuation and kana included.
+
+Raise the register without stiffening it. Use the plainest written form the
+row offers; do not turn native verbs into kanji compounds wholesale, add
+において, or string それゆえ and よって through a paragraph (reference, section
+2).
+
 ### The review
 
 Read the text once yourself for what no script decides: whether each paragraph serves the
 document's purpose, whether terms stay consistent from start to end, and
 whether the conclusion comes first.
+
+In academic mode, read also for the points of the reference's sections 1.3 to
+1.6 and 2 that no regex finds: fact and judgement kept apart, with the ground
+of each judgement given and another author's view attributed; claims measured
+by numbers, with no praise of one's own result; each demonstrative with a
+named referent; one term per concept; methods and results in the past tense
+and discussion in the present; no paragraph leaning on において, のである or a
+stiff connective in every sentence.
 
 ## Step 3b - English
 
@@ -314,7 +378,10 @@ a name.
   applying them wholesale flattens prose the user wrote deliberately. `textlint
   --fix` is off the table for the same reason.
 - For Japanese, open with the naturalness score and its band, then the ledger
-  by layer, then the second run's resolved / new / persisting counts. A score
+  by layer, then the second run's resolved / new / persisting counts. In
+  academic mode, add a line under the score: that the run was in academic mode
+  and why, and the academic register's hit count before and after the fixes;
+  the academic ledger comes after the register's, with each hit's sources. A score
   alone says nothing about the register hits, so it never replaces the ledger.
 - For English, open with one line: the count of ai-tells and AISigns hits and
   the count per 1,000 words, from the vale run before the fixes (`vale
