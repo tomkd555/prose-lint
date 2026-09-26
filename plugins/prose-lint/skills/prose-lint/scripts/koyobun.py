@@ -25,8 +25,15 @@ item of the 建議 it leans on.
     nominal_ending   house rule: 体言止め in body sentences (after JTF style guide 1.1.2/1.1.3)
     negated_predicate house rule: the sentence's final predicate is negated
 
+With --academic, two more checks list the spoken forms that a surface regex
+cannot tell from ordinary verbs (使って, したがって, もたらす). Both come from
+the table of 話し言葉的 words in 柏野ほか (2016), 言語処理学会第22回年次大会
+P18-1; references/academic-japanese.md cites the rest.
+    tte              って as a particle (この手法って, 来るって言った)
+    tara             たら/だら, the conditional of た (上げたら, 読んだら)
+
 Usage:
-    uv run koyobun.py [--json] <file>
+    uv run koyobun.py [--academic] [--json] <file>
     uv run koyobun.py --nj-dir      # print the natural-japanese scripts directory
 
 Sentence splitting and Markdown masking come from natural-japanese's textcore.py,
@@ -96,6 +103,8 @@ HINTS = {
     "tari_single": "「たり」が一つ。「AたりBたり」と繰り返すか、「たり」を使わずに書く",
     "sasete_itadaku": "「させていただく」。相手の許可を得る場面でなければ「します」「いたします」で書く",
     "negated_predicate": "文末の述語が否定。何であるかを書く（動詞を単に打ち消した文は残る）",
+    "tte": "助詞「って」。話し言葉の形。主題なら「は」「とは」、引用なら「と」「という」で書く",
+    "tara": "仮定の「たら」。話し言葉の形。「と」「ば」「場合」で書く",
 }
 
 
@@ -174,6 +183,13 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
         if surf in {"等", "など"} and pos[0] in {"助詞", "接尾辞", "名詞"}:
             add("etc", surf)
 
+        if sentence["academic"]:
+            context = "".join(x.surface() for x in ms[max(0, i - 4) : i + 2])
+            if pos[0] == "助詞" and surf == "って":
+                add("tte", context)
+            if pos[0] == "助動詞" and lemma == "た" and surf in {"たら", "だら"}:
+                add("tara", context)
+
     if chain >= CHAIN_THRESHOLD:
         add("clause_chain", raw, n=chain)
     if tari == 1:
@@ -208,7 +224,7 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
     return out
 
 
-def run(text: str) -> tuple[list[dict], dict]:
+def run(text: str, academic: bool = False) -> tuple[list[dict], dict]:
     masked = mask_markdown_structure(text)
     lines = iter_lines_with_no(masked)
     raw_by_no = dict(iter_lines_with_no(text))
@@ -226,7 +242,7 @@ def run(text: str) -> tuple[list[dict], dict]:
         next_line = raw_by_no.get(no + 1, "")
         closed = after.startswith(("。", "！", "？", "．")) or (after == "" and not next_line.strip())
         ms = list(tok.tokenize(sent, SplitMode.C))
-        findings.extend(_findings_for({"closed": closed}, no, raw, ms))
+        findings.extend(_findings_for({"closed": closed, "academic": academic}, no, raw, ms))
     counts: dict[str, int] = {}
     for f in findings:
         counts[f["check"]] = counts.get(f["check"], 0) + 1
@@ -240,13 +256,14 @@ def main() -> int:
         return 0
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("file")
+    ap.add_argument("--academic", action="store_true", help="also list the spoken particles tte and tara")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
     text, err = read_source_file(Path(args.file))
     if err:
         print(err, file=sys.stderr)
         return 1
-    findings, stats = run(text)
+    findings, stats = run(text, academic=args.academic)
     if args.json:
         print(json.dumps({"file": args.file, "stats": stats, "findings": findings}, ensure_ascii=False, indent=2))
         return 0
