@@ -19,7 +19,7 @@ The 建議 on official writing calls the である forms the written style prope
 > 「である・であろう・であった」は書き言葉専用の文体であり、論理的に結論を導き出すような文章にふさわしい。〔公用文〕 Ⅲ-1 ウ
 
 Every university guide read asks for 常体 and forbids mixing it with です・ます
-〔東北大, 金沢大, 立教大, 神戸国際大, 名桜大, 立命館IR〕; so do the lab guides
+〔東北大, 金沢大, 立教大, 神戸国際大, 名桜大 and 立命館IR〕. So do the lab guides
 〔坂間, 垂水, 金森〕 and two society author guides:
 
 > 文章は口語体で、基本的に｢である調｣で統一すること。〔土木学会E3〕
@@ -47,7 +47,7 @@ Two findings shape the rows:
   hardness of connectives in BCCWJ and matched it to 柏野's four classes (a: to
   be avoided … d: no problem in academic prose). Class a holds
   「けど，だって，でも，それで，ですから，けれど，それから，だから」; class d
-  holds しかし, また, ただし, あるいは, さらに, したがって, または, なお, すなわち,
+  holds しかし、また、ただし、あるいは、さらに、したがって、または、なお、すなわち、
   および.
 - For adverbs, the Sino-Japanese word is often the spoken one: 「全然，多分，絶対，
   全部，一番は話し言葉的であり，まったく，おそらく，〔かならず〕，すべて，もっとも

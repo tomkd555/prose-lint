@@ -1,6 +1,6 @@
 ---
 name: prose-lint
-description: Runs the wording linters on a file or pasted text and picks the ones the text's language calls for - for Japanese, textlint with the Japanese config (technical-writing and JTF presets, the AI-writing preset, the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー), a register of rejected wordings including definition by negation and the AI stock phrases, natural-japanese's lint in both lanes with its naturalness score and baseline rerun, and a sudachipy morphology lint (passive, clause chains, 漢字１字＋する and 等/など from 公用文作成の考え方; conjunctive が, lone たり, させていただく, body 体言止め and negated predicates as house rules), and an academic mode for papers, theses and reports that adds a register of 47 spoken or over-stiff wordings drawn from university writing guides, lab guides and corpus studies, two morphology checks and a review for the academic register; for English, textlint with the English config, the register's English negation row, and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written text. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+description: Runs the wording linters on a file or pasted text and picks the ones the text's language calls for - for Japanese, textlint with the Japanese config (technical-writing and JTF presets, the AI-writing preset, the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー), a register of rejected wordings including definition by negation and the AI stock phrases, natural-japanese's lint in both lanes with its naturalness score and baseline rerun, and a sudachipy morphology lint (passive, clause chains, 漢字１字＋する and 等/など from 公用文作成の考え方; clauses strung on 読点, conjunctive が, lone たり, させていただく, body 体言止め and negated predicates as house rules), and an academic mode for papers, theses and reports that adds a register of 47 spoken or over-stiff wordings drawn from university writing guides, lab guides and corpus studies, two morphology checks and a review for the academic register; for English, textlint with the English config, the register's English negation row, and vale with proselint, the ai-tells package and three house rules: two for the signs of LLM-written text and a comma cap for sentences strung on commas. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -52,9 +52,9 @@ holding a dozen Japanese terms still routes to English.
 A mixed document runs once, under its majority language. Findings that land on a
 quotation in the other language get dropped.
 
-A Japanese text also runs in **academic mode** when the user asks for the
-register of a paper, thesis or report (論文調, 論文向け, レポートの文体,
-学術的な表現, 口語表現を直して), or when the text is plainly one: a 参考文献 or
+A Japanese text also runs in **academic mode** in two cases. The user asks for
+the register of a paper, thesis or report: 論文調, 論文向け, レポートの文体,
+学術的な表現 or 口語表現を直して. Or the text is plainly one: a 参考文献 or
 引用文献 section together with 本研究, 本稿 or 本論文 in the body. The report
 says which of the two put the run in academic mode. Academic mode adds one
 step to 3a and changes some rulings; the other layers run as usual.
@@ -81,10 +81,10 @@ code. The findings fall in three tiers by rule id:
   `no-mix-dearu-desumasu`, and the kana rules: `ja-keishikimeishi`,
   `ja-hiragana-hojodoushi`, `ja-hiragana-daimeishi`, `ja-hiragana-fukushi`
   and `prh`. The four hiragana rules and prh together restate 「公用文における
-  漢字使用等について」(平成22年内閣訓令第1号) 別紙: prh carries the
-  conjunctions, auxiliaries and the fixed phrases of its item キ (但し, 出来る,
-  様に, 通り, 致します and the rest), and each prh message names the item it
-  comes from. The fukushi dictionary is the rule's own minus the five words the
+  漢字使用等について」(平成22年内閣訓令第1号) 別紙. prh carries the
+  conjunctions, auxiliaries and the fixed phrases of its item キ. Those
+  phrases include 但し, 出来る, 様に, 通り and 致します. Each prh message names
+  the item it comes from. The fukushi dictionary is the rule's own minus the five words the
   訓令 keeps in kanji (更に, 既に, 最も, 僅か, 若しくは). A kana rule firing on
   a proper noun, a legal term or a quotation is kept, with that reason.
 - Advisory - each needs judgement: `no-doubled-joshi`, `no-doubled-conjunction`,
@@ -116,15 +116,18 @@ which one it read. The sample carries twelve rows in three groups.
 - The spoken register, four rows: なので and だから at a sentence start, 一番
   before an adjective, ほぼ全部. Rewrite in a formal document; a quotation or
   a deliberately casual text keeps them.
-- The stock phrases of generated Japanese, six rows, each on a pattern that
-  natural-japanese's catalogue lists but its lint leaves to the eye: hearsay
-  with no source (と言われています, とされています, という声もあります),
-  breadth adjectives that stand in for a list (様々な, 多様な, 幅広い),
-  outcomes named by an abstract noun (を実現, に寄与, シームレス, 最適化), an
-  intention softened with と思います, the closing ぜひ〜してみてください, and
-  the opening 今回は〜について紹介します. Rewrite each as the row says: name
-  the source or own the claim, list the items, say what changes, say it
-  plainly, delete the boilerplate. A hit inside a quotation stays.
+- The stock phrases of generated Japanese, six rows. Each is on a pattern that
+  natural-japanese's catalogue lists but its lint leaves to the eye:
+  - hearsay with no source (と言われています, とされています, という声もあります)
+  - breadth adjectives that stand in for a list (様々な, 多様な, 幅広い)
+  - outcomes named by an abstract noun (を実現, に寄与, シームレス, 最適化)
+  - an intention softened with と思います
+  - the closing ぜひ〜してみてください
+  - the opening 今回は〜について紹介します
+
+  Rewrite each as the row says: name the source or own the claim, list the
+  items, say what changes, say it plainly, delete the boilerplate. A hit
+  inside a quotation stays.
 
 The regex reaches the surface forms only. The `negated_predicate` id of the
 morphology lint below lists every sentence whose final predicate is negated;
@@ -146,8 +149,8 @@ switches off detectors that misfire on bullet-heavy business documents. The JSON
 the ledger the report rules on, and the baseline for the second run below. Two
 lanes come out.
 
-- The AI-smell lane: banned phrases, translationese, uniform sentence length,
-  the 体言止め rate, paragraph-opening conjunctions, lexical variety. Judge each
+- The AI-smell lane: banned phrases and translationese, uniform sentence length,
+  the 体言止め rate, paragraph-opening conjunctions and lexical variety. Judge each
   hit against the section for its category in the natural-japanese skill's
   `references/revision-guide.md`. Its antithesis detector counts `ではなく` and
   `だけでなく…も` across the document, fires at three occurrences, and sets the
@@ -188,8 +191,8 @@ uv run {SKILL_DIR}/scripts/koyobun.py <file>
 This script checks rules that turn on parts of speech, which no surface-string
 linter sees. Four come from 「公用文作成の考え方」 (文化審議会建議, 2022-01-07,
 https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/93650001_01.html);
-the rules below paraphrase its items. Five are house rules of this skill,
-marked as such, three of them leaning on an item of the 建議. It tokenises
+the rules below paraphrase its items. Six are house rules of this skill,
+marked as such, four of them leaning on an item of the 建議. It tokenises
 with sudachipy, on the same sentence split and Markdown mask lint.py uses, and
 reports one line per suspicion. Each id carries its rule and its ruling:
 
@@ -201,9 +204,16 @@ reports one line per suspicion. Each id carries its rule and its ruling:
   continuative forms): three or more 接続助詞 or 連用中止 in one sentence; the
   threshold of three is this skill's. Split at the joint where the topic
   changes.
+- `comma_chain` (house rule, after Ⅲ-3 カ): two or more 読点 in one sentence
+  that each close a clause, after a 接続助詞 or a 連用中止
+  (「要件を確認し、設計を進めて、実装に着手する」). 「，」 and 「,」 count as
+  読点; について、 に対して、 として、 and their kin work as particles and
+  stay out of the count, as does a 読点 after a topic, a conjunction or an
+  item of a noun list. Fixed: give each clause its own sentence, or a list
+  when the clauses are parallel. A hit inside a quotation stays.
 - `kanji_suru` (Ⅱ-8, limit verbs made of one kanji and する): a verb of that
-  shape. The 建議 gives 模する, 擬する, 賭する and 滅する as examples, with
-  似せる, なぞらえる, 賭ける and 滅ぼす as rewrites. This skill exempts 関する,
+  shape. The 建議 gives 模する, 擬する, 賭する and 滅する as examples. Its
+  rewrites are 似せる, なぞらえる, 賭ける and 滅ぼす. This skill exempts 関する,
   対する and 際する, which work as particles. Rewrite with a native verb or a
   two-kanji compound; a legal term of art stays.
 - `etc` (Ⅱ-5 イ, use 等 and など with care): every occurrence. The 建議 asks
@@ -249,19 +259,32 @@ The academic register is `$PROSE_LINT_ACADEMIC_REGISTER`, else
 groups; the Why of each hit ends with the sources in 〔〕, which the report
 keeps.
 
-- Fixed - 文体と文末 (です・ます, だ, じゃ, んだ, ちゃう, ？！), 接続の言葉
-  (でも, けど, それで, 正直), 程度と量の副詞 (すごく, ちょっと, いっぱい,
-  全然, 多分, 一番), 指示の言葉と名詞 (こんな, とか, みたい, 私, 今回は,
-  卒論), 述語と判断の示し方 (と思う, と考えた, てみた, ないといけない,
-  ないで, 図を見ると) and 文語調 (ごとく, べく, するべき). Rewrite each with
-  the row's Instead, in the words of the text around it. A hit inside a
-  quotation, a term of art or a corpus example stays, with that reason.
-- Advisory - 判断が要る言い方: 文中の なので/だから, とても, 完全に/必ず,
-  と思われる, ことが分かる, することができる, を行う, しかしながら. The
-  sources split on these or keep them in some uses; section 3 of the reference
-  says how to rule. Fix the ones that hold and say why the others stay.
+- Fixed - six groups:
+  - 文体と文末: です・ます、だ、じゃ、んだ、ちゃう、？！
+  - 接続の言葉: でも、けど、それで、正直
+  - 程度と量の副詞: すごく、ちょっと、いっぱい、全然、多分、一番
+  - 指示の言葉と名詞: こんな、とか、みたい、私、今回は、卒論
+  - 述語と判断の示し方: と思う、と考えた、てみた、ないといけない、ないで、図を見ると
+  - 文語調: ごとく、べく、するべき
 
-`koyobun.py --academic` adds two ids to the nine above: `tte` (って as a
+  Rewrite each with the row's Instead, in the words of the text around it. A
+  hit inside a quotation, a term of art or a corpus example stays, with that
+  reason.
+- Advisory - 判断が要る言い方, eight rows:
+  - 文中の なので/だから
+  - とても
+  - 完全に/必ず
+  - と思われる
+  - ことが分かる
+  - することができる
+  - を行う
+  - しかしながら
+
+  The sources split on these or keep them in some uses; section 3 of the
+  reference says how to rule. Fix the ones that hold and say why the others
+  stay.
+
+`koyobun.py --academic` adds two ids to the ten above: `tte` (って as a
 particle) and `tara` (the conditional たら/だら), both fixed. Rewrite って as
 は, とは or と/という, and たら as と, ば or 場合.
 
@@ -306,13 +329,13 @@ Three mechanical layers, then the review.
 {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
 ```
 
-The English config covers write-good, terminology, a 40-word sentence cap,
-duplicated conjunctions at the start of consecutive sentences, and two
-Markdown-shape rules of the AI-writing preset, `no-ai-list-formatting` (a
-bullet that opens with a bold label and a colon, an emoji bullet) and
-`no-ai-emphasis-patterns` (bold inside a heading, an emoji before a bold
-label). Those two report in Japanese; restate the finding in English in the
-report. All of these are fixed when they hold.
+The English config covers write-good, terminology, a 40-word sentence cap and
+duplicated conjunctions at the start of consecutive sentences. It also runs
+two Markdown-shape rules of the AI-writing preset. `no-ai-list-formatting`
+reports a bullet that opens with a bold label and a colon, and an emoji
+bullet. `no-ai-emphasis-patterns` reports bold inside a heading, and an emoji
+before a bold label. Those two report in Japanese; restate the finding in
+English in the report. All of these are fixed when they hold.
 
 ### vale
 
@@ -320,34 +343,83 @@ report. All of these are fixed when they hold.
 vale --config {HOME}/vale/.vale.ini <file>
 ```
 
-Three styles run: proselint (redundancy, corporate speak, jargon, hedging),
-`ai-tells` (https://github.com/tbhb/vale-ai-tells, the signs of LLM-written
-English, 137 rules), and `AISigns`, two house rules shipped in
-`assets/vale/styles/AISigns` for what ai-tells leaves out: the model talking
-about itself or a token pasted from a chat interface (`AISigns.Chatbot`), and an
-emoji in a heading or list item (`AISigns.Emoji`). vale exits 1 on any finding.
-Every ai-tells rule is `error`, so the tier comes from the message's opening
-words, which name the family:
+Three styles run:
+
+- proselint: redundancy, corporate speak, jargon and hedging.
+- `ai-tells` (https://github.com/tbhb/vale-ai-tells): the signs of LLM-written
+  English, 137 rules.
+- `AISigns`: three house rules shipped in `assets/vale/styles/AISigns` for
+  what ai-tells leaves out. `AISigns.Chatbot` reports the model talking about
+  itself or a token pasted from a chat interface. `AISigns.Emoji` reports an
+  emoji in a heading or list item. `AISigns.CommaCount` reports five or more
+  commas in one sentence.
+
+vale exits 1 on any finding. Every ai-tells rule is `error`, so the tier comes
+from the message's opening words, which name the family:
 
 - Fixed - the families that name a stock phrase, a filler or a chat artefact:
-  `AI closing`, `AI opening`, `AI sycophancy`, `AI hedge`, `AI stacked hedge`,
-  `AI conclusion`, `AI vague attribution`, `AI copula dodge`, `AI participial
-  padding`, `AI transition`, `AI overused word`, `AI vocabulary`, `AI cliché`,
-  `AI puffery`, every `AI ... heading`, `AI structure announcement`,
-  `AI metacommentary`, `AI restatement`, `AI empty modifier`, `AI intensifier`,
-  `AI quantity metaphor`, `AI list intro`, `AI label-and-explain`,
-  `AI sequencing`, `AI contrast`, `AI contrast by negation`, `AI strawman
-  contrast`, `AI stilted negation`, `AI stacked absence`, `AI negated subject`,
-  `AI evasion`, `AI strategy buzzword`, and both AISigns rules. Fix them; a hit inside a quotation or on
-  a term of art stays, with that reason.
+  - `AI closing`
+  - `AI opening`
+  - `AI sycophancy`
+  - `AI hedge`
+  - `AI stacked hedge`
+  - `AI conclusion`
+  - `AI vague attribution`
+  - `AI copula dodge`
+  - `AI participial padding`
+  - `AI transition`
+  - `AI overused word`
+  - `AI vocabulary`
+  - `AI cliché`
+  - `AI puffery`
+  - every `AI ... heading`
+  - `AI structure announcement`
+  - `AI metacommentary`
+  - `AI restatement`
+  - `AI empty modifier`
+  - `AI intensifier`
+  - `AI quantity metaphor`
+  - `AI list intro`
+  - `AI label-and-explain`
+  - `AI sequencing`
+  - `AI contrast`
+  - `AI contrast by negation`
+  - `AI strawman contrast`
+  - `AI stilted negation`
+  - `AI stacked absence`
+  - `AI negated subject`
+  - `AI evasion`
+  - `AI strategy buzzword`
+  - `AISigns.Chatbot`
+  - `AISigns.Emoji`
+
+  Fix them; a hit inside a quotation or on a term of art stays, with that
+  reason.
 - Advisory - the families that name a figure of speech, a rhythm or a
-  punctuation mark, which human writers also use: `AI overused verb` (the
-  Figurative rules), every `AI ... metaphor`, `AI figurative noun`,
-  `AI punctuation` (an em dash is a sign only when a paragraph holds three or
-  more; a capital after a colon is a style choice), `AI tricolon`, `AI staccato`,
-  `AI noun string`, `AI numbered lead-in`, `AI rhetoric`, `AI rhetorical
-  self-answer`, `AI mic-drop`, `AI pseudo-cleft`, `AI anthropomorphism`,
-  `AI anthropomorphic adjective`, and proselint. Fix the ones that hold and say why the others stay.
+  punctuation mark, which human writers also use:
+  - `AI overused verb` (the Figurative rules)
+  - every `AI ... metaphor`
+  - `AI figurative noun`
+  - `AI punctuation`: an em dash is a sign only when a paragraph holds three
+    or more; a capital after a colon is a style choice
+  - `AI tricolon`
+  - `AI staccato`
+  - `AI noun string`
+  - `AI numbered lead-in`
+  - `AI rhetoric`
+  - `AI rhetorical self-answer`
+  - `AI mic-drop`
+  - `AI pseudo-cleft`
+  - `AI anthropomorphism`
+  - `AI anthropomorphic adjective`
+  - proselint
+  - `AISigns.CommaCount`: the rule counts, because no published rule reads
+    English clause structure. Split a sentence that strings clauses on commas,
+    and set a list of six or more items out as a list or keep it. A comma
+    splice with one or two commas passes the count, so the review below reads
+    for it.
+
+  Fix the ones that hold and say why the others stay.
 
 Two ai-tells rules that police one project's own wording (`HouseStyle`,
 `ShipOveruse`) are switched off in the shipped `.vale.ini`.
@@ -364,10 +436,14 @@ With the `elements-of-style:writing-clearly-and-concisely` skill installed
 (https://github.com/obra/the-elements-of-style), invoke it for the judgement
 layer; without it, read for needless words, passive voice that hides the actor,
 and vague nouns yourself. Then read once for the signs no regex catches:
-three items where two or four were the truth, a paragraph that opens with a
-claim and closes with its restatement, headings that all take the same shape,
-a document that agrees with the reader, and a synonym cycled to avoid repeating
-a name.
+
+- clauses joined by a comma alone (a comma splice, which the comma count
+  passes at one or two commas)
+- three items where two or four were the truth
+- a paragraph that opens with a claim and closes with its restatement
+- headings that all take the same shape
+- a document that agrees with the reader
+- a synonym cycled to avoid repeating a name
 
 ## Reporting
 
@@ -383,10 +459,11 @@ a name.
   and why, and the academic register's hit count before and after the fixes;
   the academic ledger comes after the register's, with each hit's sources. A score
   alone says nothing about the register hits, so it never replaces the ledger.
-- For English, open with one line: the count of ai-tells and AISigns hits and
-  the count per 1,000 words, from the vale run before the fixes (`vale
-  --output line` piped to a count of lines holding `ai-tells` or `AISigns`,
-  over `wc -w`). It is a direction, like the naturalness score, and never
+- For English, open with one line: the count of ai-tells, `AISigns.Chatbot`
+  and `AISigns.Emoji` hits and the count per 1,000 words. Both come from the
+  vale run before the fixes: `vale --output line` piped to a count of lines
+  holding `ai-tells`, `AISigns.Chatbot` or `AISigns.Emoji`, over `wc -w`. It
+  is a direction, like the naturalness score, and never
   replaces the ledger. After the fixes, run vale again and state the count
   that remains.
 - Name every layer that was skipped and the tool it lacked.

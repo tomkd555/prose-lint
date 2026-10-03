@@ -13,10 +13,11 @@ each suspicion with a line number. Every hit is a suspicion; the ruling belongs
 to the caller.
 
 Checks (id - rule). The first four paraphrase items of 「公用文作成の考え方」
-(文化審議会建議, 2022-01-07); the other five are house rules, each with the
+(文化審議会建議, 2022-01-07); the other six are house rules, each with the
 item of the 建議 it leans on.
     passive          use the passive sparingly (Ⅲ-3 ケ)
     clause_chain     avoid long chains of conjunctive particles and continuative forms, 3 or more (Ⅲ-3 カ)
+    comma_chain      house rule: clauses strung on 読点 (Aし、Bして、Cする), 2 or more clause-closing 読点 (after Ⅲ-3 カ)
     kanji_suru       limit verbs made of one kanji and する (Ⅱ-8)
     etc              use 等 and など with care (Ⅱ-5 イ)
     ga_conjunction   house rule: every conjunctive が, for the reader to keep the contrastive ones (after Ⅲ-3 カ)
@@ -88,6 +89,13 @@ except ImportError as exc:  # the marketplace clone is gone or moved
     sys.exit(1)
 
 CHAIN_THRESHOLD = 3
+COMMA_CHAIN_THRESHOLD = 2
+# について, に対して, として and their kin: a 格助詞, a verb and て to the
+# tokeniser, one particle to the reader, so they join no clauses.
+COMPOUND_PARTICLES = {
+    ("に", "つく"), ("に", "対する"), ("に", "関する"), ("に", "よる"),
+    ("に", "おく"), ("に", "とる"), ("と", "する"),
+}
 # The guideline's examples are 模する, 擬する, 賭する and 滅する. These three work
 # as particles, so this script exempts them.
 KANJI_SURU_ALLOW = {"関する", "対する", "際する"}
@@ -96,6 +104,7 @@ NEGATORS = {"ない", "ぬ", "ん"}
 HINTS = {
     "passive": "受身。動作主を主語にして能動で書けるなら書き換える",
     "clause_chain": "接続助詞・中止法が {n} 箇所。文を分ける",
+    "comma_chain": "読点で節を {n} 回つないだ文。節ごとに文を分けるか、箇条書きにする",
     "kanji_suru": "漢字１字＋する。二字の熟語か訓読みの動詞で書く",
     "nominal_ending": "本文の体言止め。述語で終える",
     "etc": "「等」「など」。前に代表的・典型的なものを挙げる",
@@ -112,6 +121,11 @@ def _pos(m) -> tuple:
     return m.part_of_speech()
 
 
+def _compound_particle(ms: list, i: int) -> bool:
+    v = i - 1 if ms[i].surface() == "て" else i
+    return v >= 1 and (ms[v - 1].surface(), ms[v].dictionary_form()) in COMPOUND_PARTICLES
+
+
 def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
     out: list[dict] = []
 
@@ -123,6 +137,7 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
         return out
 
     chain = 0
+    commas = 0
     tari = 0
     for i, m in enumerate(ms):
         pos = _pos(m)
@@ -155,15 +170,16 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
             add("passive", ms[i - 1].surface() + surf)
 
         # clause chain: a 接続助詞, or a 連用形 verb/adjective before a 読点 (中止法).
-        if pos[0] == "助詞" and pos[1] == "接続助詞":
+        # comma chain: the same joints, counted only where a 読点 follows
+        # (「、」「，」「,」). A clause closed by a noun (ため、 ところ、) is outside
+        # both counts.
+        before_comma = i + 1 < len(ms) and _pos(ms[i + 1])[1] == "読点"
+        is_joint = (pos[0] == "助詞" and pos[1] == "接続助詞") or (
+            pos[0] in {"動詞", "形容詞", "助動詞"} and pos[5].startswith("連用形") and before_comma
+        )
+        if is_joint and not _compound_particle(ms, i):
             chain += 1
-        elif (
-            pos[0] in {"動詞", "形容詞", "助動詞"}
-            and pos[5].startswith("連用形")
-            and i + 1 < len(ms)
-            and _pos(ms[i + 1])[1] == "読点"
-        ):
-            chain += 1
+            commas += before_comma
 
         # 漢字１字＋する, either as one verb token (資する) or as a one-kanji
         # noun followed by する (達＋する).
@@ -192,6 +208,8 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
 
     if chain >= CHAIN_THRESHOLD:
         add("clause_chain", raw, n=chain)
+    if commas >= COMMA_CHAIN_THRESHOLD:
+        add("comma_chain", raw, n=commas)
     if tari == 1:
         add("tari_single", raw)
 

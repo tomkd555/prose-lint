@@ -1,8 +1,8 @@
 {
   "name": "prose-lint",
   "displayName": "Prose Lint",
-  "version": "1.2.0",
-  "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs (the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー, the AI-writing preset), a register of rejected wordings that you grow row by row (definition by negation, the spoken register, the stock phrases of generated Japanese), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and five house rules), an academic mode for Japanese papers, theses and reports (47 register rows of spoken or over-stiff wordings, each citing the university writing guides, lab guides and corpus studies it rests on, and two morphology checks), and vale with proselint, the ai-tells package and two house rules for the signs of LLM-written English.",
+  "version": "1.3.0",
+  "description": "Runs the wording linters on a Japanese or English document and rules on every hit: textlint with Japanese and English configs (the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー, the AI-writing preset), a register of rejected wordings that you grow row by row (definition by negation, the spoken register, the stock phrases of generated Japanese), natural-japanese's lint with its naturalness score and baseline rerun, a sudachipy morphology lint (four checks from 公用文作成の考え方 and six house rules), an academic mode for Japanese papers, theses and reports (47 register rows of spoken or over-stiff wordings, each citing the university writing guides, lab guides and corpus studies it rests on, and two morphology checks), and vale with proselint, the ai-tells package and three house rules: two for the signs of LLM-written English and a comma cap for sentences strung on commas.",
   "author": {
     "name": "tomkd555",
     "url": "https://github.com/tomkd555"

@@ -4,16 +4,24 @@ A Claude Code skill that runs the wording linters over one document, picks the c
 
 | Layer | Japanese | English |
 |---|---|---|
-| textlint | ja-technical-writing, JTF style and AI-writing presets; the kana rules of 内閣訓令 (four hiragana rules and a prh rule set, `assets/textlint/prh/koyobun-kana.yml`); い抜き, さ入れ and フィラー; the skill sorts findings into blocking, advisory and notation | write-good, terminology, a 40-word sentence cap, duplicated conjunctions at sentence starts, and the AI-writing preset's two Markdown-shape rules (bold-label bullets, emoji bullets, bold in headings) |
+| textlint | ja-technical-writing, JTF style and AI-writing presets. The kana rules of 内閣訓令: four hiragana rules and a prh rule set, `assets/textlint/prh/koyobun-kana.yml`. い抜き, さ入れ and フィラー. The skill sorts findings into blocking, advisory and notation. | write-good, terminology, a 40-word sentence cap and duplicated conjunctions at sentence starts. The AI-writing preset's two Markdown-shape rules: bold-label bullets, emoji bullets and bold in headings. |
 | Register | `scripts/register.py` over a Markdown table of rejected wordings that you grow one row at a time: definition by negation, the spoken register, the stock phrases of generated Japanese | the same table's English negation row |
 | natural-japanese | `lint.py` in the AI-smell and reading-load lanes, the naturalness score, a baseline rerun after the fixes | — |
-| Morphology | `scripts/koyobun.py`: passive, clause chains, 漢字１字＋する and 等/など from 「公用文作成の考え方」; conjunctive が, a lone たり, させていただく, 体言止め in body text and negated predicates as house rules | — |
-| Academic mode | `register.py --academic` over a second table of 47 rows: the spoken register (でも, すごく, こんな, と思う, です・ます), 文語調 (べく, ごとく) and the over-stiff forms (することができる, を行う), each row citing its sources; `koyobun.py --academic` for って and たら; the rules a regex cannot find, read from `references/academic-japanese.md` | — |
-| vale | — | proselint (redundancy, corporate speak, jargon, hedging); [ai-tells](https://github.com/tbhb/vale-ai-tells), 137 rules for the signs of LLM-written English (overused vocabulary, stock openers and closings, hedges, vague attributions, participial padding, copula dodges, transitions, figurative verbs, em dashes); `AISigns`, two house rules for the model talking about itself and emoji in headings |
+| Morphology | `scripts/koyobun.py`. From 「公用文作成の考え方」: passive, clause chains, 漢字１字＋する and 等/など. House rules: clauses strung on 読点, conjunctive が, a lone たり, させていただく, 体言止め in body text and negated predicates. | — |
+| Academic mode | `register.py --academic` over a second table of 47 rows, each citing its sources. The spoken register: でも, すごく, こんな, と思う and です・ます. 文語調: べく and ごとく. The over-stiff forms: することができる and を行う. `koyobun.py --academic` for って and たら. The rules a regex cannot find, read from `references/academic-japanese.md`. | — |
+| vale | — | proselint: redundancy, corporate speak, jargon and hedging. [ai-tells](https://github.com/tbhb/vale-ai-tells): 137 rules for the signs of LLM-written English. They cover overused vocabulary, stock openers and closings, hedges, vague attributions and participial padding. They also cover copula dodges, transitions, figurative verbs and em dashes. `AISigns`: three house rules for the model talking about itself, emoji in headings, and five or more commas in one sentence. |
 
 The register ships with twelve sample rows. Two catch definition by negation (`ではない`, `not X but Y`, `rather than` and related forms), which the skill rewrites to say what a thing is. Four catch the spoken register in a formal document. Six catch the stock phrases of generated Japanese that natural-japanese's catalogue lists but its lint leaves to the eye: hearsay with no source, breadth adjectives, outcomes named by an abstract noun, an intention softened with と思います, and the boilerplate opening and closing of a blog post.
 
-Academic mode runs on a Japanese paper, thesis or report, when you ask for the register of one or when the text carries a reference list and 本研究 or 本稿. It rewrites spoken Japanese into the written register of a paper and holds it back from the stiff forms the same guides warn against. Every row and rule rests on sources read for it: 文化審議会「公用文作成の考え方」, the writing guides of thirteen universities (東北大学, 金沢大学, 立教大学 and others), fourteen lab and faculty guides, three academic societies' author guides, and six research papers, among them a survey of 1,900 written and spoken words in 63 books and papers on writing (柏野ほか 2016) and a BCCWJ measure of how hard connectives are (馬場 2018). `references/academic-japanese.md` quotes the passage behind each rule, lists where the sources disagree and how the skill rules then, and gives every source with its URL.
+Academic mode runs on a Japanese paper, thesis or report, when you ask for the register of one or when the text carries a reference list and 本研究 or 本稿. It rewrites spoken Japanese into the written register of a paper and holds it back from the stiff forms the same guides warn against. Every row and rule rests on sources read for it:
+
+- 文化審議会「公用文作成の考え方」
+- the writing guides of thirteen universities (東北大学, 金沢大学, 立教大学 and others)
+- fourteen lab and faculty guides
+- three academic societies' author guides
+- six research papers, among them a survey of 1,900 written and spoken words in 63 books and papers on writing (柏野ほか 2016) and a BCCWJ measure of how hard connectives are (馬場 2018)
+
+`references/academic-japanese.md` quotes the passage behind each rule, lists where the sources disagree and how the skill rules then, and gives every source with its URL.
 
 ## Install
 
@@ -48,7 +56,7 @@ AI っぽさを消して: docs/blog.md
 論文調にして: thesis/chapter2.md
 ```
 
-The skill settles the language, runs the layers for it, and replies with a report: for Japanese, the naturalness score first, then every finding by layer as fixed or kept with a reason, then the counts from the rerun after the fixes; for English, the count of AI-sign hits per 1,000 words first, then the ledger, then the count that remains. It edits the document only where a finding holds, and never applies the linters' automatic fixes.
+The skill settles the language, runs the layers for it, and replies with a report. For Japanese, the report gives the naturalness score first, then every finding by layer as fixed or kept with a reason, then the counts from the rerun after the fixes. For English, it gives the count of AI-sign hits per 1,000 words first, then the ledger, then the count that remains. It edits the document only where a finding holds, and never applies the linters' automatic fixes.
 
 ## Your register
 

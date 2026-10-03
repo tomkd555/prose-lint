@@ -1,0 +1,13 @@
+# House rule: a sentence strung on commas. No published Vale style and no
+# textlint rule reads English clause structure, so this rule counts: five or
+# more commas in one sentence. A list of five items passes and a longer list
+# fires, which is why the skill rules on each hit. The token is the word
+# before the comma, the comma and the whitespace after it: the whitespace
+# keeps the comma inside a number (3,000) out of the count, and the word lets
+# vale report the hit on the line of the sentence that fired.
+extends: occurrence
+message: "Five or more commas in one sentence; split it, or set a list out as a list."
+level: warning
+scope: sentence
+max: 4
+token: '[^\s,]+,\s'
