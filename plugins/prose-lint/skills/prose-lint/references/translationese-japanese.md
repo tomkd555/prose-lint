@@ -303,7 +303,7 @@ casual `article`.
 ## 4. Measurements
 
 Human-written set: the web entries of natural-japanese's calibration corpus
-(`corpus/sources.json` at commit b251b9b of https://github.com/coji/natural-japanese), fetched on
+(`corpus/sources.json` at commit b251b9b, tag v1.5.2, of https://github.com/coji/natural-japanese), fetched on
 2026-10-16 with its `corpus/fetch.py` and limited to the 83 published before
 2022-12 (business 27 + 1, tech 40, essay 7, slide 8; 832,702 characters). They
 include 内閣府 and 総務省 white papers, RIETI columns and company incident

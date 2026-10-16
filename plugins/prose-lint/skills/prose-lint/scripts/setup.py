@@ -6,8 +6,8 @@ Copies the textlint and vale configs from assets/ to ~/.prose-lint (or
 $PROSE_LINT_HOME), runs `npm install` for textlint and `vale sync` for the vale
 packages, and copies the sample registers to vocabulary.md, academic.md and
 translationese.md unless they are already there. The directory sits outside the plugin, so an update of the plugin keeps
-it. Safe to run again: package.json, the prh rule file and the AISigns vale
-style are refreshed, while a config file already in place (.textlintrc*.json,
+it. Safe to run again: package.json, the prh rule file, the fukushi dictionary
+and the AISigns vale style are refreshed, while a config file already in place (.textlintrc*.json,
 .vale.ini) is kept as edited. A missing or failing npm or vale is reported and
 skipped.
 """

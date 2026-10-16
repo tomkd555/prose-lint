@@ -53,7 +53,7 @@ uv run python <skill dir>/scripts/setup.py
 
 It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md` and `~/.prose-lint/translationese.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited.
 
-Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and natural-japanese. A missing tool skips its layer, and the report names it.
+Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and [natural-japanese](https://github.com/coji/natural-japanese) (this release is tested with 1.5.2). A missing tool skips its layer, and the report names it.
 
 ## Usage
 
