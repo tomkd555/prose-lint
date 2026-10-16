@@ -15,12 +15,15 @@ a space goes between two Latin characters, and a list item starts a new
 paragraph. A row whose pattern does not compile is reported on stderr.
 
 Usage:
-    uv run register.py [--register <vocabulary.md> | --academic] [--json] <file>
+    uv run register.py [--register <vocabulary.md> | --academic | --translationese] [--json] <file>
 
 The register is --register, else $PROSE_LINT_REGISTER, else
 vocabulary.md in $PROSE_LINT_HOME or ~/.prose-lint, else assets/vocabulary.sample.md next to this script.
 --academic reads the academic register instead: $PROSE_LINT_ACADEMIC_REGISTER, else
 academic.md in the same home, else assets/academic.sample.md.
+--translationese reads the register of English constructions carried into Japanese:
+$PROSE_LINT_TRANSLATIONESE_REGISTER, else translationese.md in the same home, else
+assets/translationese.sample.md.
 Exit code 0 on any number of hits; 1 on an input error.
 """
 from __future__ import annotations
@@ -39,6 +42,7 @@ ASSETS = Path(__file__).resolve().parent.parent / "assets"
 REGISTERS = {
     "general": ("PROSE_LINT_REGISTER", "vocabulary.md", "vocabulary.sample.md"),
     "academic": ("PROSE_LINT_ACADEMIC_REGISTER", "academic.md", "academic.sample.md"),
+    "translationese": ("PROSE_LINT_TRANSLATIONESE_REGISTER", "translationese.md", "translationese.sample.md"),
 }
 
 
@@ -109,9 +113,11 @@ def main() -> int:
     group = ap.add_mutually_exclusive_group()
     group.add_argument("--register", type=Path)
     group.add_argument("--academic", action="store_true", help="read the academic register")
+    group.add_argument("--translationese", action="store_true", help="read the translationese register")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    reg = args.register or default_register("academic" if args.academic else "general")
+    kind = "academic" if args.academic else "translationese" if args.translationese else "general"
+    reg = args.register or default_register(kind)
     try:
         entries = load_entries(reg.read_text(encoding="utf-8"))
         content = Path(args.file).read_text(encoding="utf-8")

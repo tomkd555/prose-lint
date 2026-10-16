@@ -1,6 +1,6 @@
 # House rule: an emoji in a heading or a list item. ai-tells has no rule for
-# it; the textlint preset-ai-writing has one, but the English config does
-# not load that preset.
+# it. The English textlint config runs the preset-ai-writing rule for emoji
+# bullets; this rule also covers headings and runs when only vale is installed.
 extends: existence
 message: "Emoji in a heading or list item; drop it."
 link: https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing

@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for - for Japanese, textlint with the Japanese config (technical-writing and JTF presets, the AI-writing preset, the kana rules of 内閣訓令 through prh and the hiragana rules, い抜き・さ入れ・フィラー), a register of rejected wordings including definition by negation and the AI stock phrases, natural-japanese's lint in both lanes with its naturalness score and baseline rerun, and a sudachipy morphology lint (passive, clause chains, 漢字１字＋する and 等/など from 公用文作成の考え方; clauses strung on 読点, conjunctive が, lone たり, させていただく, body 体言止め and negated predicates as house rules), and an academic mode for papers, theses and reports that adds a register of 47 spoken or over-stiff wordings drawn from university writing guides, lab guides and corpus studies, two morphology checks and a review for the academic register; for English, textlint with the English config, the register's English negation row, and vale with proselint, the ai-tells package and three house rules: two for the signs of LLM-written text and a comma cap for sentences strung on commas. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference; a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; and an academic mode for papers, theses and reports. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -60,10 +60,67 @@ the register of a paper, thesis or report: 論文調, 論文向け, レポート
 says which of the two put the run in academic mode. Academic mode adds one
 step to 3a and changes some rulings; the other layers run as usual.
 
+A Japanese text also gets a **style** before any layer runs: what the document
+is and who reads it, its 文体, and where its words come from. The reader in
+Step 3a judges the text against it, and every rewrite is written to it. A
+calling skill can name it with `style=<name>`; otherwise settle it from the
+request, the file name, the headings and the text, and state it in one line at
+the head of the report (「style: business - 設計書、読み手は開発者、常体、IT の
+用語はカタカナ」).
+
+| Style | Signals | 文体 | Words |
+| --- | --- | --- | --- |
+| `business`, the default | 設計書, 仕様書, 手順書, 報告書, 計画書, 議事録, README, a work email | the one most body sentences end in | the reader's field terms in the form the field writes them: an engineer's katakana term (スクリーンショット, コンポーネント, デプロイ) over a 漢語 rendering; a 漢語 predicate where the sentence carries weight |
+| `paper` | `style=paper` from a calling skill: a business document for print or hand-over | 常体 in the である form throughout | as `business` |
+| `official` | 通知, 規程, 要綱, a notice from an organisation to the public | the one most body sentences end in | the words of 公用文, and 外来語 only where the reader knows them |
+| `academic` | the academic-mode signals above | 常体 in the である form | the academic register |
+| `article` | a blog post, note, essay or column for a general reader | the one most body sentences end in | everyday 和語 over 漢語; a field term only where the reader knows it |
+
+A sentence off the style's 文体 is a finding. In `paper` a です・ます sentence
+gets rewritten; in the others the minority 文体 does, unless a quotation or a
+direct address explains it. In `article` the spoken-register rows of the
+register stay where the text is casual by design.
+
 ## Step 3a - Japanese
 
-Four mechanical layers, then the review. Each layer reports suspicions; the
+Launch the reader first, in the background, then run the mechanical layers
+while it reads; the review comes last. Each layer reports suspicions; the
 ruling on each hit is yours and goes in the report.
+
+### The reader
+
+The translationese that survives the other layers sits where no regex reaches.
+A word gets picked as the dictionary match of an English one: 提供する for
+*provide* in 「MWCは製品発表以外にも多くのことを提供する」, where Japanese says
+「多くの見どころがある」. A frame gets built in English order:
+「この機能はユーザーにデータ出力を可能にします」 for a feature that lets users
+export data. The same word is right in its own sense elsewhere, and the
+human-written documents the reference measured use the commonest surface forms
+too (において in 47 of 83), so the decision needs the sentence and the document
+around it.
+
+Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
+
+- the purpose in one line: find every sentence of one Japanese document that
+  reads as translated from English, or whose 文体 or words do not fit the
+  document's style, and propose a rewrite for each;
+- the document's absolute path and the style line from Step 2;
+- the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
+  with "read it first and use its marker ids";
+- the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
+  user's own notes on wordings they rejected, read after the reference;
+- the output shape, one finding per line:
+  `<line> | <marker id> | "<sentence>" | <rewrite> | <reason>`;
+- "report every finding, no severity filter";
+- the scope: notation, kana, sentence length and the register's wordings belong
+  to the other layers;
+- English as the output language, with Japanese quoted verbatim.
+
+It withholds who wrote the text, the task it served, any reason a wording was
+chosen, the lint results and any expected finding. A reader handed those reads
+the intent into each sentence and passes the English frame it sits in.
+
+Its findings join the ledger and are ruled on like any other hit.
 
 ### textlint
 
@@ -139,6 +196,42 @@ names only what something lacks. The other rows are handled as the register
 says: kept when the wording fits the context and the reason is stated, otherwise
 rewritten.
 
+### The translationese register
+
+```
+uv run {SKILL_DIR}/scripts/register.py --translationese <file>
+```
+
+The register is `$PROSE_LINT_TRANSLATIONESE_REGISTER`, else
+`{HOME}/translationese.md`, else `assets/translationese.sample.md`. Its rows
+are the forms from the reference that a regex can find. Each rests on a
+published source and was measured against 83 human-written documents:
+business, technical, essays and slides. The rows fall in two groups:
+
+- Rewrite, seven rows, each matching at most 2 of the 83 human documents:
+  - 彼, 彼女 and 彼ら
+  - a feature or product made the agent (この機能は〜を可能にします)
+  - これは〜を示す
+  - 値を持つ
+  - に存在する before a noun
+  - および／または
+  - されるように設定され
+
+  Rewrite each to the style; the row's `Why` names any exception.
+- Read in context, six rows that human writers use in some kinds of document:
+  - が可能です
+  - することにより
+  - を可能にする
+  - あなた
+  - 私たち
+  - the em dash
+
+  Rule each by the style and the sentence.
+
+A span that a row of each group matches (この機能は〜を可能にします) is one
+finding, ruled under the Rewrite row. The bracket at the end of each `Why`
+names the sources; keep it in the report.
+
 ### natural-japanese lint
 
 ```
@@ -193,7 +286,7 @@ This script checks rules that turn on parts of speech, which no surface-string
 linter sees. Four come from 「公用文作成の考え方」 (文化審議会建議, 2022-01-07,
 https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/93650001_01.html);
 the rules below paraphrase its items. Six are house rules of this skill,
-marked as such, four of them leaning on an item of the 建議. It tokenises
+marked as such, three of them leaning on an item of the 建議. It tokenises
 with sudachipy, on the same sentence split and Markdown mask lint.py uses, and
 reports one line per suspicion. Each id carries its rule and its ruling:
 
@@ -320,6 +413,33 @@ named referent; one term per concept; methods and results in the past tense
 and discussion in the present; no paragraph leaning on において, のである or a
 stiff connective in every sentence.
 
+### Writing a fix
+
+Every rewrite, from any layer, is written to the style from Step 2:
+
+1. Settle what the sentence asserts and who acts in it: a person, or the program
+   doing what a program does. A state is written as a state. Then build the
+   sentence from that in Japanese order. Swapping one word inside an English
+   frame leaves the frame.
+2. Take each word from the first source that has it: the term the document
+   already uses for the same thing; the reader's field term in the form the
+   field writes it; a plain word whose dictionary entry lists the sense you
+   mean. Look up every word the rewrite brings in, in Weblio 国語辞書
+   (`https://www.weblio.jp/content/<word>`) or goo 国語辞書, and confirm the
+   sense before using it.
+3. End the sentence in the style's 文体.
+4. Read the rewrite with the sentence before and after it: the topic carries
+   on, the connective still holds, and the term matches the one used nearby.
+5. A row's `Instead` and the reference's before/after pairs give the
+   direction; the words come from the text around the hit. One replacement
+   pasted at every hit is a template, and a template reads as translation.
+
+Once the fixes are in, launch the reader once more, fresh, on the fixed file,
+with the line numbers of the rewritten sentences and "read these sentences in
+their paragraphs". It gets the same material as the first read and still
+withholds the original wording and the reason for each change. Rule on what it
+returns; this second read runs once.
+
 ## Step 3b - English
 
 Three mechanical layers, then the review.
@@ -348,7 +468,7 @@ Three styles run:
 
 - proselint: redundancy, corporate speak, jargon and hedging.
 - `ai-tells` (https://github.com/tbhb/vale-ai-tells): the signs of LLM-written
-  English, 137 rules.
+  English.
 - `AISigns`: three house rules shipped in `assets/vale/styles/AISigns` for
   what ai-tells leaves out. `AISigns.Chatbot` reports the model talking about
   itself or a token pasted from a chat interface. `AISigns.Emoji` reports an
@@ -454,8 +574,10 @@ and vague nouns yourself. Then read once for the signs no regex catches:
   output.** A run over a long document produces more hits than problems, and
   applying them wholesale flattens prose the user wrote deliberately. `textlint
   --fix` is off the table for the same reason.
-- For Japanese, open with the naturalness score and its band, then the ledger
-  by layer, then the second run's resolved / new / persisting counts. In
+- For Japanese, open with the style line, then the naturalness score and its
+  band, then the ledger by layer with the reader's findings as one layer, then
+  the second run's resolved / new / persisting counts and what the second read
+  of the rewrites returned. In
   academic mode, add a line under the score: that the run was in academic mode
   and why, and the academic register's hit count before and after the fixes;
   the academic ledger comes after the register's, with each hit's sources. A score
