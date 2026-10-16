@@ -109,7 +109,7 @@ Rule by the style's reader (section 5, D5).
 
 **`comparative`** - より with an adjective and no object of comparison:
 「「より大きい」「より悪い」というのは発明された翻訳調なので日本語としては不自然
-です。」〔関西大〕 Rewrite: name what is compared, or state the change with a
+です。」〔関西大CogLab〕 Rewrite: name what is compared, or state the change with a
 verb (増えた, 上がった). 10 of the 83 human documents use より with an
 adjective, among them より良い方向 and より少ない輸入代金 (section 4). The
 skill's ruling: a set phrase of that kind stays.
@@ -119,7 +119,7 @@ skill's ruling: a set phrase of that kind stays.
 **`inanimate-subject`** - a product, program, value, rule or abstract noun
 made the agent of a transitive verb, or given a person's act or feeling.
 The definition: 「抽象概念や自然現象など、
-人間や動物以外の主語が動作をする＝無生物主語です。」〔関西大〕 The guides:
+人間や動物以外の主語が動作をする＝無生物主語です。」〔関西大CogLab〕 The guides:
 "In general, do not literally translate inanimate subject (such as product,
 program and device) as the agent of action unless it is necessary. Use
 passive voice and omit the subject instead." 〔Microsoft〕 §4.2;
@@ -142,8 +142,9 @@ The rewrite depends on the style:
 | `business`, a manual, with a verb of improving or preventing | the result, or the cause and then the result | 「更新プログラムがシステム安定性を改善しました。」 → 「更新後、システムの安定性が向上しました。」; 「エラーがアプリケーションの起動を妨げました。」 → 「エラーにより、アプリケーションを起動できませんでした。」〔Manual Hub〕 |
 | `business`, a step the computer does | a passive with the subject dropped, where the computer acts from the user's view | "In general, use active voice when the agent of action is person (user). Use passive voice when the action is automatically performed by computer from user's point of view." 〔Microsoft〕 §4.2 |
 | `business`, a specification | the actor stays as subject | 「仕様書や法務寄りの文書では、「システムが〜」「本製品は〜」「アプリケーションが〜」のように、動作主体を明示した方が適切な場合があります。」〔Manual Hub〕 |
-| any, a cause or condition | 「〜で」「〜の場合」「〜により」 and an intransitive verb | 「この関数を呼ぶことはメモリー不足を発生させます。」 → 「この関数を呼んだ場合、メモリー不足が発生します。」〔GDI〕; 「台風で13人が死んだ」〔関西大〕 |
+| any, a cause or condition | 「〜で」「〜の場合」「〜により」 and an intransitive verb | 「この関数を呼ぶことはメモリー不足を発生させます。」 → 「この関数を呼んだ場合、メモリー不足が発生します。」〔GDI〕; 「台風で13人が死んだ」〔関西大CogLab〕 |
 | any, a finding | what was found as the predicate | 「この事実は、従来の前提が誤っていたことを示している。」 → 「この事実から、従来の前提が誤っていたと分かる。」〔natural-japanese〕 |
+
 Red Hat keeps the active form where it is clearer:
 「ただし、無生物の場合でも単刀直入の方がわかりやすい場合には能動態を使う場合も
 あります。」〔Red Hat〕 §7.6. Manual Hub keeps UI text and feature descriptions
@@ -151,7 +152,7 @@ such as 「この機能は、一時ファイルを自動的に削除します。
 a command's description of the same shape into a passive with により (section
 5, D2). Corpus studies find natural-force subjects with many verbs 〔麻2016〕,
 and inanimate-subject transitive sentences standing out in textbook science
-explanations 〔麻2024〕; 関西大 still rewrites
+explanations 〔麻2024〕; 関西大CogLab still rewrites
 「台風が13人を殺した」 as 「台風で13人が死んだ」. Section 5, D2 gives the ruling.
 
 **`pronoun`** - 彼, 彼女, 彼ら, あなた, 私たち, and それ standing for *it*.
@@ -375,7 +376,7 @@ Notes on the counts:
   abstract noun given a person's act. Keep a feature description where the
   plain active sentence is clearer, as Red Hat §7.6 also allows. Read a
   natural force sentence by sentence against 風間2016's two conditions and
-  麻2016's corpus pairs; 関西大's typhoon example is one to rewrite.
+  麻2016's corpus pairs; 関西大CogLab's typhoon example is one to rewrite.
 - **D3 および before the last item.** Microsoft lists 「xxx、yyy、および zzz」
   among the forms to avoid, though its own §4.1.12 example
   「行の追加、移動、または削除を行います。」 puts 、または before the last item;
@@ -419,7 +420,7 @@ Notes on the counts:
 - 〔川村2019〕 川村インターナショナル. 「「なぜか読みにくい」訳文の正体①遠距離でのすれ違い」, 2019年1月18日. https://www.k-intl.co.jp/blog/B_1901118
 - 〔川村2020〕 川村インターナショナル. 「ITシステムの操作マニュアルを翻訳する」, 2020年1月10日. https://www.k-intl.co.jp/blog/B_200110A
 - 〔ISS〕 津村建一郎. 「第15回：『の』重なりを防ぐ」, アイ・エス・エス, 2020年3月2日. https://www.issjp.com/columns/column-4717/
-- 〔関西大〕 関西大学 Cognitive Lab. 『日英翻訳の技術』の紹介ページ, 2020年6月. https://wps.itc.kansai-u.ac.jp/cricket/research/book-1/
+- 〔関西大CogLab〕 関西大学 Cognitive Lab. 『日英翻訳の技術』の紹介ページ, 2020年6月. https://wps.itc.kansai-u.ac.jp/cricket/research/book-1/
 - 〔ミドリ〕 ミドリインターナショナル. 「翻訳のヒント「受動態の訳し方」」, 2012年9月. https://www.midorico.co.jp/tip/201209.html
 - 〔インターブックス〕 インターブックス. 「「カタカナ語」との終わりなき戦い」, 2025年4月1日更新. https://www.interbooks.co.jp/news-room/multiling-3403/
 
