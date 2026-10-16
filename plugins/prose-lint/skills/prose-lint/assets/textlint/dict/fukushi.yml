@@ -1,10 +1,33 @@
 # fukushi.yml - the dictionary of textlint-rule-ja-hiragana-fukushi (v1.3.0,
-# MIT, lostandfound), minus the entries that 「公用文における漢字使用等について」
-# (平成22年内閣訓令第1号) 別紙 1(2)イ keeps in kanji: 更に 既に 若しくは 最も 僅か
-# (若しくは is one of the four conjunctions of 1(2)オ written in kanji).
-# Every other entry opens a reading the 常用漢字表 does not carry, which is what
-# the 訓令's item 1(1) asks for. Loaded through the rule's rulePath option in
-# .textlintrc.json; edit or add entries here.
+# https://github.com/lostandfound/textlint-rule-ja-hiragana-fukushi), minus the
+# entries that 「公用文における漢字使用等について」 (平成22年内閣訓令第1号) 別紙
+# 1(2)イ keeps in kanji: 更に 既に 若しくは 最も 僅か (若しくは is one of the
+# four conjunctions of 1(2)オ written in kanji). One duplicate entry (薄々) is
+# dropped and a malformed key on 却って is corrected to pos. The other entries
+# are the rule's own; edit or remove one where your house style keeps the word
+# in kanji. Loaded through the rule's rulePath option in .textlintrc.json.
+#
+# The upstream dictionary is distributed under the MIT License:
+#
+# Copyright (c) Hiroshi Takase
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 message: ひらがなで表記したほうが読みやすい副詞
 dict:
 - expected: あいにく
@@ -205,19 +228,6 @@ dict:
     basic_form: 言わば
     reading: イワバ
     pronunciation: イワバ
-- expected: うすうす
-  extensions: {}
-  tokens:
-  - surface_form: 薄々
-    pos: 副詞
-    pos_detail_1: 一般
-    pos_detail_2: '*'
-    pos_detail_3: '*'
-    conjugated_type: '*'
-    conjugated_form: '*'
-    basic_form: 薄々
-    reading: ウスウス
-    pronunciation: ウスウス
 - expected: おおむね
   extensions: {}
   tokens:
@@ -300,7 +310,7 @@ dict:
   extensions: {}
   tokens:
   - surface_form: 却って
-    po": 副詞
+    pos: 副詞
     pos_detail_1: 一般
     pos_detail_2: '*'
     pos_detail_3: '*'

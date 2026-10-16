@@ -4,8 +4,8 @@
 
 Copies the textlint and vale configs from assets/ to ~/.prose-lint (or
 $PROSE_LINT_HOME), runs `npm install` for textlint and `vale sync` for the vale
-packages, and copies the sample registers to vocabulary.md and academic.md unless
-they are already there. The directory sits outside the plugin, so an update of the plugin keeps
+packages, and copies the sample registers to vocabulary.md, academic.md and
+translationese.md unless they are already there. The directory sits outside the plugin, so an update of the plugin keeps
 it. Safe to run again: package.json, the prh rule file and the AISigns vale
 style are refreshed, while a config file already in place (.textlintrc*.json,
 .vale.ini) is kept as edited. A missing or failing npm or vale is reported and
@@ -51,7 +51,11 @@ def main():
         copy_tree(ASSETS / name, HOME / name)
     run("npm", ["install", "--no-audit", "--no-fund"], HOME / "textlint")
     run("vale", ["--config", str(HOME / "vale" / ".vale.ini"), "sync"], HOME / "vale")
-    for sample, name in (("vocabulary.sample.md", "vocabulary.md"), ("academic.sample.md", "academic.md")):
+    for sample, name in (
+        ("vocabulary.sample.md", "vocabulary.md"),
+        ("academic.sample.md", "academic.md"),
+        ("translationese.sample.md", "translationese.md"),
+    ):
         if not (HOME / name).exists():
             shutil.copy(ASSETS / sample, HOME / name)
     print(f"ready: {HOME}")

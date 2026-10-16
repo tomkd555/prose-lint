@@ -13,8 +13,8 @@ each suspicion with a line number. Every hit is a suspicion; the ruling belongs
 to the caller.
 
 Checks (id - rule). The first four paraphrase items of 「公用文作成の考え方」
-(文化審議会建議, 2022-01-07); the other six are house rules, each with the
-item of the 建議 it leans on.
+(文化審議会建議, 2022-01-07); the other six are house rules, three of them
+with the item of the 建議 they lean on.
     passive          use the passive sparingly (Ⅲ-3 ケ)
     clause_chain     avoid long chains of conjunctive particles and continuative forms, 3 or more (Ⅲ-3 カ)
     comma_chain      house rule: clauses strung on 読点 (Aし、Bして、Cする), 2 or more clause-closing 読点 (after Ⅲ-3 カ)
