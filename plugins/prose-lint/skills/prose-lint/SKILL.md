@@ -85,7 +85,11 @@ register stay where the text is casual by design.
 
 Launch the reader first, in the background, then run the mechanical layers
 while it reads; the review comes last. Each layer reports suspicions; the
-ruling on each hit is yours and goes in the report.
+ruling on each hit is yours and goes in the report. Start fixing once the
+reader has returned and the review is done: the reader reads the file as it
+stands, and a sentence fixed for one layer's hit gets rewritten again for the
+next. With the whole ledger in hand, each sentence is rewritten once in the
+main pass, against all its hits.
 
 ### The reader
 
@@ -110,7 +114,8 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
 - the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
   user's own notes on wordings they rejected, read after the reference;
 - the output shape, one finding per line:
-  `<line> | <marker id> | "<sentence>" | <rewrite> | <reason>`;
+  `<line> | <marker id> | "<sentence>" | <rewrite> | <reason>`, the reason
+  in one sentence;
 - "report every finding, no severity filter";
 - the scope: notation, kana, sentence length and the register's wordings belong
   to the other layers;
@@ -121,6 +126,12 @@ chosen, the lint results and any expected finding. A reader handed those reads
 the intent into each sentence and passes the English frame it sits in.
 
 Its findings join the ledger and are ruled on like any other hit.
+
+The reader reads a document in full on its first run in a session, and again
+when the document changed outside the session. On a later run over a
+document it has already read, such as a revised draft, it takes the second
+read's form (end of "Writing a fix") over the passages changed since that
+run.
 
 ### textlint
 
@@ -236,23 +247,30 @@ names the sources; keep it in the report.
 
 ```
 uv run {NJ}/lint.py --genre business --reading-load --json <file> > <tmp>/nj-1.json
+uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));d.pop('paragraphs',None);print(json.dumps(d,ensure_ascii=False))" <tmp>/nj-1.json
 ```
 
 `--genre business` selects natural-japanese's business profile, which mainly
 switches off detectors that misfire on bullet-heavy business documents. The JSON goes to a temporary file so it serves twice: it is
-the ledger the report rules on, and the baseline for the second run below. Two
-lanes come out.
+the ledger the report rules on, and the baseline for the second run below.
+Read it through the second command, which prints it without the `paragraphs`
+key. From natural-japanese 1.6.0 that key copies every paragraph of the
+document as the worksheet for that skill's own paragraph check, and it makes
+up most of the file. Two lanes come out.
 
 - The AI-smell lane: banned phrases and translationese, uniform sentence length,
   the 体言止め rate, paragraph-opening conjunctions and lexical variety. Judge each
-  hit against the section for its category in the natural-japanese skill's
-  `references/revision-guide.md`. Its antithesis detector counts `ではなく` and
+  hit by the fix its own message gives and by §3 of natural-japanese's
+  `SKILL.md` (「既存の文書を直すとき」). That file runs to about 45 KB, so read
+  the section once, before ruling on the lane, from its heading to the next
+  `## ` heading. The lane's antithesis detector counts `ではなく` and
   `だけでなく…も` across the document, fires at three occurrences, and sets the
   severity by their share of all sentences.
 - The reading-load lane (`--reading-load`): a sentence over 90 characters, a
   buried enumeration, a kanji run, a double negative, a chain of の. Judge each
-  hit against `references/readability-antipatterns.md`, catalogue A to J,
-  applied from A. A split sentence that grows longer is a correct result.
+  hit against the nine checks of 「読みやすさの点検」 in §5 of the same file,
+  read once and applied in order from the first. A split sentence that grows
+  longer is a correct result.
 
 Three more pieces of natural-japanese come in here.
 
@@ -271,10 +289,14 @@ Three more pieces of natural-japanese come in here.
   paragraph leads it prints in one pass: whether the line of argument holds from
   headings alone, whether each heading is a message, and whether sections repeat
   one template. Those findings join the ledger.
-- **The second run.** After the fixes are applied, run lint.py again with
-  `--baseline <tmp>/nj-1.json`. It sorts findings into resolved, new and
-  persisting; a `new` finding is a fix that introduced a fresh smell, and it goes
-  back into the ledger. The report states the three counts.
+- **The second run.** It runs with the second read (end of "Writing a fix"),
+  after the fixes are applied: lint.py again with the same options plus
+  `--baseline <tmp>/nj-1.json`, into `<tmp>/nj-2.json`, read through the
+  second command above with `<tmp>/nj-2.json` as its argument. Keep `--json`:
+  the text output ends with the paragraph worksheet and asks for every
+  paragraph to be written out. lint.py sorts findings into resolved, new and
+  persisting; a `new` finding is a fix that introduced a fresh smell, and it
+  goes into the final pass. The report states the three counts.
 
 ### 公用文 morphology lint
 
@@ -401,8 +423,8 @@ row offers; do not turn native verbs into kanji compounds wholesale, add
 
 ### The review
 
-Read the text once yourself for what no script decides: whether each paragraph serves the
-document's purpose, whether terms stay consistent from start to end, and
+Review the text from the read that settled the style in Step 2, for what no
+script decides: whether each paragraph serves the document's purpose, whether terms stay consistent from start to end, and
 whether the conclusion comes first.
 
 In academic mode, read also for the points of the reference's sections 1.3 to
@@ -424,25 +446,37 @@ Every rewrite, from any layer, is written to the style from Step 2:
 2. Take each word from the first source that has it: the term the document
    already uses for the same thing; the reader's field term in the form the
    field writes it; a plain word whose dictionary entry lists the sense you
-   mean. Look up every word the rewrite brings in, in Weblio 国語辞書
+   mean. Look up each content word the rewrite brings in, unless the document
+   already uses it for the same thing, in Weblio 国語辞書
    (`https://www.weblio.jp/content/<word>`) or goo 国語辞書, and confirm the
-   sense before using it.
+   sense before using it. One lookup per word serves the whole run.
 3. End the sentence in the style's 文体.
 4. Read the rewrite with the sentence before and after it: the topic carries
-   on, the connective still holds, and the term matches the one used nearby.
+   on, the connective still holds, and the term matches the one the document
+   uses for the same thing.
 5. A row's `Instead` and the reference's before/after pairs give the
    direction; the words come from the text around the hit. One replacement
    pasted at every hit is a template, and a template reads as translation.
 
-Once the fixes are in, launch the reader once more, fresh, on the fixed file,
-with the line numbers of the rewritten sentences and "read these sentences in
-their paragraphs". It gets the same material as the first read and still
-withholds the original wording and the reason for each change. Rule on what it
-returns; this second read runs once.
+Apply the fixes in one pass once every hit is ruled: one Edit per paragraph
+that contains a fix. Each Edit can set off the session's write hooks, so one
+Edit per hit multiplies their output by the number of hits.
+
+Once the fixes are in, run natural-japanese's second run and launch the
+reader once more, fresh, on the fixed file. The reader's prompt carries the
+first read's items with the scope narrowed: the line ranges of the paragraphs
+that contain a rewritten sentence, the line of each rewritten sentence, "read
+only these ranges, with offset and limit", and "report on the sentences at
+those lines only". Merge ranges under 10 lines apart; once they cover half the
+file, drop the ranges and let the reader read the file in full. The prompt
+still withholds the original wording and the reason for each change. Rule on
+both results together and apply what holds in one final pass; that pass
+closes the run.
 
 ## Step 3b - English
 
-Three mechanical layers, then the review.
+Three mechanical layers, then the review. Fix once all four are in, one Edit
+per paragraph that contains a fix, as in "Writing a fix".
 
 ### textlint
 
