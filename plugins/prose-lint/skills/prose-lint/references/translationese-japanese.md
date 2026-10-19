@@ -7,7 +7,8 @@ settles in Step 2. `assets/translationese.sample.md` holds the few forms a
 regex can find; everything else here needs the sentence and the document
 around it.
 
-Every source in section 6 was fetched on 2026-10-16. Each quotation carries
+Every source in section 6 was fetched on 2026-10-16, and the Microsoft guide
+again on 2026-10-19 at its current build. Each quotation carries
 its source's short name in 〔〕, the key the register rows and this file cite,
 and section 6 gives the URL to check it against.
 
@@ -87,8 +88,9 @@ fits, write the phrase.
 
 **`field-term`** - a dictionary rendering where the reader's field has its own
 term, or a fresh rendering of a term the product already fixes. Microsoft's
-rule: "Use approved terminology from Microsoft Language Portal where
-applicable" 〔Microsoft〕 §2.1.3. The 建議 keeps established loanwords:
+rule: "Use approved terminology from Microsoft Terminology - Globalization |
+Microsoft Learn where applicable" 〔Microsoft〕 §2.1.3. The 建議 keeps
+established loanwords:
 「こうしたものは、ほかの言葉に言い換えるよりもそのまま用いる方が良い。」
 〔公用文〕 Ⅱ-3. Rewrite in `business` and `paper`: the field's term in the
 form the field writes it, katakana included. In `official` and `article`, use
@@ -403,7 +405,7 @@ Notes on the counts:
 
 ### Style guides and standards
 
-- 〔Microsoft〕 Microsoft. *Japanese Localization Style Guide*. No edition date printed. https://download.microsoft.com/download/a/8/2/a822a118-18d4-4429-b857-1b65ab388315/jpn-jpn-StyleGuide.pdf
+- 〔Microsoft〕 Microsoft. *Japanese Localization Style Guide*. No edition date printed; the build of 2025-07-18. https://aka.ms/japanese-styleguide
 - 〔公用文〕 文化審議会. 「公用文作成の考え方（建議）」 and its 解説, 令和4年1月7日. https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/93651301_01.pdf
 - 〔JTF〕 日本翻訳連盟 翻訳品質委員会. 『JTF日本語標準スタイルガイド（翻訳用）』第4.0版, 2026年7月25日. https://www.jtf.jp/pdf/jtf_style_guide.pdf
 - 〔Red Hat〕 Red Hat Localization Services. 『Red Hat 日本語スタイルガイド』, 2014年7月改訂. https://community.jboss.org/servlet/JiveServlet/previewBody/52925-102-2-171801/DOC-954596.pdf

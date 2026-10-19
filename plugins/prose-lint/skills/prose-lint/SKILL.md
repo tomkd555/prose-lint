@@ -448,7 +448,7 @@ Every rewrite, from any layer, is written to the style from Step 2:
    field writes it; a plain word whose dictionary entry lists the sense you
    mean. Look up each content word the rewrite brings in, unless the document
    already uses it for the same thing, in Weblio 国語辞書
-   (`https://www.weblio.jp/content/<word>`) or goo 国語辞書, and confirm the
+   (`https://www.weblio.jp/content/<word>`), and confirm the
    sense before using it. One lookup per word serves the whole run.
 3. End the sentence in the style's 文体.
 4. Read the rewrite with the sentence before and after it: the topic carries
@@ -545,13 +545,29 @@ from the message's opening words, which name the family:
   - `AI negated subject`
   - `AI evasion`
   - `AI strategy buzzword`
+  - `AI adjective-noun pair`
+  - `AI affirmation`
+  - `AI colloquial assessment`
+  - `AI cross-reference`
+  - `AI defensive hedge`
+  - `AI despite-formula`
+  - `AI explainer prompt`
+  - `AI false exclusivity`
+  - `AI filler`
+  - `AI fingerprint`
+  - `AI formalism`
+  - `AI hollow acknowledgment`
+  - `AI inevitability`
+  - `AI narrative pivot`
+  - `AI overreach`
+  - `AI urgency`
   - `AISigns.Chatbot`
   - `AISigns.Emoji`
 
   Fix them; a hit inside a quotation or on a term of art stays, with that
   reason.
-- Advisory - the families that name a figure of speech, a rhythm or a
-  punctuation mark, which human writers also use:
+- Advisory - the families that name a figure of speech, a sentence frame, a
+  rhythm or a punctuation mark, which human writers also use:
   - `AI overused verb` (the Figurative rules)
   - every `AI ... metaphor`
   - `AI figurative noun`
@@ -567,6 +583,28 @@ from the message's opening words, which name the family:
   - `AI pseudo-cleft`
   - `AI anthropomorphism`
   - `AI anthropomorphic adjective`
+  - `AI abstraction subject`
+  - `AI anaphora`
+  - `AI blanket claim`
+  - `AI consequence clause`
+  - `AI consequence tail`
+  - `AI designation adjective`
+  - `AI designation verb`
+  - `AI emphasis`
+  - `AI explainer lead`
+  - `AI idiom`
+  - `AI incomplete comparison`
+  - `AI nominalization`
+  - `AI point verdict`
+  - `AI possession verb`
+  - `AI quantified reveal`
+  - `AI regime opener`
+  - `AI scope partition`
+  - `AI shell noun`
+  - `AI summative appositive`
+  - `AI totality claim`
+  - `AI upkeep frame`
+  - `AI value verdict`
   - proselint
   - `AISigns.CommaCount`: the rule counts, because no published rule reads
     English clause structure. Split a sentence that strings clauses on commas,

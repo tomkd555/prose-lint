@@ -173,7 +173,8 @@ A journal's author guide wins over this file and over the 訓令 rules.
 
 ## 6. Sources
 
-Accessed 2026-09-26.
+Accessed 2026-09-26. The 東北大, 法政大, 土木学会E3 and 人工知能学会 entries
+were checked against their current editions on 2026-10-19.
 
 ### Public guidance
 
@@ -196,12 +197,12 @@ Accessed 2026-09-26.
 
 | Key | Source |
 | --- | --- |
-| 東北大 | 東北大学『東北大学レポート指南書』第5版, 2024-03-15. https://ital.ihe.tohoku.ac.jp/italwp/wp-content/uploads/2024/03/shinansyo_v5.pdf ; 『東北大学レポート指南書・別冊』2024-03-21. https://ital.ihe.tohoku.ac.jp/italwp/wp-content/uploads/2024/03/shinansyo_bessatu.pdf |
+| 東北大 | 東北大学『東北大学レポート指南書』第6版, 2026-03-15. https://ital.ihe.tohoku.ac.jp/italwp/wp-content/uploads/2026/03/shinansyoV6_1.pdf ; 『東北大学レポート指南書・別冊』2024-03-21. https://ital.ihe.tohoku.ac.jp/italwp/wp-content/uploads/2024/03/shinansyo_bessatu.pdf |
 | 金沢大 | 金沢大学国際基幹教育院『レポート作成の手引き』2023-04. https://ilas.w3.kanazawa-u.ac.jp/wp-content/uploads/ReportWritingGuide.pdf |
 | 立教大 | 立教大学大学教育開発・支援センター『Master of Writing』. https://www.rikkyo.ac.jp/about/activities/fd/cdshe/mknpps000001ri7e-att/MasterofWriting.pdf |
 | 大阪大 | 大阪大学全学教育推進機構『阪大生のためのアカデミック・ライティング入門』第4版, 2023. https://ir.library.osaka-u.ac.jp/repo/ouka/all/71454/2023academicwriting.pdf |
 | 名大図書館 | 名古屋大学附属図書館『アカデミックスキルズ』第2章「レポートの書き方」. https://nagoya.repo.nii.ac.jp/record/2002305/files/Academic_Skills_02.pdf |
-| 法政大 | 法政大学教育開発・学習支援センター 学習ハンドブック「レポートの文章術」. https://www.hoseikyoiku.jp/lf/images/handbook/pdf/2020/handbook22.pdf |
+| 法政大 | 法政大学教育開発・学習支援センター『学習支援ハンドブック2026』「レポートの文章術」pp.55–56. https://www.hoseikyoiku.jp/lf/handbook/ (2020 edition: https://www.hoseikyoiku.jp/lf/images/handbook/pdf/2020/handbook22.pdf) |
 | 関西大 | 関西大学ライティングラボ「期末レポートに関するルーブリック」2016. https://www.kansai-u.ac.jp/ctl/labo/images/write1_4.pdf |
 | 徳島大 | 徳島大学高等教育研究センター「3-1.「文章力」を身につけよう」. https://www.tokushima-u.ac.jp/highedu/reform/sih/writing.html |
 | 大手前 | 大手前学園学修サポートセンター「レポートの書き方」第4章 確認テスト（答えと解説）. https://lsc.otemae.ac.jp/documents/reports/04_answer.pdf |
@@ -233,7 +234,7 @@ Accessed 2026-09-26.
 
 | Key | Source |
 | --- | --- |
-| 土木学会E3 | 土木学会論文集E3（特集号）執筆要領, 2022改正. https://committees.jsce.or.jp/mokuzai07/system/files/sippitu_youryou22.pdf |
-| 人工知能学会 | 人工知能学会論文誌 原稿執筆案内, 2021改訂. https://www.ai-gakkai.or.jp/pdf/journal/how_to_paper.pdf |
+| 土木学会E3 | 土木学会論文集 特集号（木材工学）執筆要領, 2022-09-05改正; formerly 土木学会論文集E3（特集号）執筆要領. https://committees.jsce.or.jp/mokuzai07/system/files/sippitu_youryou22a_0.pdf |
+| 人工知能学会 | 人工知能学会論文誌 原稿執筆案内, 2025-02-07改訂. https://www.ai-gakkai.or.jp/pdf/journal/how_to_paper_20260318.pdf |
 | 塚本 | 塚本真也「技術文章の書き方 第2講」『砥粒加工学会誌』57(10), pp.673–676, 2013. https://www.jsat.or.jp/sites/default/files/2017-11/20161227155134.pdf |
 | ja-engineering-paper | kn1cht, textlint-rule-preset-ja-engineering-paper 1.0.4 (MIT). https://github.com/kn1cht/textlint-rule-preset-ja-engineering-paper |
