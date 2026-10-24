@@ -41,6 +41,9 @@ def copy_tree(src: Path, dst: Path):
         target = dst / path.relative_to(src)
         target.parent.mkdir(parents=True, exist_ok=True)
         if path.name.startswith(".") and target.exists():
+            # A kept config can name a rule package this release dropped.
+            if target.read_bytes() != path.read_bytes():
+                print(f"kept: {target} differs from the shipped {path}; merge the changes by hand")
             continue
         shutil.copy(path, target)
 

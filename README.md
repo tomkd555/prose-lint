@@ -5,14 +5,14 @@ A Claude Code skill that runs the wording linters over one document, picks the c
 | Layer | Japanese | English |
 |---|---|---|
 | Style | Settled before any layer runs: what the document is and who reads it, its 文体, and where its words come from (`business`, `paper`, `official`, `academic`, `article`). A calling skill can pass `style=<name>`. Every rewrite is written to it. | — |
-| Reader | An agent in a fresh context reads the document against `references/translationese-japanese.md` and flags each sentence that reads as translated from English or sits off the style: a word picked as the dictionary match of an English one, an English frame, a 文体 or a word at the wrong distance from the reader. A second read checks the rewrites. | — |
+| Reader | An agent in a fresh context reads the document against `references/translationese-japanese.md` and the exemplar passages for its style in `references/exemplars-japanese.md`, and flags each sentence that reads as translated from English or sits off the style: a word picked as the dictionary match of an English one, an English frame, a 文体 or a word at the wrong distance from the reader. A second read checks the rewrites. | — |
 | Translationese | `register.py --translationese` over 13 rows, each resting on a style guide or study and measured against 83 human-written documents | — |
-| textlint | ja-technical-writing, JTF style and AI-writing presets. The kana rules of 内閣訓令: four hiragana rules and a prh rule set, `assets/textlint/prh/koyobun-kana.yml`. い抜き, さ入れ and フィラー. The skill sorts findings into blocking, advisory and notation. | write-good, terminology, a 40-word sentence cap and duplicated conjunctions at sentence starts. The AI-writing preset's two Markdown-shape rules: bold-label bullets, emoji bullets and bold in headings. |
+| textlint | ja-technical-writing, JTF style and AI-writing presets. The kana rules of 内閣訓令: four hiragana rules and a prh rule set, `assets/textlint/prh/koyobun-kana.yml`. い抜き, さ入れ and フィラー. A たり with no partner. Two spellings of one word in a document (ユーザー and ユーザ). The skill sorts findings into blocking, advisory and notation. | Duplicated conjunctions at sentence starts. The AI-writing preset's two Markdown-shape rules: bold-label bullets, emoji bullets and bold in headings. |
 | Register | `scripts/register.py` over a Markdown table of rejected wordings that you grow one row at a time: definition by negation, the spoken register, the stock phrases of generated Japanese | the same table's English negation row |
 | natural-japanese | `lint.py` in the AI-smell and reading-load lanes, the naturalness score, a baseline rerun after the fixes | — |
-| Morphology | `scripts/koyobun.py`. From 「公用文作成の考え方」: passive, clause chains, 漢字１字＋する and 等/など. House rules: clauses strung on 読点, conjunctive が, a lone たり, させていただく, 体言止め in body text and negated predicates. | — |
+| Morphology | `scripts/koyobun.py`. From 「公用文作成の考え方」: passive, clause chains, 漢字１字＋する and 等/など. House rules: clauses strung on 読点, conjunctive が, させていただく, 体言止め in body text and negated predicates. | — |
 | Academic mode | `register.py --academic` over a second table of 47 rows, each citing its sources. The spoken register: でも, すごく, こんな, と思う and です・ます. 文語調: べく and ごとく. The over-stiff forms: することができる and を行う. `koyobun.py --academic` for って and たら. The rules a regex cannot find, read from `references/academic-japanese.md`. | — |
-| vale | — | proselint: redundancy, corporate speak, jargon and hedging. [ai-tells](https://github.com/tbhb/vale-ai-tells): rules for the signs of LLM-written English. They cover overused vocabulary, stock openers and closings, hedges, vague attributions and participial padding. They also cover copula dodges, transitions, figurative verbs and em dashes. `AISigns`: three house rules for the model talking about itself, emoji in headings, and five or more commas in one sentence. |
+| vale | — | proselint: clichés, redundancy, corporate speak, jargon and hedging, and vale's check for a word typed twice. [ai-tells](https://github.com/tbhb/vale-ai-tells): rules for the signs of LLM-written English. They cover overused vocabulary, stock openers and closings, hedges, vague attributions and participial padding. They also cover copula dodges, transitions, figurative verbs and em dashes. `AISigns`: three house rules for the model talking about itself, emoji in headings, and five or more commas in one sentence. |
 
 The register ships with twelve sample rows. Two catch definition by negation (`ではない`, `not X but Y`, `rather than` and related forms), which the skill rewrites to say what a thing is. Four catch the spoken register in a formal document. Six catch the stock phrases of generated Japanese that natural-japanese's catalogue lists but its lint leaves to the eye: hearsay with no source, breadth adjectives, outcomes named by an abstract noun, an intention softened with と思います, and the boilerplate opening and closing of a blog post.
 
@@ -34,6 +34,8 @@ The reading carries the translationese layer, because a surface form alone says 
 
 Each quotation names its source's URL, so it can be checked against the page. The register carries the 13 forms that a regex finds and human writers rarely use, or that need a ruling in context.
 
+The reader and every rewrite also work from `references/exemplars-japanese.md`: eighteen paragraphs of present-day Japanese that institutions and award committees hold up as well written, grouped by the style that reads them. They come from 文化審議会's 「公用文作成の考え方」 and its 2018 report 「分かり合うための言語コミュニケーション」, デジタル庁's accessibility guidebook, and two papers that won 優秀賞 at 言語処理学会's annual meeting. Each passage is quoted verbatim, with notes on how its sentences open and end, which words they choose and how they join, and with the reason it was chosen.
+
 ## Install
 
 ```
@@ -51,7 +53,7 @@ Then install the linters once, where `<skill dir>` is the folder that holds `SKI
 uv run python <skill dir>/scripts/setup.py
 ```
 
-It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md` and `~/.prose-lint/translationese.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited.
+It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md` and `~/.prose-lint/translationese.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited, naming each one that differs from the shipped file so you can merge a change by hand.
 
 Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and [natural-japanese](https://github.com/coji/natural-japanese) (this release is tested with 1.6.0). A missing tool skips its layer, and the report names it.
 
@@ -89,6 +91,7 @@ The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`,
 | `plugins/prose-lint/skills/prose-lint/assets/translationese.sample.md` | The translationese register |
 | `plugins/prose-lint/skills/prose-lint/references/academic-japanese.md` | The academic rules, the passages they rest on, the disagreements and the source list |
 | `plugins/prose-lint/skills/prose-lint/references/translationese-japanese.md` | The translationese markers, the test and the rewrite per style for each, the measurements, the disagreements and the source list |
+| `plugins/prose-lint/skills/prose-lint/references/exemplars-japanese.md` | Passages of present-day Japanese per style, the features to take from each, and the source, selection reason and licence of each |
 
 ## Considered and left out
 
@@ -99,7 +102,12 @@ Surveyed in September 2026 while choosing the layers above; listed so the choice
 | textlint-rule-stop-words (2,000 words) | Overlaps ai-tells and flags ordinary verbs (accelerate, accompany); ai-tells gives a rewrite with each hit |
 | textlint-rule-preset-ai-words-ja | Its list comes from one tech-blog corpus and holds everyday words (走る, 壊れる, 経路) |
 | textlint-rule-ja-hiraku | Opens 及び, 更に, 既に and the other words the 訓令 keeps in kanji; the four hiragana rules plus prh follow the 訓令 as written |
-| textlint-rule-rousseau | Its checks duplicate write-good; per-sentence readability alone did not earn a layer |
+| textlint-rule-rousseau | Per-sentence readability and write-good's checks; neither earned a layer |
+| textlint-rule-write-good, terminology, en-max-word-count | Removed in 1.5.0. Measured on six Go blog posts and five Rust book chapters (18,000 words): write-good's remaining check fired on many, few and several 34 times; terminology rewrote at run time, README and the verb indexes; a word cap says nothing about whether a sentence reads well |
+| eleven ai-tells rules | Switched off in 1.5.0, because they fired more often on that human prose than on LLM-written articles on the same topics: For example, Therefore, implements, In other words, of course, a single channel. `.vale.ini` lists them |
+| textlint-rule-ja-no-orthographic-variants | Reports 呼び出し時 against とき and 呼び方 against ほう, the pairs the 訓令 writes differently on purpose |
+| textlint-rule-preset-smarthr | Its prh dictionary opens 及び and other words the 訓令 keeps in kanji; its other rules overlap the two presets |
+| textlint-rule-common-misspellings | One hit in 41,000 words, on the COBOL keyword THRU |
 | vale Readability, Microsoft, Google | Grade-level metrics and one company's style; neither says whether a person wrote the text |
 | vale signs-of-ai-writing, LLMCliches, Slop | Smaller ports of the same Wikipedia list; ai-tells covers them and is in the vale hub |
 | textlint-rule-preset-ja-engineering-paper | Deletes 非常に and 極めて outright, rewrites 又は, 基に and 挙げる against the 訓令, and forces 「，．」; its register ideas are cited in the academic register instead |
@@ -115,4 +123,5 @@ MIT. prose-lint is an independent project; [proselint](https://github.com/ampers
 - `assets/textlint/dict/fukushi.yml` is the dictionary of [textlint-rule-ja-hiragana-fukushi](https://github.com/lostandfound/textlint-rule-ja-hiragana-fukushi) (MIT © Hiroshi Takase) with five entries removed and one duplicate dropped; its header carries the upstream copyright and permission notice.
 - The academic register and `references/academic-japanese.md` restate rules from the university, lab, society and research sources listed in that file, with short quotations for citation; no text is copied beyond those quotations.
 - The translationese register and `references/translationese-japanese.md` restate rules from the style guides, translator articles and studies listed in that file, with short quotations for citation. The human-written documents they were measured against are natural-japanese's calibration sources, fetched for the measurement and not redistributed.
+- `references/exemplars-japanese.md` quotes excerpts under their own terms. 文化審議会「公用文作成の考え方」, 文化審議会国語分科会「分かり合うための言語コミュニケーション（報告）」 and デジタル庁「ウェブアクセシビリティ導入ガイドブック」 are used under 公共データ利用規約（第1.0版）, which is compatible with CC BY 4.0. The papers by 川崎・永田・高村・大谷 (2025) and 永田・川崎・大谷・高村 (2024), from 言語処理学会's annual meetings, are CC BY 4.0. The file names the source and URL of each excerpt.
 - The four 公用文 rules paraphrased in `SKILL.md` and `koyobun.py` come from 「公用文作成の考え方」 (文化審議会建議, 2022-01-07), https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/93650001_01.html. The kana rules in `prh/koyobun-kana.yml` restate 「公用文における漢字使用等について」 (平成22年内閣訓令第1号).
