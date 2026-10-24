@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference; a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; and an academic mode for papers, theses and reports. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; and an academic mode for papers, theses and reports. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -31,12 +31,10 @@ prints the directory it found, written `{NJ}` below.
 
 ## Step 1 - settle the target
 
-A path in the request is the target. Pasted text goes to a `.md` file in a
-temporary directory first, because textlint, vale and the scripts all read
-files.
-
-With no path given and no file in play from the conversation, ask which text to
-lint.
+The target is the path in the request, or else the file the conversation is
+working on. With neither, ask which text to lint. Pasted text goes to a `.md`
+file in a temporary directory first, because textlint, vale and the scripts
+all read files.
 
 ## Step 2 - route by script
 
@@ -76,6 +74,13 @@ the head of the report (「style: business - 設計書、読み手は開発者�
 | `academic` | the academic-mode signals above | 常体 in the である form | the academic register |
 | `article` | a blog post, note, essay or column for a general reader | the one most body sentences end in | everyday 和語 over 漢語; a field term only where the reader knows it |
 
+`{SKILL_DIR}/references/exemplars-japanese.md` quotes present-day Japanese
+that institutions and award committees hold up as well written: 公用文 for
+`official`, a council report and a government technical guide for
+`business`, award-winning papers for `academic`, and writing for
+the general public for `article`. Its section 0 names the groups each style
+reads. Each passage names its source and the features to take from it.
+
 A sentence off the style's 文体 is a finding. In `paper` a です・ます sentence
 gets rewritten; in the others the minority 文体 does, unless a quotation or a
 direct address explains it. In `article` the spoken-register rows of the
@@ -93,9 +98,9 @@ main pass, against all its hits.
 
 ### The reader
 
-The translationese that survives the other layers sits where no regex reaches.
-A word gets picked as the dictionary match of an English one: 提供する for
-*provide* in 「MWCは製品発表以外にも多くのことを提供する」, where Japanese says
+The other layers match surface forms. The translationese they leave lies in
+word senses and sentence frames, which only a reading finds. A word gets
+picked as the dictionary match of an English one: 提供する for *provide* in 「MWCは製品発表以外にも多くのことを提供する」, where Japanese says
 「多くの見どころがある」. A frame gets built in English order:
 「この機能はユーザーにデータ出力を可能にします」 for a feature that lets users
 export data. The same word is right in its own sense elsewhere, and the
@@ -111,6 +116,9 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
 - the document's absolute path and the style line from Step 2;
 - the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
   with "read it first and use its marker ids";
+- the absolute path of `{SKILL_DIR}/references/exemplars-japanese.md`, with
+  "read section 0 and the groups it names for the style, and judge each
+  sentence against what those writers would have written";
 - the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
   user's own notes on wordings they rejected, read after the reference;
 - the output shape, one finding per line:
@@ -142,12 +150,13 @@ run.
 textlint exits 1 when it finds anything, so read the output and ignore the exit
 code. The findings fall in three tiers by rule id:
 
-- Blocking - fix these: `no-ai-hype-expressions`, `ai-tech-writing-guideline`,
+- Blocking - fix these:
   `ja-no-weak-phrase`, `ja-no-redundant-expression`, `ja-no-abusage`,
   `ja-no-successive-word`, `no-doubled-conjunctive-particle-ga`,
   `no-double-negative-ja`, `no-dropping-the-ra`, `@textlint-ja/no-dropping-i`,
   `@textlint-ja/no-insert-dropping-sa`, `@textlint-ja/no-filler`,
-  `no-mix-dearu-desumasu`, and the kana rules: `ja-keishikimeishi`,
+  `no-mix-dearu-desumasu`, `prefer-tari-tari` (a たり with no partner:
+  rewrite with the pair, 読んだり書いたりする, or without たり), and the kana rules: `ja-keishikimeishi`,
   `ja-hiragana-hojodoushi`, `ja-hiragana-daimeishi`, `ja-hiragana-fukushi`
   and `prh`. The four hiragana rules and prh together restate 「公用文における
   漢字使用等について」(平成22年内閣訓令第1号) 別紙. prh carries the
@@ -156,10 +165,18 @@ code. The findings fall in three tiers by rule id:
   the item it comes from. The fukushi dictionary is the rule's own minus the five words the
   訓令 keeps in kanji (更に, 既に, 最も, 僅か, 若しくは). A kana rule firing on
   a proper noun, a legal term or a quotation is kept, with that reason.
+  `ja-no-redundant-expression` runs without its 〜を行う dictionary; the
+  reader judges the light verb (`light-verb` in the reference).
 - Advisory - each needs judgement: `no-doubled-joshi`, `no-doubled-conjunction`,
-  `sentence-length` (90 characters), `max-ten`, `max-kanji-continuous-len`. A
-  particle repeated in a plain list holds; the conjunctive が repeated in one
-  sentence gets fixed. Fix the ones that hold and say why the others stay.
+  `sentence-length` (90 characters), `max-ten`, `max-kanji-continuous-len`,
+  `no-ai-hype-expressions`, `ai-tech-writing-guideline` and
+  `@textlint-ja/no-synonyms`. A particle repeated in a plain list holds; the
+  conjunctive が repeated in one sentence gets fixed. The two AI-writing rules
+  also fire on a negated 完全には and on 必要があります. `no-synonyms` reports
+  two spellings of one word in the document (ユーザー and ユーザ, アプリ and
+  アプリケーション); settle on the spelling the field uses, and keep a pair
+  that names two things, such as a company and its group. Fix the ones that
+  hold and say why the others stay.
 - Notation - every other rule: punctuation, spacing, numerals. Leave them alone
   unless the user asks for notation.
 
@@ -198,9 +215,9 @@ which one it read. The sample carries twelve rows in three groups.
   items, say what changes, say it plainly, delete the boilerplate. A hit
   inside a quotation stays.
 
-The regex reaches the surface forms only. The `negated_predicate` id of the
-morphology lint below lists every sentence whose final predicate is negated;
-read each one and rewrite the ones whose whole content is a denial:
+The regex matches surface forms only. The `negated_predicate` id of the
+morphology lint below lists every sentence whose final predicate is negated.
+Read each one and rewrite the ones whose whole content is a denial:
 「〜とは限らない」, 「〜するわけがない」, 「〜を含まない」, 「〜せず」 or
 「〜しない」 used to define a thing or to draw its boundary, and a clause that
 names only what something lacks. The other rows are handled as the register
@@ -251,8 +268,9 @@ uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8')
 ```
 
 `--genre business` selects natural-japanese's business profile, which mainly
-switches off detectors that misfire on bullet-heavy business documents. The JSON goes to a temporary file so it serves twice: it is
-the ledger the report rules on, and the baseline for the second run below.
+switches off detectors that misfire on bullet-heavy business documents. The
+JSON goes to a temporary file so it serves twice: it is the ledger the report
+rules on, and the baseline for the second run below.
 Read it through the second command, which prints it without the `paragraphs`
 key. From natural-japanese 1.6.0 that key copies every paragraph of the
 document as the worksheet for that skill's own paragraph check, and it makes
@@ -286,9 +304,9 @@ Three more pieces of natural-japanese come in here.
   Under 100 characters of body the score is skipped.
 - **The skeleton.** For a document with headings and over about 3,000
   characters, run `uv run {NJ}/outline.py <file>` and read the headings and
-  paragraph leads it prints in one pass: whether the line of argument holds from
-  headings alone, whether each heading is a message, and whether sections repeat
-  one template. Those findings join the ledger.
+  paragraph leads it prints in one pass. Check three things: the line of
+  argument follows from the headings alone, each heading states a message, and
+  no two sections repeat one template. Those findings join the ledger.
 - **The second run.** It runs with the second read (end of "Writing a fix"),
   after the fixes are applied: lint.py again with the same options plus
   `--baseline <tmp>/nj-1.json`, into `<tmp>/nj-2.json`, read through the
@@ -307,7 +325,7 @@ uv run {SKILL_DIR}/scripts/koyobun.py <file>
 This script checks rules that turn on parts of speech, which no surface-string
 linter sees. Four come from 「公用文作成の考え方」 (文化審議会建議, 2022-01-07,
 https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/93650001_01.html);
-the rules below paraphrase its items. Six are house rules of this skill,
+the rules below paraphrase its items. Five are house rules of this skill,
 marked as such, three of them leaning on an item of the 建議. It tokenises
 with sudachipy, on the same sentence split and Markdown mask lint.py uses, and
 reports one line per suspicion. Each id carries its rule and its ruling:
@@ -336,14 +354,10 @@ reports one line per suspicion. Each id carries its rule and its ruling:
   the writer to have the full content in mind and to put representative,
   typical items before 「等」「など」; check that each occurrence does.
 - `ga_conjunction` (house rule, after Ⅲ-3 カ): every が used as a 接続助詞,
-  with the words before it. The 建議 asks the writer not to string clauses on
-  接続助詞; this check lists each が so that the ones that join two clauses
-  with no contrast (「説明しますが、」, 「検討したが、」 before a result) get
-  cut into two sentences or rewritten with ので or ため. A が that marks a real
+  with the words before it. The 建議 asks the writer not to overuse 接続助詞. Some が join two clauses with no contrast, as in 「説明しますが、」 or
+  「検討したが、」 before a result; cut each of those into two sentences, or
+  rewrite it with ので or ため. A が that marks a real
   contrast stays, and the report says so.
-- `tari_single` (house rule): a sentence with one たり and no partner.
-  Standard usage pairs it (読んだり書いたりする); rewrite with the pair, or
-  without たり (読むなどして). A たり that closes a list on purpose stays.
 - `sasete_itadaku` (house rule, after Ⅱ-6 ウ): させていただく. The 建議 asks
   for 敬語 to be used as needed and not piled up; させていただく asks the reader's
   leave, so it stays only where leave is being asked. Elsewhere write します or
@@ -416,24 +430,29 @@ Academic mode changes these rulings in the other layers:
   of the reference say. A journal's author guide, when the user names one, wins
   over every rule here, punctuation and kana included.
 
-Raise the register without stiffening it. Use the plainest written form the
-row offers; do not turn native verbs into kanji compounds wholesale, add
-において, or string それゆえ and よって through a paragraph (reference, section
-2).
+Raise the register and keep the prose plain. Use the plainest written form
+the row offers. Keep the text's native verbs unless the kanji verb is more
+precise, and write において, それゆえ and よって only where the sentence needs
+them (reference, section 2). The
+`academic` group of the exemplars shows the level to aim at.
 
 ### The review
 
-Review the text from the read that settled the style in Step 2, for what no
-script decides: whether each paragraph serves the document's purpose, whether terms stay consistent from start to end, and
-whether the conclusion comes first.
+Review the text from the read that settled the style in Step 2, for the
+points that need a reader: each paragraph serves the document's purpose, terms
+stay the same from start to end, and the conclusion comes first.
 
 In academic mode, read also for the points of the reference's sections 1.3 to
-1.6 and 2 that no regex finds: fact and judgement kept apart, with the ground
-of each judgement given and another author's view attributed; claims measured
-by numbers, with no praise of one's own result; each demonstrative with a
-named referent; one term per concept; methods and results in the past tense
-and discussion in the present; no paragraph leaning on において, のである or a
-stiff connective in every sentence.
+1.6 and 2 that need a reader:
+
+- fact and judgement kept apart, with the ground of each judgement given and
+  another author's view attributed;
+- claims measured by numbers, with the writer's own result stated without
+  praise;
+- each demonstrative with a named referent, and one term per concept;
+- methods and results in the past tense, and discussion in the present;
+- において, のである and the stiff connectives used where a sentence needs
+  them; a paragraph that leans on them gets thinned.
 
 ### Writing a fix
 
@@ -447,16 +466,20 @@ Every rewrite, from any layer, is written to the style from Step 2:
    already uses for the same thing; the reader's field term in the form the
    field writes it; a plain word whose dictionary entry lists the sense you
    mean. Look up each content word the rewrite brings in, unless the document
-   already uses it for the same thing, in Weblio 国語辞書
-   (`https://www.weblio.jp/content/<word>`), and confirm the
-   sense before using it. One lookup per word serves the whole run.
+   already uses it in the same sense, in Weblio 国語辞書
+   (`https://www.weblio.jp/content/<word>`), and confirm the sense before
+   using it. One lookup per word serves the whole run.
 3. End the sentence in the style's 文体.
 4. Read the rewrite with the sentence before and after it: the topic carries
    on, the connective still holds, and the term matches the one the document
    uses for the same thing.
 5. A row's `Instead` and the reference's before/after pairs give the
-   direction; the words come from the text around the hit. One replacement
-   pasted at every hit is a template, and a template reads as translation.
+   direction. The exemplar groups that section 0 of
+   `references/exemplars-japanese.md` names for the style give the frame: how
+   their sentences open and end, which words they choose, and how they join.
+   Read those groups once per run, before the first rewrite. The words come from the
+   text around the hit. One replacement pasted at every hit is a template, and
+   a template reads as translation.
 
 Apply the fixes in one pass once every hit is ruled: one Edit per paragraph
 that contains a fix. Each Edit can set off the session's write hooks, so one
@@ -484,9 +507,8 @@ per paragraph that contains a fix, as in "Writing a fix".
 {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
 ```
 
-The English config covers write-good, terminology, a 40-word sentence cap and
-duplicated conjunctions at the start of consecutive sentences. It also runs
-two Markdown-shape rules of the AI-writing preset. `no-ai-list-formatting`
+The English config covers duplicated conjunctions at the start of consecutive
+sentences and two Markdown-shape rules of the AI-writing preset. `no-ai-list-formatting`
 reports a bullet that opens with a bold label and a colon, and an emoji
 bullet. `no-ai-emphasis-patterns` reports bold inside a heading, and an emoji
 before a bold label. Those two report in Japanese; restate the finding in
@@ -500,7 +522,8 @@ vale --config {HOME}/vale/.vale.ini <file>
 
 Three styles run:
 
-- proselint: redundancy, corporate speak, jargon and hedging.
+- proselint: clichés, redundancy, corporate speak, jargon and hedging, plus
+  vale's own `Vale.Repetition` for a word typed twice.
 - `ai-tells` (https://github.com/tbhb/vale-ai-tells): the signs of LLM-written
   English.
 - `AISigns`: three house rules shipped in `assets/vale/styles/AISigns` for
@@ -515,24 +538,18 @@ from the message's opening words, which name the family:
 - Fixed - the families that name a stock phrase, a filler or a chat artefact:
   - `AI closing`
   - `AI opening`
-  - `AI sycophancy`
   - `AI hedge`
   - `AI stacked hedge`
   - `AI conclusion`
   - `AI vague attribution`
   - `AI copula dodge`
   - `AI participial padding`
-  - `AI transition`
   - `AI overused word`
   - `AI vocabulary`
   - `AI cliché`
   - `AI puffery`
   - every `AI ... heading`
   - `AI structure announcement`
-  - `AI metacommentary`
-  - `AI restatement`
-  - `AI empty modifier`
-  - `AI intensifier`
   - `AI quantity metaphor`
   - `AI list intro`
   - `AI label-and-explain`
@@ -555,7 +572,6 @@ from the message's opening words, which name the family:
   - `AI false exclusivity`
   - `AI filler`
   - `AI fingerprint`
-  - `AI formalism`
   - `AI hollow acknowledgment`
   - `AI inevitability`
   - `AI narrative pivot`
@@ -572,7 +588,7 @@ from the message's opening words, which name the family:
   - every `AI ... metaphor`
   - `AI figurative noun`
   - `AI punctuation`: an em dash is a sign only when a paragraph holds three
-    or more; a capital after a colon is a style choice
+    or more
   - `AI tricolon`
   - `AI staccato`
   - `AI noun string`
@@ -590,13 +606,11 @@ from the message's opening words, which name the family:
   - `AI consequence tail`
   - `AI designation adjective`
   - `AI designation verb`
-  - `AI emphasis`
   - `AI explainer lead`
   - `AI idiom`
   - `AI incomplete comparison`
   - `AI nominalization`
   - `AI point verdict`
-  - `AI possession verb`
   - `AI quantified reveal`
   - `AI regime opener`
   - `AI scope partition`
@@ -615,7 +629,12 @@ from the message's opening words, which name the family:
   Fix the ones that hold and say why the others stay.
 
 Two ai-tells rules that police one project's own wording (`HouseStyle`,
-`ShipOveruse`) are switched off in the shipped `.vale.ini`.
+`ShipOveruse`) are switched off in the shipped `.vale.ini`, and so are eleven
+whose hits on the Go blog and the Rust book were sound sentences: the
+families `AI transition`, `AI formalism`, `AI empty modifier`,
+`AI restatement`, `AI metacommentary`, `AI sycophancy`, `AI intensifier`,
+`AI possession verb` and `AI emphasis`, and the colon rule of
+`AI punctuation`.
 
 ### The register
 
@@ -628,7 +647,7 @@ in English text. Rewrite each hit the same way as in Step 3a.
 With the `elements-of-style:writing-clearly-and-concisely` skill installed
 (https://github.com/obra/the-elements-of-style), invoke it for the judgement
 layer; without it, read for needless words, passive voice that hides the actor,
-and vague nouns yourself. Then read once for the signs no regex catches:
+and vague nouns yourself. Then read once for the signs that need a reader:
 
 - clauses joined by a comma alone (a comma splice, which the comma count
   passes at one or two commas)
@@ -647,13 +666,13 @@ and vague nouns yourself. Then read once for the signs no regex catches:
   applying them wholesale flattens prose the user wrote deliberately. `textlint
   --fix` is off the table for the same reason.
 - For Japanese, open with the style line, then the naturalness score and its
-  band, then the ledger by layer with the reader's findings as one layer, then
-  the second run's resolved / new / persisting counts and what the second read
-  of the rewrites returned. In
-  academic mode, add a line under the score: that the run was in academic mode
-  and why, and the academic register's hit count before and after the fixes;
-  the academic ledger comes after the register's, with each hit's sources. A score
-  alone says nothing about the register hits, so it never replaces the ledger.
+  band. In academic mode, add a line under the score: that the run was in
+  academic mode and why, and the academic register's hit count before and
+  after the fixes. The ledger follows by layer, with the reader's findings as
+  one layer; the academic ledger comes after the register's, with each hit's
+  sources. End with the second run's resolved / new / persisting counts and
+  what the second read of the rewrites returned. A score alone says nothing
+  about the register hits, so it never replaces the ledger.
 - For English, open with one line: the count of ai-tells, `AISigns.Chatbot`
   and `AISigns.Emoji` hits and the count per 1,000 words. Both come from the
   vale run before the fixes: `vale --output line` piped to a count of lines

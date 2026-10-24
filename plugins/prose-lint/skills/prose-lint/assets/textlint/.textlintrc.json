@@ -20,6 +20,8 @@
     "@textlint-ja/no-filler": true,
     "@textlint-ja/no-insert-dropping-sa": true,
     "@textlint-ja/no-dropping-i": true,
+    "@textlint-ja/no-synonyms": true,
+    "prefer-tari-tari": true,
     "ja-keishikimeishi": {
       "detection_hou_kata": false,
       "detection_ue": false
@@ -35,6 +37,13 @@
     "preset-ja-technical-writing": {
       "sentence-length": {
         "max": 90
+      },
+      "ja-no-redundant-expression": {
+        "dictOptions": {
+          "dict5": {
+            "disabled": true
+          }
+        }
       },
       "no-mix-dearu-desumasu": {
         "preferInHeader": "",
