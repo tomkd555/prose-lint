@@ -17,6 +17,7 @@
         "enableDocumentAnalysis": false
       }
     },
+    "preset-ai-words-ja": true,
     "@textlint-ja/no-filler": true,
     "@textlint-ja/no-insert-dropping-sa": true,
     "@textlint-ja/no-dropping-i": true,

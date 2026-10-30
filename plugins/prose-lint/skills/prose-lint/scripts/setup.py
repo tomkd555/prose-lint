@@ -136,18 +136,27 @@ def run(tool, args, cwd) -> bool:
     return True
 
 
+def same(a: Path, b: Path) -> bool:
+    """Compare two text files, ignoring CRLF against LF from a git checkout."""
+    return a.read_bytes().replace(b"\r\n", b"\n") == b.read_bytes().replace(b"\r\n", b"\n")
+
+
 def copy_tree(src: Path, dst: Path):
-    """Copy src into dst; a dotfile already in dst is kept, everything else is refreshed."""
+    """Copy src into dst; a dotfile the user edited is kept, everything else is refreshed."""
     for path in src.rglob("*"):
         if path.is_dir():
             continue
         target = dst / path.relative_to(src)
         target.parent.mkdir(parents=True, exist_ok=True)
-        if path.name.startswith(".") and target.exists():
-            # A kept config can name a rule package this release dropped.
-            if target.read_bytes() != path.read_bytes():
+        if path.name.startswith("."):
+            # The copy of the last shipped config tells an untouched config from an edited one.
+            shipped = target.with_name(target.name + ".shipped")
+            edited = target.exists() and not (shipped.exists() and same(shipped, target))
+            shutil.copy(path, shipped)
+            if edited and not same(target, path):
+                # A kept config can name a rule package this release dropped.
                 print(f"kept: {target} differs from the shipped {path}; merge the changes by hand")
-            continue
+                continue
         shutil.copy(path, target)
 
 

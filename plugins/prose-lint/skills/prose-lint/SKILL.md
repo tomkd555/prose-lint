@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -215,8 +215,10 @@ code. The findings fall in three tiers by rule id:
   reader judges the light verb (`light-verb` in the reference).
 - Advisory - each needs judgement: `no-doubled-joshi`, `no-doubled-conjunction`,
   `sentence-length` (90 characters), `max-ten`, `max-kanji-continuous-len`,
-  `no-ai-hype-expressions`, `ai-tech-writing-guideline` and
-  `@textlint-ja/no-synonyms`. A particle repeated in a plain list holds; the
+  `no-ai-hype-expressions`, `ai-tech-writing-guideline`, `ai-words-ja/no-ai-words` and
+  `@textlint-ja/no-synonyms`. `no-ai-words` reports words generated Japanese
+  overuses: a figurative verb (走る, 焼く, 見張る) gets the literal one, and a
+  term the document's field uses in its literal sense (検査, 照合) stays. A particle repeated in a plain list holds; the
   conjunctive が repeated in one sentence gets fixed. The two AI-writing rules
   also fire on a negated 完全には and on 必要があります. `no-synonyms` reports
   two spellings of one word in the document (ユーザー and ユーザ, アプリ and
