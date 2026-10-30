@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# prose-lint-run - run a command with the tools setup.py downloaded on PATH.
+# Tools already on PATH come first; the downloaded uv, vale and Node follow.
+H="${PROSE_LINT_HOME:-$HOME/.prose-lint}"
+# Git Bash: C:/x would split PATH at its colon.
+command -v cygpath >/dev/null 2>&1 && H=$(cygpath -u "$H")
+PATH="$PATH:$H/bin:$H/node:$H/node/bin" exec "$@"

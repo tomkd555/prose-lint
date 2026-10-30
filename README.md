@@ -40,25 +40,24 @@ The reader and every rewrite also work from `references/exemplars-japanese.md`: 
 ## Install
 
 ```
-/plugin marketplace add coji/natural-japanese
-/plugin install natural-japanese@natural-japanese
 /plugin marketplace add tomkd555/prose-lint
 /plugin install prose-lint@prose-lint
 ```
 
-Without the plugin system, clone the repository and copy `plugins/prose-lint/skills/prose-lint` to `~/.claude/skills/`; clone [natural-japanese](https://github.com/coji/natural-japanese) anywhere and set `NATURAL_JAPANESE_SCRIPTS` to its `skills/natural-japanese/scripts` directory.
+That is the whole install. On the first session after an install or an update, the plugin's SessionStart hook (`hooks/session-start.sh`) sets up the linters in the background, in about a minute:
 
-Then install the linters once, where `<skill dir>` is the folder that holds `SKILL.md` (the copy under `~/.claude/skills/`, or the plugin's copy under `~/.claude/plugins/` after a plugin install):
+- It fetches [uv](https://docs.astral.sh/uv/) when none is on PATH; uv then fetches Python, sudachipy and python-pptx on first use.
+- It runs `scripts/setup.py`. That script downloads [vale](https://vale.sh/) 3.25.1 and Node 24.22.2 with npm when they are not on PATH. It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`) and runs `npm install` and `vale sync` there; the sync pulls proselint and ai-tells from the vale package hub. It puts the sample registers in the same directory as `vocabulary.md`, `academic.md`, `translationese.md` and `slop.md`.
 
-```
-uv run python <skill dir>/scripts/setup.py
-```
+Every download is a pinned release from the tool's official site, checked against its SHA-256 and kept under `~/.prose-lint`; a tool already on PATH is used as it is. The plugin's `bin/prose-lint-run` puts the downloaded tools on PATH for the skill's commands. The hook needs bash, which macOS, Linux and Git for Windows provide. `~/.prose-lint/setup.log` holds the last run, and `~/.prose-lint/.setup-version` the plugin version it set up; a setup with a failed step reruns on the next session. A plugin installed in a running session is set up when the skill first runs.
 
-It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md`, `~/.prose-lint/translationese.md` and `~/.prose-lint/slop.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited, naming each one that differs from the shipped file so you can merge a change by hand.
+A rerun refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style. It keeps a `.textlintrc*.json` or `.vale.ini` you have edited and copies a register the update added. It names each config or register that differs from the shipped file so you can merge a change by hand. A missing tool skips its layer, and the report names it.
 
-Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and [natural-japanese](https://github.com/coji/natural-japanese) (this release is tested with 1.6.4). Install the latest release of each. A `.pptx` is read through python-pptx, which `uv` fetches on first use. After a plugin update, run `setup.py` again: it copies a register the update added, such as `slop.md`, and names each register that differs from the shipped sample. A missing tool skips its layer, and the report names it.
+Without the plugin system, clone the repository, copy `plugins/prose-lint/skills/prose-lint` to `~/.claude/skills/`, and run `uv run python ~/.claude/skills/prose-lint/scripts/setup.py` once; put `~/.prose-lint/bin` and `~/.prose-lint/node` on PATH when it downloaded vale or Node there.
 
-Vale 3.24 and later match `^` at the start of a paragraph only. ai-tells 1.37.0, the latest release on 2026-10-30, predates its fix for this ([tbhb/vale-ai-tells#88](https://github.com/tbhb/vale-ai-tells/pull/88), merged 2026-10-07). Until the next ai-tells release, its `ConclusionMarkers` rule finds a sentence-opening "Ultimately," or "Overall," only at the start of a paragraph. Run `setup.py` again after that release; `vale sync` pulls the latest ai-tells.
+[natural-japanese](https://github.com/coji/natural-japanese) 1.6.4 ships in `skills/prose-lint/vendor/natural-japanese`; set `NATURAL_JAPANESE_SCRIPTS` to another copy's `skills/natural-japanese/scripts` directory to use that one for the morphology lint.
+
+Vale 3.24 and later match `^` at the start of a paragraph only. ai-tells 1.37.0, the latest release on 2026-10-30, predates its fix for this ([tbhb/vale-ai-tells#88](https://github.com/tbhb/vale-ai-tells/pull/88), merged 2026-10-07). Until the next ai-tells release, its `ConclusionMarkers` rule finds a sentence-opening "Ultimately," or "Overall," only at the start of a paragraph. Run `setup.py` again after that release, or delete `~/.prose-lint/.setup-version` so the next session reruns it; `vale sync` pulls the latest ai-tells.
 
 ## Usage
 
@@ -88,7 +87,10 @@ The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`,
 | Path | Holds |
 |---|---|
 | `plugins/prose-lint/skills/prose-lint/SKILL.md` | The routing, the layers, the ruling on each finding id, the report |
+| `plugins/prose-lint/hooks/` | `hooks.json` and `session-start.sh`, which run `setup.py` once per plugin version |
+| `plugins/prose-lint/bin/prose-lint-run` | Runs a command with the downloaded uv, vale and Node on PATH |
 | `plugins/prose-lint/skills/prose-lint/scripts/` | `register.py`, `koyobun.py`, `pptx_text.py`, `setup.py` |
+| `plugins/prose-lint/skills/prose-lint/vendor/natural-japanese/` | natural-japanese 1.6.4 and its licence |
 | `plugins/prose-lint/skills/prose-lint/assets/textlint/` | `package.json`, the two configs, `prh/koyobun-kana.yml`, `dict/fukushi.yml` |
 | `plugins/prose-lint/skills/prose-lint/assets/vale/` | `.vale.ini`, `styles/AISigns/` |
 | `plugins/prose-lint/skills/prose-lint/assets/vocabulary.sample.md` | The sample register |
@@ -125,7 +127,8 @@ Surveyed in September 2026 while choosing the layers above; listed so the choice
 
 MIT. prose-lint is an independent project; [proselint](https://github.com/amperser/proselint) is a separate linter by other authors, which this skill runs through vale.
 
-- `koyobun.py` imports `textcore.py` from [natural-japanese](https://github.com/coji/natural-japanese) (MIT, coji) at run time. `SKILL.md` restates natural-japanese's naturalness-score formula and bands from its `references/diagnose.md` and points to sections 3 and 5 of its `SKILL.md`, and six register rows restate patterns from its `references/forbidden-patterns.md`. No code from it is copied here.
+- `vendor/natural-japanese/` holds the `skills/natural-japanese` directory of [natural-japanese](https://github.com/coji/natural-japanese) (MIT © 2026 coji) 1.6.4, as published at commit 25a8638, with its `SKILL.md` renamed `guide.md` so Claude Code does not load it as a second skill. Its `LICENSE` sits beside it. The skill runs its `lint.py` and `outline.py`, and `koyobun.py` imports its `textcore.py`. `SKILL.md` restates its naturalness-score formula and bands from `references/diagnose.md` and points to sections 3 and 5 of its `SKILL.md`, and six register rows restate patterns from its `references/forbidden-patterns.md`.
+- The SessionStart hook and `setup.py` download [uv](https://github.com/astral-sh/uv) (MIT or Apache-2.0), [vale](https://github.com/vale-cli/vale) (MIT) and [Node.js](https://nodejs.org/) (MIT, with the third-party licences in its archive) from their official releases. Nothing of them is stored in this repository.
 - `references/stop-ai-slop-jp/` holds [stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) (MIT © 2026 Daichi Nagashima), itself a Japanese adaptation of [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop), as published at commit e09d327, with its `SKILL.md` renamed `rules.md` so Claude Code does not load it as a second skill. Its `LICENSE` sits beside it. `assets/slop.sample.md` restates its phrase lists as regex rows.
 - `assets/vale/.vale.ini` pulls [ai-tells](https://github.com/tbhb/vale-ai-tells) (MIT, Tony Burns) through the vale package hub; nothing from it is copied here.
 - `assets/textlint/dict/fukushi.yml` is the dictionary of [textlint-rule-ja-hiragana-fukushi](https://github.com/lostandfound/textlint-rule-ja-hiragana-fukushi) (MIT © Hiroshi Takase) with five entries removed and one duplicate dropped; its header carries the upstream copyright and permission notice.

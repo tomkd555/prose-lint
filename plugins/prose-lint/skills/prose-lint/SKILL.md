@@ -13,21 +13,33 @@ absolute path of this skill's directory, and `{HOME}` as `$PROSE_LINT_HOME`, or
 
 ## Step 0 - setup
 
-`{HOME}/textlint/node_modules`, `{HOME}/vale/styles/proselint` and
-`{HOME}/vale/styles/ai-tells` hold the installed linters. When any is missing,
-run once:
+The plugin's SessionStart hook sets up the linters in the background, on the
+first session after an install or an update. It fetches uv when none is on
+PATH and runs `scripts/setup.py`, which copies the textlint and vale configs
+and the registers to `{HOME}`, downloads vale and Node with npm under `{HOME}`
+when they are not on PATH, and runs `npm install` and `vale sync`.
+`{HOME}/.setup-version` names the plugin version of the last setup that
+finished. When it is missing or older than this plugin, as after an install
+in the running session, run the hook's script and wait for it:
 
 ```
-uv run python {SKILL_DIR}/scripts/setup.py
+bash {SKILL_DIR}/../../hooks/session-start.sh
 ```
 
-It needs `npm` for textlint and `vale` on PATH for the vale packages, and
-reports a missing tool as `skip`. A layer whose tool is missing is reported as
-skipped in the final report; the other layers still run. The Japanese
-morphology and natural-japanese layers need `uv` and the natural-japanese
-plugin (`/plugin marketplace add coji/natural-japanese`, then
-`/plugin install natural-japanese@natural-japanese`); `uv run {SKILL_DIR}/scripts/koyobun.py --nj-dir`
-prints the directory it found, written `{NJ}` below.
+It prints the log's path and every `skip` or `fail` line. A skill copied by
+hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. A
+layer whose tool is still missing is reported as skipped in the final report;
+the other layers still run.
+
+The commands below start with `prose-lint-run`, which the plugin puts on PATH:
+it adds the uv, vale and Node that setup downloaded. A skill copied by hand
+drops it.
+
+natural-japanese (https://github.com/coji/natural-japanese, MIT, coji) ships
+in `{SKILL_DIR}/vendor/natural-japanese`. `{NJ}` below is its `scripts`
+directory. Its `SKILL.md` is renamed `guide.md` there, so Claude Code does not
+load it as a second skill; natural-japanese's `SKILL.md` below, and a mention
+of `SKILL.md` in its own files, mean that file.
 
 ## Step 1 - settle the target
 
@@ -39,7 +51,7 @@ all read files.
 A PowerPoint file goes to a `.md` file in a temporary directory too:
 
 ```
-uv run {SKILL_DIR}/scripts/pptx_text.py <deck.pptx> <tmp>/deck.md
+prose-lint-run uv run {SKILL_DIR}/scripts/pptx_text.py <deck.pptx> <tmp>/deck.md
 ```
 
 Each slide becomes a `## Slide <n>` section: the title as a `### ` heading,
@@ -60,7 +72,7 @@ file, hiragana over 10% of the non-whitespace body means Japanese, otherwise
 English:
 
 ```
-uv run python -c "import re,sys;t=open(sys.argv[1],encoding='utf-8').read();b=len(re.sub(r'\s','',t));print('ja' if len(re.findall('[ぁ-ゟ]',t))*10>b else 'en')" <file>
+prose-lint-run uv run python -c "import re,sys;t=open(sys.argv[1],encoding='utf-8').read();b=len(re.sub(r'\s','',t));print('ja' if len(re.findall('[ぁ-ゟ]',t))*10>b else 'en')" <file>
 ```
 
 It counts hiragana alone on purpose: the Japanese an English document quotes is
@@ -178,7 +190,7 @@ run.
 ### textlint
 
 ```
-{HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.json <file>
+prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.json <file>
 ```
 
 textlint exits 1 when it finds anything, so read the output and ignore the exit
@@ -217,7 +229,7 @@ code. The findings fall in three tiers by rule id:
 ### The register
 
 ```
-uv run {SKILL_DIR}/scripts/register.py <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py <file>
 ```
 
 The register is a Markdown table, or a CSV with the header `Pattern,Instead,Why`,
@@ -262,7 +274,7 @@ rewritten.
 ### The translationese register
 
 ```
-uv run {SKILL_DIR}/scripts/register.py --translationese <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --translationese <file>
 ```
 
 The register is `$PROSE_LINT_TRANSLATIONESE_REGISTER`, else
@@ -298,7 +310,7 @@ names the sources; keep it in the report.
 ### stop-ai-slop-jp (`article` and `slides`)
 
 ```
-uv run {SKILL_DIR}/scripts/register.py --slop <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --slop <file>
 ```
 
 stop-ai-slop-jp (https://github.com/iKora128/stop-ai-slop-jp, MIT, Daichi
@@ -358,8 +370,8 @@ still rewritten once, in the main pass.
 ### natural-japanese lint
 
 ```
-uv run {NJ}/lint.py --genre business --reading-load --json <file> > <tmp>/nj-1.json
-uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));d.pop('paragraphs',None);print(json.dumps(d,ensure_ascii=False))" <tmp>/nj-1.json
+prose-lint-run uv run {NJ}/lint.py --genre business --reading-load --json <file> > <tmp>/nj-1.json
+prose-lint-run uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));d.pop('paragraphs',None);print(json.dumps(d,ensure_ascii=False))" <tmp>/nj-1.json
 ```
 
 `--genre business` selects natural-japanese's business profile, which mainly
@@ -400,7 +412,7 @@ Three more pieces of natural-japanese come in here.
   The score varies between runs, so read it as a direction.
   Under 100 characters of body the score is skipped.
 - **The skeleton.** For a document with headings and over about 3,000
-  characters, run `uv run {NJ}/outline.py <file>` and read the headings and
+  characters, run `prose-lint-run uv run {NJ}/outline.py <file>` and read the headings and
   paragraph leads it prints in one pass. Check three things: the line of
   argument follows from the headings alone, each heading states a message, and
   no two sections repeat one template. Those findings join the ledger.
@@ -416,7 +428,7 @@ Three more pieces of natural-japanese come in here.
 ### 公用文 morphology lint
 
 ```
-uv run {SKILL_DIR}/scripts/koyobun.py <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/koyobun.py <file>
 ```
 
 This script checks rules that turn on parts of speech, which no surface-string
@@ -477,8 +489,8 @@ it gives each rule, the passage it rests on and the sources' disagreements. Then
 run:
 
 ```
-uv run {SKILL_DIR}/scripts/register.py --academic <file>
-uv run {SKILL_DIR}/scripts/koyobun.py --academic <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --academic <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/koyobun.py --academic <file>
 ```
 
 The academic register is `$PROSE_LINT_ACADEMIC_REGISTER`, else
@@ -601,7 +613,7 @@ per paragraph that contains a fix, as in "Writing a fix".
 ### textlint
 
 ```
-{HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
+prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
 ```
 
 The English config covers duplicated conjunctions at the start of consecutive
@@ -614,7 +626,7 @@ English in the report. All of these are fixed when they hold.
 ### vale
 
 ```
-vale --config {HOME}/vale/.vale.ini <file>
+prose-lint-run vale --config {HOME}/vale/.vale.ini <file>
 ```
 
 Three styles run:
@@ -774,7 +786,7 @@ and vague nouns yourself. Then read once for the signs that need a reader:
   about the register hits, so it never replaces the ledger.
 - For English, open with one line: the count of ai-tells, `AISigns.Chatbot`
   and `AISigns.Emoji` hits and the count per 1,000 words. Both come from the
-  vale run before the fixes: `vale --output line` piped to a count of lines
+  vale run before the fixes: `prose-lint-run vale --output line` piped to a count of lines
   holding `ai-tells`, `AISigns.Chatbot` or `AISigns.Emoji`, over `wc -w`. It
   is a direction, like the naturalness score, and never
   replaces the ledger. After the fixes, run vale again and state the count
