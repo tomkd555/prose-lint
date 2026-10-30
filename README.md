@@ -11,6 +11,7 @@ A Claude Code skill that runs the wording linters over one document, picks the c
 | Register | `scripts/register.py` over a Markdown table of rejected wordings that you grow one row at a time: definition by negation, the spoken register, the stock phrases of generated Japanese | the same table's English negation row |
 | natural-japanese | `lint.py` in the AI-smell and reading-load lanes, the naturalness score, a baseline rerun after the fixes | — |
 | Morphology | `scripts/koyobun.py`. From 「公用文作成の考え方」: passive, clause chains, 漢字１字＋する and 等/など. House rules: clauses strung on 読点, conjunctive が, させていただく, 体言止め in body text and negated predicates. | — |
+| stop-ai-slop-jp | For blog posts, essays and slide decks. `register.py --slop` over 31 rows restating [stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp)'s phrase lists and symbol rules, in three groups that each hit names: rewrite each hit, count the hits, or read in context. The rows were measured on technical books and Wikipedia articles, which hold no blog posts. A `.pptx` is read through `scripts/pptx_text.py`, tables and grouped shapes included. The reader finds its structure patterns (false agency, a thesis as a heading, uniform rhythm) and scores the five axes of its rubric out of 50. | — |
 | Academic mode | `register.py --academic` over a second table of 47 rows, each citing its sources. The spoken register: でも, すごく, こんな, と思う and です・ます. 文語調: べく and ごとく. The over-stiff forms: することができる and を行う. `koyobun.py --academic` for って and たら. The rules a regex cannot find, read from `references/academic-japanese.md`. | — |
 | vale | — | proselint: clichés, redundancy, corporate speak, jargon and hedging, and vale's check for a word typed twice. [ai-tells](https://github.com/tbhb/vale-ai-tells): rules for the signs of LLM-written English. They cover overused vocabulary, stock openers and closings, hedges, vague attributions and participial padding. They also cover copula dodges, transitions, figurative verbs and em dashes. `AISigns`: three house rules for the model talking about itself, emoji in headings, and five or more commas in one sentence. |
 
@@ -53,9 +54,11 @@ Then install the linters once, where `<skill dir>` is the folder that holds `SKI
 uv run python <skill dir>/scripts/setup.py
 ```
 
-It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md` and `~/.prose-lint/translationese.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited, naming each one that differs from the shipped file so you can merge a change by hand.
+It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`), runs `npm install` and `vale sync` there (the sync pulls proselint and ai-tells from the vale package hub), and puts the sample registers at `~/.prose-lint/vocabulary.md`, `~/.prose-lint/academic.md`, `~/.prose-lint/translationese.md` and `~/.prose-lint/slop.md`. The skill also runs this step itself when the linters are missing. Running it again refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style, and keeps a `.textlintrc*.json` or `.vale.ini` you have edited, naming each one that differs from the shipped file so you can merge a change by hand.
 
-Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and [natural-japanese](https://github.com/coji/natural-japanese) (this release is tested with 1.6.0). A missing tool skips its layer, and the report names it.
+Requirements: Python 3.10+, [uv](https://docs.astral.sh/uv/), Node 20.18+ with npm for textlint, [vale](https://vale.sh/) 3.x for English, and [natural-japanese](https://github.com/coji/natural-japanese) (this release is tested with 1.6.4). Install the latest release of each. A `.pptx` is read through python-pptx, which `uv` fetches on first use. After a plugin update, run `setup.py` again: it copies a register the update added, such as `slop.md`, and names each register that differs from the shipped sample. A missing tool skips its layer, and the report names it.
+
+Vale 3.24 and later match `^` at the start of a paragraph only. ai-tells 1.37.0, the latest release on 2026-10-30, predates its fix for this ([tbhb/vale-ai-tells#88](https://github.com/tbhb/vale-ai-tells/pull/88), merged 2026-10-07). Until the next ai-tells release, its `ConclusionMarkers` rule finds a sentence-opening "Ultimately," or "Overall," only at the start of a paragraph. Run `setup.py` again after that release; `vale sync` pulls the latest ai-tells.
 
 ## Usage
 
@@ -68,13 +71,15 @@ check this English draft: README.md
 AI っぽさを消して: docs/blog.md
 論文調にして: thesis/chapter2.md
 翻訳調を直して: docs/設計書.md
+AI臭を消して: blog/2026-10-post.md
+スライドの文言を直して: slides/review.pptx
 ```
 
 The skill settles the language, runs the layers for it, and replies with a report. For Japanese, the report gives the naturalness score first, then every finding by layer as fixed or kept with a reason, then the counts from the rerun after the fixes. For English, it gives the count of AI-sign hits per 1,000 words first, then the ledger, then the count that remains. It edits the document only where a finding holds, and never applies the linters' automatic fixes.
 
 ## Your register
 
-`~/.prose-lint/vocabulary.md` is yours to edit. Each row is a regex, the wording to use instead, and the reason shown with each hit; the file's header gives the rules for a good row. Point `PROSE_LINT_REGISTER` at another file to keep it elsewhere. `~/.prose-lint/academic.md` is the academic register in the same format, with `PROSE_LINT_ACADEMIC_REGISTER` to move it; add a row for your field's or journal's house usage, and cite the source in the `Why` column the way the shipped rows do. `~/.prose-lint/translationese.md` is the translationese register, with `PROSE_LINT_TRANSLATIONESE_REGISTER` to move it. Point `PROSE_LINT_PATTERNS` at a Markdown file of your own notes on wordings you rejected, and the reader reads it after the reference.
+`~/.prose-lint/vocabulary.md` is yours to edit. Each row is a regex, the wording to use instead, and the reason shown with each hit; the file's header gives the rules for a good row. Point `PROSE_LINT_REGISTER` at another file to keep it elsewhere; a `.csv` with the header `Pattern,Instead,Why` is read the same way. `~/.prose-lint/academic.md` is the academic register in the same format, with `PROSE_LINT_ACADEMIC_REGISTER` to move it; add a row for your field's or journal's house usage, and cite the source in the `Why` column the way the shipped rows do. `~/.prose-lint/translationese.md` is the translationese register, with `PROSE_LINT_TRANSLATIONESE_REGISTER` to move it. `~/.prose-lint/slop.md` is the stop-ai-slop-jp register, with `PROSE_LINT_SLOP_REGISTER` to move it. Point `PROSE_LINT_PATTERNS` at a Markdown file of your own notes on wordings you rejected, and the reader reads it after the reference.
 
 The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`, one rule per line of the 訓令's appendix with a test for each guard; add a row there for a house spelling, or delete one that misfires on your house style. `~/.prose-lint/textlint/dict/fukushi.yml` is the adverb dictionary, the rule's own minus the five words the 訓令 keeps in kanji.
 
@@ -83,14 +88,16 @@ The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`,
 | Path | Holds |
 |---|---|
 | `plugins/prose-lint/skills/prose-lint/SKILL.md` | The routing, the layers, the ruling on each finding id, the report |
-| `plugins/prose-lint/skills/prose-lint/scripts/` | `register.py`, `koyobun.py`, `setup.py` |
+| `plugins/prose-lint/skills/prose-lint/scripts/` | `register.py`, `koyobun.py`, `pptx_text.py`, `setup.py` |
 | `plugins/prose-lint/skills/prose-lint/assets/textlint/` | `package.json`, the two configs, `prh/koyobun-kana.yml`, `dict/fukushi.yml` |
 | `plugins/prose-lint/skills/prose-lint/assets/vale/` | `.vale.ini`, `styles/AISigns/` |
 | `plugins/prose-lint/skills/prose-lint/assets/vocabulary.sample.md` | The sample register |
 | `plugins/prose-lint/skills/prose-lint/assets/academic.sample.md` | The academic register |
 | `plugins/prose-lint/skills/prose-lint/assets/translationese.sample.md` | The translationese register |
+| `plugins/prose-lint/skills/prose-lint/assets/slop.sample.md` | The stop-ai-slop-jp register |
 | `plugins/prose-lint/skills/prose-lint/references/academic-japanese.md` | The academic rules, the passages they rest on, the disagreements and the source list |
 | `plugins/prose-lint/skills/prose-lint/references/translationese-japanese.md` | The translationese markers, the test and the rewrite per style for each, the measurements, the disagreements and the source list |
+| `plugins/prose-lint/skills/prose-lint/references/stop-ai-slop-jp/` | stop-ai-slop-jp as published at commit e09d327: its `SKILL.md` as `rules.md`, `phrases.md`, `structures.md`, `examples.md` and its licence |
 | `plugins/prose-lint/skills/prose-lint/references/exemplars-japanese.md` | Passages of present-day Japanese per style, the features to take from each, and the source, selection reason and licence of each |
 
 ## Considered and left out
@@ -119,6 +126,7 @@ Surveyed in September 2026 while choosing the layers above; listed so the choice
 MIT. prose-lint is an independent project; [proselint](https://github.com/amperser/proselint) is a separate linter by other authors, which this skill runs through vale.
 
 - `koyobun.py` imports `textcore.py` from [natural-japanese](https://github.com/coji/natural-japanese) (MIT, coji) at run time. `SKILL.md` restates natural-japanese's naturalness-score formula and bands from its `references/diagnose.md` and points to sections 3 and 5 of its `SKILL.md`, and six register rows restate patterns from its `references/forbidden-patterns.md`. No code from it is copied here.
+- `references/stop-ai-slop-jp/` holds [stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) (MIT © 2026 Daichi Nagashima), itself a Japanese adaptation of [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop), as published at commit e09d327, with its `SKILL.md` renamed `rules.md` so Claude Code does not load it as a second skill. Its `LICENSE` sits beside it. `assets/slop.sample.md` restates its phrase lists as regex rows.
 - `assets/vale/.vale.ini` pulls [ai-tells](https://github.com/tbhb/vale-ai-tells) (MIT, Tony Burns) through the vale package hub; nothing from it is copied here.
 - `assets/textlint/dict/fukushi.yml` is the dictionary of [textlint-rule-ja-hiragana-fukushi](https://github.com/lostandfound/textlint-rule-ja-hiragana-fukushi) (MIT © Hiroshi Takase) with five entries removed and one duplicate dropped; its header carries the upstream copyright and permission notice.
 - The academic register and `references/academic-japanese.md` restate rules from the university, lab, society and research sources listed in that file, with short quotations for citation; no text is copied beyond those quotations.

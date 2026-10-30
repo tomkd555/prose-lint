@@ -4,9 +4,10 @@
 
 Copies the textlint and vale configs from assets/ to ~/.prose-lint (or
 $PROSE_LINT_HOME), runs `npm install` for textlint and `vale sync` for the vale
-packages, and copies the sample registers to vocabulary.md, academic.md and
-translationese.md unless they are already there. The directory sits outside the plugin, so an update of the plugin keeps
-it. Safe to run again: package.json, the prh rule file, the fukushi dictionary
+packages, and copies the sample registers to vocabulary.md, academic.md,
+translationese.md and slop.md unless they are already there. The directory
+sits outside the plugin, so an update of the plugin keeps it; a register that
+differs from the shipped sample is named so the new rows can be merged. Safe to run again: package.json, the prh rule file, the fukushi dictionary
 and the AISigns vale style are refreshed, while a config file already in place (.textlintrc*.json,
 .vale.ini) is kept as edited. A missing or failing npm or vale is reported and
 skipped.
@@ -58,9 +59,12 @@ def main():
         ("vocabulary.sample.md", "vocabulary.md"),
         ("academic.sample.md", "academic.md"),
         ("translationese.sample.md", "translationese.md"),
+        ("slop.sample.md", "slop.md"),
     ):
         if not (HOME / name).exists():
             shutil.copy(ASSETS / sample, HOME / name)
+        elif (HOME / name).read_bytes() != (ASSETS / sample).read_bytes():
+            print(f"kept: {HOME / name} differs from the shipped {ASSETS / sample}; merge new rows by hand")
     print(f"ready: {HOME}")
 
 

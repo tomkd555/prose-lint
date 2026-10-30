@@ -4,10 +4,14 @@
 # ///
 """register.py - match a file against a register of rejected wordings.
 
-The register is a Markdown table whose columns are Pattern, Instead and Why.
-Pattern is a regex in the syntax of the `regex` module; the block-name form
-\\p{IsX} is also accepted and read as \\p{InX}. A pipe inside a pattern is
-written \\| so it does not split the table.
+The register is a CSV, or a Markdown table, whose columns are Pattern, Instead
+and Why. Pattern is a regex in the syntax of the `regex` module; the block-name
+form \\p{IsX} is also accepted and read as \\p{InX}. In the Markdown form a pipe
+inside a pattern is written \\| so it does not split the table; the CSV takes
+it as it is.
+
+In the Markdown form, the latest `## ` heading above a row names its group,
+and each hit carries it: `[Rewrite]` or `[Read in context]`, for example.
 
 Fenced code blocks are skipped. Consecutive lines of a paragraph are joined
 before matching, because hard-wrapped Japanese puts a line break inside a word;
@@ -15,7 +19,7 @@ a space goes between two Latin characters, and a list item starts a new
 paragraph. A row whose pattern does not compile is reported on stderr.
 
 Usage:
-    uv run register.py [--register <vocabulary.md> | --academic | --translationese] [--json] <file>
+    uv run register.py [--register <vocabulary.md> | --academic | --translationese | --slop] [--json] <file>
 
 The register is --register, else $PROSE_LINT_REGISTER, else
 vocabulary.md in $PROSE_LINT_HOME or ~/.prose-lint, else assets/vocabulary.sample.md next to this script.
@@ -24,11 +28,15 @@ academic.md in the same home, else assets/academic.sample.md.
 --translationese reads the register of English constructions carried into Japanese:
 $PROSE_LINT_TRANSLATIONESE_REGISTER, else translationese.md in the same home, else
 assets/translationese.sample.md.
+--slop reads the register of stop-ai-slop-jp's phrase lists: $PROSE_LINT_SLOP_REGISTER, else
+slop.md in the same home, else assets/slop.sample.md.
 Exit code 0 on any number of hits; 1 on an input error.
 """
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import os
 import sys
@@ -43,6 +51,7 @@ REGISTERS = {
     "general": ("PROSE_LINT_REGISTER", "vocabulary.md", "vocabulary.sample.md"),
     "academic": ("PROSE_LINT_ACADEMIC_REGISTER", "academic.md", "academic.sample.md"),
     "translationese": ("PROSE_LINT_TRANSLATIONESE_REGISTER", "translationese.md", "translationese.sample.md"),
+    "slop": ("PROSE_LINT_SLOP_REGISTER", "slop.md", "slop.sample.md"),
 }
 
 
@@ -56,20 +65,32 @@ def default_register(kind: str = "general") -> Path:
 
 
 def load_entries(text: str) -> list[dict]:
+    text = text.lstrip("﻿")
+    rows = []
+    if text.startswith(("Pattern,", '"Pattern"')):  # the CSV form, told apart by its header line
+        for r in csv.DictReader(io.StringIO(text)):
+            rows.append(([(r.get(k) or "").strip() for k in ("Pattern", "Instead", "Why")], ""))
+    else:
+        group = ""  # the latest `## ` heading names the group of the rows under it
+        for line in text.splitlines():
+            t = line.strip()
+            if t.startswith("## "):
+                group = t[3:].strip()
+            if not t.startswith("|"):
+                continue
+            cells = [c.strip().replace(SEP, "|") for c in t.replace("\\|", SEP).strip("|").split("|")]
+            if len(cells) >= 3:
+                rows.append((cells, group))
     entries = []
-    for line in text.splitlines():
-        t = line.strip()
-        if not t.startswith("|"):
-            continue
-        cells = [c.strip().replace(SEP, "|") for c in t.replace("\\|", SEP).strip("|").split("|")]
-        if len(cells) < 3 or not cells[0] or cells[0] == "Pattern" or regex.fullmatch(r":?-{3,}:?", cells[0]):
+    for cells, group in rows:
+        if not cells[0] or cells[0] == "Pattern" or regex.fullmatch(r":?-{3,}:?", cells[0]):
             continue
         try:
             rx = regex.compile(regex.sub(r"\\([pP])\{Is", r"\\\1{In", cells[0]))
         except regex.error as exc:
             print(f"warning: row skipped, pattern does not compile ({exc}): {cells[0]}", file=sys.stderr)
             continue
-        entries.append({"pattern": cells[0], "regex": rx, "instead": cells[1], "why": cells[2]})
+        entries.append({"pattern": cells[0], "regex": rx, "instead": cells[1], "why": cells[2], "group": group})
     return entries
 
 
@@ -103,7 +124,8 @@ def find_hits(content: str, entries: list[dict]) -> list[dict]:
         for e in entries:
             for m in e["regex"].finditer(text):
                 line = next(no for off, no in reversed(starts) if off <= m.start())
-                hits.append({"line": line, "matched": m.group(), "instead": e["instead"], "why": e["why"]})
+                hits.append({"line": line, "matched": m.group(), "instead": e["instead"], "why": e["why"],
+                             "group": e["group"]})
     return sorted(hits, key=lambda h: h["line"])
 
 
@@ -114,9 +136,11 @@ def main() -> int:
     group.add_argument("--register", type=Path)
     group.add_argument("--academic", action="store_true", help="read the academic register")
     group.add_argument("--translationese", action="store_true", help="read the translationese register")
+    group.add_argument("--slop", action="store_true", help="read the stop-ai-slop-jp register")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    kind = "academic" if args.academic else "translationese" if args.translationese else "general"
+    kind = ("academic" if args.academic else "translationese" if args.translationese
+            else "slop" if args.slop else "general")
     reg = args.register or default_register(kind)
     try:
         entries = load_entries(reg.read_text(encoding="utf-8"))
@@ -130,7 +154,9 @@ def main() -> int:
     else:
         print(f"register: {reg} ({len(entries)} rows)")
         for h in hits:
-            print(f'L{h["line"]} "{h["matched"]}" -> {h["instead"]} ({h["why"]})')
+            why = f' ({h["why"]})' if h["why"] else ""
+            group = f' [{h["group"]}]' if h["group"] else ""
+            print(f'L{h["line"]}{group} "{h["matched"]}" -> {h["instead"]}{why}')
     return 0
 
 
