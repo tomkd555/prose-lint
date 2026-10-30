@@ -16,6 +16,7 @@ Read the groups for the document's style:
 | `paper` | 2 and 3 |
 | `academic` | 3 |
 | `article` | 4, and 1.3 when the reader is the public |
+| `slides` | 2 for a business deck, 4 for a talk to the public |
 
 Take from a passage:
 

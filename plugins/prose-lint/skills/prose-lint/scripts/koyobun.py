@@ -37,10 +37,10 @@ Usage:
     uv run koyobun.py --nj-dir      # print the natural-japanese scripts directory
 
 Sentence splitting and Markdown masking come from natural-japanese's textcore.py,
-so a sentence here is the same sentence lint.py sees. The natural-japanese plugin
-(https://github.com/coji/natural-japanese) must be installed; its scripts
-directory is found through NATURAL_JAPANESE_SCRIPTS, the marketplace clone or
-the plugin cache, in that order. Headings, list items, tables,
+so a sentence here is the same sentence lint.py sees. natural-japanese
+(https://github.com/coji/natural-japanese, MIT) ships with this skill in
+vendor/natural-japanese; NATURAL_JAPANESE_SCRIPTS, when set, names another copy
+of its scripts directory. Headings, list items, tables,
 quotes and code are masked there, which is what makes nominal_ending a body-only
 check.
 
@@ -58,20 +58,14 @@ from pathlib import Path
 
 def find_textcore_dir() -> Path | None:
     env = os.environ.get("NATURAL_JAPANESE_SCRIPTS")
-    plugins = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "plugins"
-    tail = "skills/natural-japanese/scripts"
     candidates = [Path(env)] if env else []
-    candidates.append(plugins / "marketplaces/natural-japanese" / tail)
-    def version(p: Path) -> tuple:
-        return tuple(int(n) if n.isdigit() else 0 for n in p.parents[2].name.split("."))
-
-    candidates += sorted((plugins / "cache").glob(f"*/natural-japanese/*/{tail}"), key=version, reverse=True)
+    candidates.append(Path(__file__).resolve().parent.parent / "vendor/natural-japanese/scripts")
     return next((c for c in candidates if (c / "textcore.py").is_file()), None)
 
 
 TEXTCORE_DIR = find_textcore_dir()
 if TEXTCORE_DIR is None:
-    print("error: natural-japanese is not installed; install the plugin or set NATURAL_JAPANESE_SCRIPTS", file=sys.stderr)
+    print("error: vendor/natural-japanese/scripts/textcore.py is missing; reinstall prose-lint or set NATURAL_JAPANESE_SCRIPTS", file=sys.stderr)
     sys.exit(1)
 sys.path.insert(0, str(TEXTCORE_DIR))
 try:

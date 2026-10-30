@@ -17,6 +17,8 @@ at your own, and grow it one row per wording you reject.
 - A hit is a suspicion. The wording may stay when it fits the context and the
   reason is stated.
 
+## Rejected wordings
+
 | Pattern | Instead | Why |
 | --- | --- | --- |
 | ではな[いくか]\|(?<![まん])(?<!だけ)でな[いくか]\|じゃな[いくか]\|では(ありません\|ございません)\|じゃありません\|(?<!(日\|光\|雨\|風\|波\|弾\|球\|ボール\|バット\|体\|肌))に(当た\|あた)(らない\|りません)\|該当(しない\|せず\|しません)\|非該当 | 何であるかを書く。範囲を示すときは対象を挙げる。誤りを正すときは正しい内容だけを書く。 | 別のものを否定して定義する言い方である。引用は原文のまま残す。 |

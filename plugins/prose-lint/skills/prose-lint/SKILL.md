@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; and an academic mode for papers, theses and reports. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF and AI-writing presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -13,21 +13,33 @@ absolute path of this skill's directory, and `{HOME}` as `$PROSE_LINT_HOME`, or
 
 ## Step 0 - setup
 
-`{HOME}/textlint/node_modules`, `{HOME}/vale/styles/proselint` and
-`{HOME}/vale/styles/ai-tells` hold the installed linters. When any is missing,
-run once:
+The plugin's SessionStart hook sets up the linters in the background, on the
+first session after an install or an update. It fetches uv when none is on
+PATH and runs `scripts/setup.py`, which copies the textlint and vale configs
+and the registers to `{HOME}`, downloads vale and Node with npm under `{HOME}`
+when they are not on PATH, and runs `npm install` and `vale sync`.
+`{HOME}/.setup-version` names the plugin version of the last setup that
+finished. When it is missing or older than this plugin, as after an install
+in the running session, run the hook's script and wait for it:
 
 ```
-uv run python {SKILL_DIR}/scripts/setup.py
+bash {SKILL_DIR}/../../hooks/session-start.sh
 ```
 
-It needs `npm` for textlint and `vale` on PATH for the vale packages, and
-reports a missing tool as `skip`. A layer whose tool is missing is reported as
-skipped in the final report; the other layers still run. The Japanese
-morphology and natural-japanese layers need `uv` and the natural-japanese
-plugin (`/plugin marketplace add coji/natural-japanese`, then
-`/plugin install natural-japanese@natural-japanese`); `uv run {SKILL_DIR}/scripts/koyobun.py --nj-dir`
-prints the directory it found, written `{NJ}` below.
+It prints the log's path and every `skip` or `fail` line. A skill copied by
+hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. A
+layer whose tool is still missing is reported as skipped in the final report;
+the other layers still run.
+
+The commands below start with `prose-lint-run`, which the plugin puts on PATH:
+it adds the uv, vale and Node that setup downloaded. A skill copied by hand
+drops it.
+
+natural-japanese (https://github.com/coji/natural-japanese, MIT, coji) ships
+in `{SKILL_DIR}/vendor/natural-japanese`. `{NJ}` below is its `scripts`
+directory. Its `SKILL.md` is renamed `guide.md` there, so Claude Code does not
+load it as a second skill; natural-japanese's `SKILL.md` below, and a mention
+of `SKILL.md` in its own files, mean that file.
 
 ## Step 1 - settle the target
 
@@ -36,12 +48,31 @@ working on. With neither, ask which text to lint. Pasted text goes to a `.md`
 file in a temporary directory first, because textlint, vale and the scripts
 all read files.
 
-## Step 2 - route by script
-
-Hiragana over 10% of the non-whitespace body means Japanese, otherwise English:
+A PowerPoint file goes to a `.md` file in a temporary directory too:
 
 ```
-uv run python -c "import re,sys;t=open(sys.argv[1],encoding='utf-8').read();b=len(re.sub(r'\s','',t));print('ja' if len(re.findall('[ぁ-ゟ]',t))*10>b else 'en')" <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/pptx_text.py <deck.pptx> <tmp>/deck.md
+```
+
+Each slide becomes a `## Slide <n>` section: the title as a `### ` heading,
+every paragraph of a text box, a group or a table cell as a `- ` item, and the
+speaker notes under `### Notes`. The script names on stderr each chart or
+SmartArt whose text it could not read; say so in the report. It prints `ja` or
+`en`, and that settles Step 2 for the deck.
+
+The layers run on that file, every fix is applied to it, and the second runs
+read it. The report gives each finding and each rewrite by its slide. The deck
+itself stays as it is, because a text edit through python-pptx drops the run
+formatting.
+
+## Step 2 - route by script
+
+A deck takes the language `pptx_text.py` printed in Step 1. For any other
+file, hiragana over 10% of the non-whitespace body means Japanese, otherwise
+English:
+
+```
+prose-lint-run uv run python -c "import re,sys;t=open(sys.argv[1],encoding='utf-8').read();b=len(re.sub(r'\s','',t));print('ja' if len(re.findall('[ぁ-ゟ]',t))*10>b else 'en')" <file>
 ```
 
 It counts hiragana alone on purpose: the Japanese an English document quotes is
@@ -73,13 +104,17 @@ the head of the report (「style: business - 設計書、読み手は開発者�
 | `official` | 通知, 規程, 要綱, a notice from an organisation to the public | the one most body sentences end in | the words of 公用文, and 外来語 only where the reader knows them |
 | `academic` | the academic-mode signals above | 常体 in the である form | the academic register |
 | `article` | a blog post, note, essay or column for a general reader | the one most body sentences end in | everyday 和語 over 漢語; a field term only where the reader knows it |
+| `slides` | a `.pptx`, a Marp or reveal.js deck, a slide outline, スライド or 発表資料 | 体言止め in titles and bullets; the 文体 most full sentences end in | as `business` for a business deck, as `article` for a talk to the public |
+
+The `article` and `slides` styles also run the stop-ai-slop-jp layer in Step
+3a.
 
 `{SKILL_DIR}/references/exemplars-japanese.md` quotes present-day Japanese
 that institutions and award committees hold up as well written: 公用文 for
 `official`, a council report and a government technical guide for
 `business`, award-winning papers for `academic`, and writing for
-the general public for `article`. Its section 0 names the groups each style
-reads. Each passage names its source and the features to take from it.
+the general public for `article`, and the business or public group for
+`slides`. Its section 0 names the groups each style reads. Each passage names its source and the features to take from it.
 
 A sentence off the style's 文体 is a finding. In `paper` a です・ます sentence
 gets rewritten; in the others the minority 文体 does, unless a quotation or a
@@ -119,6 +154,17 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
 - the absolute path of `{SKILL_DIR}/references/exemplars-japanese.md`, with
   "read section 0 and the groups it names for the style, and judge each
   sentence against what those writers would have written";
+- for `article` and `slides`, the absolute paths of
+  `{SKILL_DIR}/references/stop-ai-slop-jp/rules.md` and of `structures.md`,
+  `examples.md` and `phrases.md` beside it, with "read them after the
+  reference. Find every pattern of structures.md except §4-5 and §4-6, and
+  the points of the rules' quick check under 構造レベル, 文・段落レベル and
+  強度と立場, except the one on uniform sentence endings. From phrases.md, find
+  the words it limits to a metaphorical use (装置, インフラ, 設計, 接続) and
+  full proper names repeated (§3). Mark each finding `slop-<section>`
+  (`slop-1-1` for false agency), `slop-rule-<n>` for a core rule or
+  `slop-phrases-<section>`. Close with five lines, one per axis of the rules'
+  採点 section: `score | <axis> | <1-10> | <grounds in one sentence>`";
 - the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
   user's own notes on wordings they rejected, read after the reference;
 - the output shape, one finding per line:
@@ -144,7 +190,7 @@ run.
 ### textlint
 
 ```
-{HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.json <file>
+prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.json <file>
 ```
 
 textlint exits 1 when it finds anything, so read the output and ignore the exit
@@ -183,11 +229,12 @@ code. The findings fall in three tiers by rule id:
 ### The register
 
 ```
-uv run {SKILL_DIR}/scripts/register.py <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py <file>
 ```
 
-The register is a Markdown table of rejected wordings: `$PROSE_LINT_REGISTER`,
-else `{HOME}/vocabulary.md`, else the sample in `assets/`. The script prints
+The register is a Markdown table, or a CSV with the header `Pattern,Instead,Why`,
+of rejected wordings: `$PROSE_LINT_REGISTER`, else `{HOME}/vocabulary.md`, else
+the sample in `assets/`. The script prints
 which one it read. The sample carries twelve rows in three groups.
 
 - Definition by negation, two rows. The Japanese row on `ではない` also covers
@@ -227,7 +274,7 @@ rewritten.
 ### The translationese register
 
 ```
-uv run {SKILL_DIR}/scripts/register.py --translationese <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --translationese <file>
 ```
 
 The register is `$PROSE_LINT_TRANSLATIONESE_REGISTER`, else
@@ -260,11 +307,71 @@ A span that a row of each group matches (この機能は〜を可能にします
 finding, ruled under the Rewrite row. The bracket at the end of each `Why`
 names the sources; keep it in the report.
 
+### stop-ai-slop-jp (`article` and `slides`)
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --slop <file>
+```
+
+stop-ai-slop-jp (https://github.com/iKora128/stop-ai-slop-jp, MIT, Daichi
+Nagashima) is a guide to the tells of AI-written Japanese in blog posts and
+essays. Its files sit in `{SKILL_DIR}/references/stop-ai-slop-jp/`. `rules.md`
+is its `SKILL.md`: the core rules, the quick check, the five-axis score and
+the fix order. `phrases.md`, `structures.md` and `examples.md` are its
+references; a link in `rules.md` to `references/<file>` means the file beside
+it. The layer runs on the `article` and `slides` styles and on no other.
+
+The register is `$PROSE_LINT_SLOP_REGISTER`, else `{HOME}/slop.md`, else
+`assets/slop.sample.md`: 31 rows restating `phrases.md` and the symbol rules
+13 and 14 of `rules.md`. Each hit carries its group in brackets.
+
+- `[Rewrite]`, 10 rows. Rewrite each hit.
+- `[Count]`, 12 rows: ordinary words that become a tell by repetition. Count
+  the hits per article or per paragraph as the row's `Why` says, and rewrite
+  once the count reaches it.
+- `[Read in context]`, 9 rows: forms human writers also use. Rule each by the
+  sentence.
+
+The rows were measured on technical books and Wikipedia; blog posts and
+essays were not in the measurement, so read each hit with that in mind.
+
+The reader covers what a regex cannot find: the sections of `structures.md`,
+the quick-check points that need a reading, and the metaphor-only words of
+`phrases.md`. Rule its `slop-` findings with the others. A span that rows of
+two registers match, such as the em dash, is one finding, ruled under the
+stricter group.
+
+Where this layer meets another, the rulings go this way:
+
+- `structures.md` §4-5 (mixed sentence endings) and §4-6 (kept fillers and
+  typos) yield to the style's 文体 and to textlint's blocking rules. The
+  reader leaves them out, and no rewrite adds a filler, a typo or a second
+  文体.
+- `rules.md` rule 4 asks for hearsay marked as hearsay (らしい, と聞いた). In
+  `article` and `slides` it takes the place of the hearsay row's "言い切る"
+  branch: name the source where there is one, and mark hearsay as hearsay
+  where there is none.
+- In `slides`, 体言止め in a `### ` title or a `- ` item is the medium's form,
+  and the morphology lint's `nominal_ending` hits there stay. Rule 9's uneven
+  rhythm reads per slide body; the notes read as prose.
+- The first person, the 毒 and the uneven rhythm of rules 5, 6 and 9 serve an
+  article. A business deck keeps the writer's stance and drops the rest; say
+  so in the report.
+- Rules 2 and 5 and the first step of the fix order ask for a stance and for
+  people, numbers and failures the writer knows. A rewrite never adds a fact,
+  a number, an anecdote or an opinion the text lacks. Put each such finding in
+  the report as a question for the author.
+
+The fix order of `rules.md` (stance, false agency, structure templates, words
+and phrases, then symbols) settles which hit leads when one sentence carries
+several, and the order of the layer's findings in the report. Each sentence is
+still rewritten once, in the main pass.
+
 ### natural-japanese lint
 
 ```
-uv run {NJ}/lint.py --genre business --reading-load --json <file> > <tmp>/nj-1.json
-uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));d.pop('paragraphs',None);print(json.dumps(d,ensure_ascii=False))" <tmp>/nj-1.json
+prose-lint-run uv run {NJ}/lint.py --genre business --reading-load --json <file> > <tmp>/nj-1.json
+prose-lint-run uv run python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));d.pop('paragraphs',None);print(json.dumps(d,ensure_ascii=False))" <tmp>/nj-1.json
 ```
 
 `--genre business` selects natural-japanese's business profile, which mainly
@@ -285,7 +392,9 @@ up most of the file. Two lanes come out.
   `だけでなく…も` across the document, fires at three occurrences, and sets the
   severity by their share of all sentences.
 - The reading-load lane (`--reading-load`): a sentence over 90 characters, a
-  buried enumeration, a kanji run, a double negative, a chain of の. Judge each
+  buried enumeration, a kanji run, a double negative, a chain of の. From
+  natural-japanese 1.6.4 it also flags a sentence inside parentheses
+  (`sentence_in_paren`). Judge each
   hit against the nine checks of 「読みやすさの点検」 in §5 of the same file,
   read once and applied in order from the first. A split sentence that grows
   longer is a correct result.
@@ -303,7 +412,7 @@ Three more pieces of natural-japanese come in here.
   The score varies between runs, so read it as a direction.
   Under 100 characters of body the score is skipped.
 - **The skeleton.** For a document with headings and over about 3,000
-  characters, run `uv run {NJ}/outline.py <file>` and read the headings and
+  characters, run `prose-lint-run uv run {NJ}/outline.py <file>` and read the headings and
   paragraph leads it prints in one pass. Check three things: the line of
   argument follows from the headings alone, each heading states a message, and
   no two sections repeat one template. Those findings join the ledger.
@@ -319,7 +428,7 @@ Three more pieces of natural-japanese come in here.
 ### 公用文 morphology lint
 
 ```
-uv run {SKILL_DIR}/scripts/koyobun.py <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/koyobun.py <file>
 ```
 
 This script checks rules that turn on parts of speech, which no surface-string
@@ -380,8 +489,8 @@ it gives each rule, the passage it rests on and the sources' disagreements. Then
 run:
 
 ```
-uv run {SKILL_DIR}/scripts/register.py --academic <file>
-uv run {SKILL_DIR}/scripts/koyobun.py --academic <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --academic <file>
+prose-lint-run uv run {SKILL_DIR}/scripts/koyobun.py --academic <file>
 ```
 
 The academic register is `$PROSE_LINT_ACADEMIC_REGISTER`, else
@@ -504,7 +613,7 @@ per paragraph that contains a fix, as in "Writing a fix".
 ### textlint
 
 ```
-{HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
+prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
 ```
 
 The English config covers duplicated conjunctions at the start of consecutive
@@ -517,7 +626,7 @@ English in the report. All of these are fixed when they hold.
 ### vale
 
 ```
-vale --config {HOME}/vale/.vale.ini <file>
+prose-lint-run vale --config {HOME}/vale/.vale.ini <file>
 ```
 
 Three styles run:
@@ -670,12 +779,14 @@ and vague nouns yourself. Then read once for the signs that need a reader:
   academic mode and why, and the academic register's hit count before and
   after the fixes. The ledger follows by layer, with the reader's findings as
   one layer; the academic ledger comes after the register's, with each hit's
-  sources. End with the second run's resolved / new / persisting counts and
+  sources. For `article` and `slides`, add a line under the score with the
+  reader's five-axis score out of 50; stop-ai-slop-jp calls for a rewrite
+  under 35. End with the second run's resolved / new / persisting counts and
   what the second read of the rewrites returned. A score alone says nothing
   about the register hits, so it never replaces the ledger.
 - For English, open with one line: the count of ai-tells, `AISigns.Chatbot`
   and `AISigns.Emoji` hits and the count per 1,000 words. Both come from the
-  vale run before the fixes: `vale --output line` piped to a count of lines
+  vale run before the fixes: `prose-lint-run vale --output line` piped to a count of lines
   holding `ai-tells`, `AISigns.Chatbot` or `AISigns.Emoji`, over `wc -w`. It
   is a direction, like the naturalness score, and never
   replaces the ledger. After the fixes, run vale again and state the count
