@@ -49,9 +49,28 @@ That is the whole install. On the first session after an install or an update, t
 - It fetches [uv](https://docs.astral.sh/uv/) when none is on PATH; uv then fetches Python, sudachipy and python-pptx on first use.
 - It runs `scripts/setup.py`. That script downloads [vale](https://vale.sh/) 3.25.1 and Node 24.22.2 with npm when they are not on PATH. It copies the textlint and vale configs to `~/.prose-lint` (or `$PROSE_LINT_HOME`) and runs `npm install` and `vale sync` there; the sync pulls proselint and ai-tells from the vale package hub. It puts the sample registers in the same directory as `vocabulary.md`, `academic.md`, `translationese.md` and `slop.md`.
 
-Every download is a pinned release from the tool's official site, checked against its SHA-256 and kept under `~/.prose-lint`; a tool already on PATH is used as it is. The plugin's `bin/prose-lint-run` puts the downloaded tools on PATH for the skill's commands. The hook needs bash, which macOS, Linux and Git for Windows provide. `~/.prose-lint/setup.log` holds the last run, and `~/.prose-lint/.setup-version` the plugin version it set up; a setup with a failed step reruns on the next session. A plugin installed in a running session is set up when the skill first runs.
+Every download is a pinned release from the tool's official site, checked against its SHA-256 and kept under `~/.prose-lint`; a tool already on PATH is used as it is. The plugin's `bin/prose-lint-run` puts the downloaded tools on PATH for the skill's commands. The hooks need bash, which macOS, Linux and Git for Windows provide. `~/.prose-lint/setup.log` holds the last run, and `~/.prose-lint/.setup-version` the plugin version it set up; a setup with a failed step reruns on the next session. A plugin installed in a running session is set up when the skill first runs.
 
 A rerun refreshes `package.json`, the prh rule set, the fukushi dictionary and the AISigns style. It keeps a `.textlintrc*.json` or `.vale.ini` you have edited and copies a register the update added. It names each config or register that differs from the shipped file so you can merge a change by hand. A missing tool skips its layer, and the report names it.
+
+### Hooks
+
+The plugin also lints while Claude works. When you install it, `/plugin` asks whether to turn on the wording-check hooks; they are on by default.
+
+- After each Write or Edit of a Markdown, text or HTML file, textlint and your register run on the lines the tool changed, read from the start of their sentence. A file Claude creates is read whole, and vale also runs on English. The extensions are `.md`, `.markdown`, `.txt`, `.html` and `.htm`. A textlint finding of the tier the skill fixes, or a register hit, returns the passage to Claude to rewrite; a register hit may stay when Claude says why. Advisory and vale findings reach Claude and leave the write in place. After three blocks in a row on the same findings in one file, the hook stops reporting them.
+- After each Write or Edit of a source file, the register runs alone and reports the hits that hold Japanese, which sits in comments and strings. The source files are those ending in `.py`, `.ps1`, `.js`, `.ts`, `.json`, `.yml` or `.yaml`.
+- After each Japanese reply, the same checks run on the reply in the background, and Claude receives the findings with your next prompt. Each finding is also appended to a log, one line per finding, in `$PROSE_LINT_REPLY_LOG_DIR` (by default `~/.prose-lint/logs/replies`), so a tool that grows your register can read the wordings Claude used.
+- Before a plan goes up for approval, the hook denies it while it holds a point still open (TBD or 未定) or still unconfirmed (要確認) outside code fences. A textlint finding of the tier the skill fixes also denies it. Before Claude asks you a question, textlint reads the question and its options. After two denials in a row, the call goes through.
+
+A file in a folder named `claude-reply` is read as a reply draft: register rows flagged `chat` stay out of it, as they do for replies.
+
+The hooks leave these alone:
+
+- folders named `node_modules`, `.git`, `__pycache__` and `scratchpad`
+- the `skills/prose-lint` folder and `~/.prose-lint`, which hold the rejected wordings as register rows
+- each register that `PROSE_LINT_REGISTER`, `PROSE_LINT_ACADEMIC_REGISTER`, `PROSE_LINT_TRANSLATIONESE_REGISTER` or `PROSE_LINT_SLOP_REGISTER` points to
+
+In an HTML file, the register reads the text outside tags, scripts, styles and comments. Each file check takes about as long as one textlint run: 2.5 seconds for a 9 KB Markdown file on the author's machine. An update from an earlier version shows no dialog, so the hooks start on, and the first session after the update tells Claude to mention it. `/plugin configure prose-lint@prose-lint` turns them on or off at any time.
 
 Without the plugin system, clone the repository, copy `plugins/prose-lint/skills/prose-lint` to `~/.claude/skills/`, and run `uv run python ~/.claude/skills/prose-lint/scripts/setup.py` once; put `~/.prose-lint/bin` and `~/.prose-lint/node` on PATH when it downloaded vale or Node there.
 
@@ -78,7 +97,7 @@ The skill settles the language, runs the layers for it, and replies with a repor
 
 ## Your register
 
-`~/.prose-lint/vocabulary.md` is yours to edit. Each row is a regex, the wording to use instead, and the reason shown with each hit; the file's header gives the rules for a good row. Point `PROSE_LINT_REGISTER` at another file to keep it elsewhere; a `.csv` with the header `Pattern,Instead,Why` is read the same way. `~/.prose-lint/academic.md` is the academic register in the same format, with `PROSE_LINT_ACADEMIC_REGISTER` to move it; add a row for your field's or journal's house usage, and cite the source in the `Why` column the way the shipped rows do. `~/.prose-lint/translationese.md` is the translationese register, with `PROSE_LINT_TRANSLATIONESE_REGISTER` to move it. `~/.prose-lint/slop.md` is the stop-ai-slop-jp register, with `PROSE_LINT_SLOP_REGISTER` to move it. Point `PROSE_LINT_PATTERNS` at a Markdown file of your own notes on wordings you rejected, and the reader reads it after the reference.
+`~/.prose-lint/vocabulary.md` is yours to edit. Each row is a regex, the wording to use instead, and the reason shown with each hit; the file's header gives the rules for a good row. Point `PROSE_LINT_REGISTER` at another file to keep it elsewhere; a `.csv` with the header `Pattern,Instead,Why` is read the same way. A `.csv` with the header `Pattern,Instead,Except` holds plain words: `Pattern` lists words split by 、, each matched as written and in any case, and `Except` names the exception shown with each hit. `Except` may open with `chat`, which keeps the row out of replies and reply drafts, and `quote`, which drops a hit inside quotation marks or a `>` quote; a space follows each flag. A CSV that Excel saved in the Windows-31J code page reads too. `~/.prose-lint/academic.md` is the academic register in the same format, with `PROSE_LINT_ACADEMIC_REGISTER` to move it; add a row for your field's or journal's house usage, and cite the source in the `Why` column the way the shipped rows do. `~/.prose-lint/translationese.md` is the translationese register, with `PROSE_LINT_TRANSLATIONESE_REGISTER` to move it. `~/.prose-lint/slop.md` is the stop-ai-slop-jp register, with `PROSE_LINT_SLOP_REGISTER` to move it. Point `PROSE_LINT_PATTERNS` at a Markdown file of your own notes on wordings you rejected, and the reader reads it after the reference.
 
 The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`, one rule per line of the 訓令's appendix with a test for each guard; add a row there for a house spelling, or delete one that misfires on your house style. `~/.prose-lint/textlint/dict/fukushi.yml` is the adverb dictionary, the rule's own minus the five words the 訓令 keeps in kanji.
 
@@ -87,7 +106,7 @@ The kana rules live next to it in `~/.prose-lint/textlint/prh/koyobun-kana.yml`,
 | Path | Holds |
 |---|---|
 | `plugins/prose-lint/skills/prose-lint/SKILL.md` | The routing, the layers, the ruling on each finding id, the report |
-| `plugins/prose-lint/hooks/` | `hooks.json` and `session-start.sh`, which run `setup.py` once per plugin version |
+| `plugins/prose-lint/hooks/` | `hooks.json`; `session-start.sh`, which runs `setup.py` once per plugin version; `lint.sh` and `lint.py`, the wording-check hooks |
 | `plugins/prose-lint/bin/prose-lint-run` | Runs a command with the downloaded uv, vale and Node on PATH |
 | `plugins/prose-lint/skills/prose-lint/scripts/` | `register.py`, `koyobun.py`, `pptx_text.py`, `setup.py` |
 | `plugins/prose-lint/skills/prose-lint/vendor/natural-japanese/` | natural-japanese 1.6.4 and its licence |
