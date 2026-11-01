@@ -6,11 +6,33 @@
 # fetches uv into $PROSE_LINT_HOME/bin when uv is not on PATH (uv then fetches
 # Python), runs setup.py, and prints one line for Claude with the log's path.
 
+# An async hook reaches Claude through JSON additionalContext alone, so a hook
+# run reruns this script and hands its lines over as one JSON object.
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${PROSE_LINT_SESSION_START:-}" ]; then
+  out=$(PROSE_LINT_SESSION_START=1 bash "$0")
+  [ -z "$out" ] && exit 0
+  out=${out//\\/\\\\}
+  out=${out//\"/\\\"}
+  out=${out//$'\t'/\\t}
+  out=${out//$'\r'/}
+  out=${out//$'\n'/\\n}
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$out"
+  exit 0
+fi
+
 H="${PROSE_LINT_HOME:-$HOME/.prose-lint}"
 # Git Bash: C:/x would split PATH at its colon.
 command -v cygpath >/dev/null 2>&1 && H=$(cygpath -u "$H")
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 want=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/.claude-plugin/plugin.json" | head -n 1)
+# An update shows no install dialog, so a user who updated has never been asked.
+# CLAUDE_PLUGIN_ROOT tells a hook run from the skill's Bash call, which gets no option values;
+# .hooks-notice keeps the notice to one per version, apart from when setup ran.
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${CLAUDE_PLUGIN_OPTION_LINT_HOOKS+x}" ] &&
+  [ "$(cat "$H/.hooks-notice" 2>/dev/null)" != "$want" ]; then
+  echo "prose-lint: the wording-check hooks are on; tell the user that /plugin configure prose-lint@prose-lint turns them off"
+  mkdir -p "$H" && echo "$want" >"$H/.hooks-notice"
+fi
 [ "$(cat "$H/.setup-version" 2>/dev/null)" = "$want" ] && exit 0
 
 mkdir -p "$H/bin"

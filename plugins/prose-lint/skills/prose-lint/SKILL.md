@@ -26,7 +26,10 @@ in the running session, run the hook's script and wait for it:
 bash {SKILL_DIR}/../../hooks/session-start.sh
 ```
 
-It prints the log's path and every `skip` or `fail` line. A skill copied by
+It prints the log's path and every `skip` or `fail` line. The plugin's other
+hooks (`hooks/lint.py`) run textlint and the register on each file Claude
+writes, on each Japanese reply, and on plans and questions before they reach
+the user; this skill runs every layer. A skill copied by
 hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. A
 layer whose tool is still missing is reported as skipped in the final report;
 the other layers still run.
@@ -236,7 +239,9 @@ prose-lint-run uv run {SKILL_DIR}/scripts/register.py <file>
 
 The register is a Markdown table, or a CSV with the header `Pattern,Instead,Why`,
 of rejected wordings: `$PROSE_LINT_REGISTER`, else `{HOME}/vocabulary.md`, else
-the sample in `assets/`. The script prints
+the sample in `assets/`. A CSV headed `Pattern,Instead,Except` lists plain words
+matched as written, and its `Except` column gives the exception shown with each
+hit; `register.py`'s docstring has the rules. The script prints
 which one it read. The sample carries twelve rows in three groups.
 
 - Definition by negation, two rows. The Japanese row on `ではない` also covers
