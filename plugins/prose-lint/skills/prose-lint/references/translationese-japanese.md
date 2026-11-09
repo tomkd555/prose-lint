@@ -7,8 +7,9 @@ settles in Step 2. `assets/translationese.sample.md` holds the few forms a
 regex can find; everything else here needs the sentence and the document
 around it.
 
-Every source in section 6 was fetched on 2026-10-16, and the Microsoft guide
-again on 2026-10-19 at its current build. Each quotation carries
+Every source in section 6 was fetched on 2026-10-16, the Microsoft guide
+again on 2026-10-19 at its current build, and the sources of section 3.5 on
+2026-11-09. Each quotation carries
 its source's short name in 〔〕, the key the register rows and this file cite,
 and section 6 gives the URL to check it against.
 
@@ -302,6 +303,86 @@ written document, such as the conjunction けど, which section 1.2 of
 rewrites as が or であるが. This applies to every style except a deliberately
 casual `article`.
 
+### 3.4 Meaning
+
+These markers come first: a sentence whose meaning fails costs the reader more
+than one that reads as translated. Each is a question with a YES or NO answer,
+asked of every sentence outside quotations, code and headings. This section
+quotes no example of a defect, because a rejected sentence printed here gets
+copied into the next text.
+
+**`opaque`** - Restate the sentence's claim in one plain sentence: who or what
+does what. Answer YES when the restatement needs a guess at what the writer
+meant, or when the sentence holds no claim a reader could act on or dispute.
+Rewrite only when the document around the sentence settles the meaning;
+otherwise put the sentence in the report as a question for the author.
+
+**`coined`** - Answer YES when a compound or a clipped word appears in no
+dictionary, in no document of the reader's field and in no other sentence that
+defines it. Rewrite with the ordinary phrase, in a clause where no single word
+fits.
+
+**`subject-predicate`** - Read the subject and the final predicate alone. Answer
+YES when the two make no sentence: the subject cannot do or be what the predicate
+says, or two subjects compete for one predicate. Rewrite from who acts.
+
+**`run-jargon`** - Answer YES when a name comes from the process that made the
+document, such as a role, a stage or a tool's label, and the document's reader
+was never given it. Rewrite with what the name stands for.
+
+### 3.5 Titles and tables
+
+The questions of 3.4 skip headings and table headers; these ask about them.
+Each heading and slide title is read with the text under it, and each table with
+its title or the sentence before it. Each question has a YES or NO answer, and a
+YES is a finding. Like 3.4, this section quotes no defect.
+
+**`table-header`** - Read each column header with the values under it. Answer
+YES when the header, without another header or the text around the table, fails
+to name the quantity its values are, or when the values carry a unit the header
+leaves out. A header that points elsewhere, through a demonstrative or a word
+such as 上記 or 同, answers YES; so does a header that runs on into its cells:
+"Don’t write partial column headings such that the sentence or phrase in the
+column heading continues from the cell text." 〔WordPress〕 Microsoft asks for the
+same precision: "Make headers precise for usability." 〔MS表〕 Units belong in the
+header: "measurements should be included in either row or column headings as
+appropriate" 〔JPHE〕. Rewrite with the noun the header stands for, taken from the
+header or the sentence it points at.
+
+**`table-purpose`** - Read the table with its title or the sentence before it.
+Answer YES when neither names the data the table holds: "A table title should
+identify the data in the table" 〔JPHE〕. Rewrite by naming the data in the title
+or in a sentence before the table.
+
+**`title-subject`** - Read the title with the text under it. Answer YES when the
+title names its subject by a symbol or an abbreviation alone, with no word for
+it in the title or the text under it. Rewrite with the subject in words; a
+symbol may follow it.
+
+**`title-role`** - Ask only of a slide that holds its title alone. Answer YES
+when the title is a sentence and holds no word that says what the slide is, such
+as 課題 or 結論. 「標題（タイトル）では、主題と文書の性格を示す。」〔公用文〕 Rewrite
+with the role word, or move the sentence to the body under a title that names it.
+A closing slide of thanks stays.
+
+**`title-message`** - Ask only when the sentences under the title state a result
+or a claim. Answer YES when the title states none of them. The
+assertion-evidence slides of 〔Garner2013〕 use "a sentence headline that makes
+explicit the main message or assertion", with "no more than two lines". A slide
+whose body holds only a table keeps a title that names its data, since a table
+title "should not summarize the results" 〔JPHE〕. A slide of numbers or formulas
+alone, with no sentence that states a result, keeps a topic title; this ruling is
+this skill's. A heading the document's genre or template fixes, such as 目的 or
+背景, stays. Rewrite with the result in the title, in 体言止め or a short
+sentence, within two lines.
+
+**`title-flow`** - Once per document, read the titles alone, in order. Answer
+YES when they leave the content hard to follow: two titles read the same over
+different content, or a step of the content has no title that names it.
+「見出しだけを読んでいけば、文書の内容と流れがおおよそつかめるようにするとよい。」
+〔公用文〕 Report it once, naming the titles, with rewrites that name what tells
+them apart.
+
 ## 4. Measurements
 
 Human-written set: the web entries of natural-japanese's calibration corpus
@@ -400,18 +481,27 @@ Notes on the counts:
   it in published titles and in some essays (section 4). Ruling: a quoted
   title keeps its dash; elsewhere rewrite it, and in `article` rule by the
   sentence.
+- **D7 Sentence headlines.** 〔Garner2013〕 found better comprehension with
+  assertion-evidence slides, but changed the headline together with the words
+  and the graphic on each slide, so the headline's own effect is unmeasured. A
+  study of the same slide form reports: "Groups did not differ on pre-test,
+  assignment, or post-test scores" 〔UMN〕. Ruling: `title-message` is asked only
+  where the sentences under a title state a result, and a topic title stays
+  elsewhere.
 
 ## 6. Sources
 
 ### Style guides and standards
 
 - 〔Microsoft〕 Microsoft. *Japanese Localization Style Guide*. No edition date printed; the build of 2025-07-18. https://aka.ms/japanese-styleguide
-- 〔公用文〕 文化審議会. 「公用文作成の考え方（建議）」 and its 解説, 令和4年1月7日. https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/93651301_01.pdf
+- 〔公用文〕 文化審議会. 「公用文作成の考え方（建議）」 and its 解説, 令和4年1月7日. https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/93651301_01.pdf (the quotations of section 3.5 were checked on 2026-11-09 against the same text at https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/pdf/93731901_01.pdf)
 - 〔JTF〕 日本翻訳連盟 翻訳品質委員会. 『JTF日本語標準スタイルガイド（翻訳用）』第4.0版, 2026年7月25日. https://www.jtf.jp/pdf/jtf_style_guide.pdf
 - 〔Red Hat〕 Red Hat Localization Services. 『Red Hat 日本語スタイルガイド』, 2014年7月改訂. https://community.jboss.org/servlet/JiveServlet/previewBody/52925-102-2-171801/DOC-954596.pdf
 - 〔SmartHR〕 SmartHR Design System. 「ライティング › 基本的な考え方」. https://smarthr.design/products/contents/writing-style/
 - 〔谷口2010〕 谷口功. 「さらば、翻訳調の文章！ 技術者向け校正ルール」, @IT, 2010年3月23日. https://atmarkit.itmedia.co.jp/ait/articles/1003/23/news095.html
 - 〔清水川〕 清水川. 「翻訳する時に心がけていること」, Scrapbox, 2019年. https://scrapbox.io/shimizukawa/%E7%BF%BB%E8%A8%B3%E3%81%99%E3%82%8B%E6%99%82%E3%81%AB%E5%BF%83%E3%81%8C%E3%81%91%E3%81%A6%E3%81%84%E3%82%8B%E3%81%93%E3%81%A8
+- 〔MS表〕 Microsoft. *Microsoft Writing Style Guide*, "Tables", 2023-04-11. https://learn.microsoft.com/en-us/style-guide/scannable-content/tables
+- 〔WordPress〕 WordPress. *Documentation Style Guide*, "Tables". https://make.wordpress.org/docs/style-guide/formatting/tables/
 
 ### Translator education
 
@@ -428,6 +518,9 @@ Notes on the counts:
 
 ### Research
 
+- 〔Garner2013〕 Joanna K. Garner and Michael P. Alley. "How the Design of Presentation Slides Affects Audience Comprehension: A Case for the Assertion–Evidence Approach", *International Journal of Engineering Education* 29(6), 2013. https://www.ijee.ie/articles/Vol29-6/23_ijee2791ns.pdf
+- 〔JPHE〕 Wei Liu. "Preparing better tables", *Journal of Public Health and Emergency* 2, January 2018. https://jphe.amegroups.org/article/view/4327/html
+- 〔UMN〕 University of Minnesota. "Effect of differing PowerPoint slide design on multiple-choice test scores and retention". https://experts.umn.edu/en/publications/effect-of-differing-powerpoint-slide-design-on-multiple-choice-te/
 - 〔Meldrum2009〕 Yukari Fukuchi Meldrum. *Contemporary Translationese in Japanese Popular Literature*. PhD thesis, University of Alberta, 2009. https://ualberta.scholaris.ca/handle/123456789/102474
 - 〔吉見2001〕 吉見毅彦. 「英日機械翻訳における代名詞翻訳の改良」, 自然言語処理 8(3), 2001. https://ndlsearch.ndl.go.jp/en/books/R000000004-I5841027
 - 〔風間2016〕 風間伸次郎. 「地域的・類型論的観点からみた無生物主語について」, 北方言語研究 6, 2016. https://eprints.lib.hokudai.ac.jp/dspace/handle/2115/60796

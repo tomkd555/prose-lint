@@ -25,6 +25,22 @@ with the item of the 建議 they lean on.
     nominal_ending   house rule: 体言止め in body sentences (after JTF style guide 1.1.2/1.1.3)
     negated_predicate house rule: the sentence's final predicate is negated
 
+Five more read the parts the sentence checks mask: the header row of each
+Markdown table, and the slides of a deck that pptx_text.py wrote
+(`## Slide <n>` sections). The table rules follow the
+header guidance of the Microsoft Writing Style Guide and the WordPress
+documentation style guide; the title rules follow 「公用文作成の考え方」 Ⅲ-2
+on 標題 and 見出し, and Garner and Alley (2013) on two-line slide headlines.
+    table_deixis     a column header opens with a demonstrative or a referring word (その確率, 上記の値);
+                     その他, これまで and これから stay
+    table_particle   a column header ends in が, を, に or の and runs on into its cells
+    title_symbol     a slide title holds no Japanese word, no Latin word of 4 letters and no lower-case
+                     word of 3 (ET, W1, KPI); the thresholds are this skill's
+    title_lines      a slide title runs over 2 lines in the extract
+    title_only       a slide holds only its title and at most a page number, the title is a sentence
+                     (a 読点, or a predicate at its end), and it has no word for the slide's role from
+                     this skill's list (課題, 例題, 問題, 目標, まとめ, 要点, 目次, 結論) and no line of thanks
+
 With --academic, two more checks list the spoken forms that a surface regex
 cannot tell from ordinary verbs (使って, したがって, もたらす). Both come from
 the table of 話し言葉的 words in 柏野ほか (2016), 言語処理学会第22回年次大会
@@ -42,7 +58,8 @@ so a sentence here is the same sentence lint.py sees. natural-japanese
 vendor/natural-japanese; NATURAL_JAPANESE_SCRIPTS, when set, names another copy
 of its scripts directory. Headings, list items, tables,
 quotes and code are masked there, which is what makes nominal_ending a body-only
-check.
+check. In a deck extract the `- ` items hold the slide text, so they are read as
+body text, and nominal_ending stays silent on them.
 
 Exit code 0 on any number of findings; 1 on an input error.
 """
@@ -106,7 +123,26 @@ HINTS = {
     "negated_predicate": "文末の述語が否定。何であるかを書く（動詞を単に打ち消した文は残る）",
     "tte": "助詞「って」。話し言葉の形。主題なら「は」「とは」、引用なら「と」「という」で書く",
     "tara": "仮定の「たら」。話し言葉の形。「と」「ば」「場合」で書く",
+    "table_deixis": "表の見出しが「{word}」で始まる。指す語を見出しに書き、見出しだけで列の値が分かるようにする",
+    "table_particle": "表の見出しが助詞「{word}」で終わり、セルへ続く。列の値を表す名詞で終える",
+    "title_symbol": "タイトルが記号と英数字だけ。何を示すかを言葉で書く",
+    "title_lines": "タイトルが {n} 行。主題と要点を 2 行以内にまとめ、残りは本文に書く",
+    "title_only": "タイトルだけのスライドの文に、役割を表す語（課題、まとめ、結論など）がない。役割を書くか、文を本文に移して要点をタイトルにする",
 }
+# Words that point at text outside a table header. The 同 words are listed one
+# by one, since 同義語 and 同順位 name no earlier item; 同 as a word of its own
+# (「同」「同 減少」「同、2022年」) is matched in _header_findings.
+REFERRING = {
+    "この", "その", "あの", "これ", "それ", "あれ", "ここ", "そこ", "あそこ", "こちら", "そちら", "あちら",
+    "当該", "上記", "下記", "前記", "後記", "上述", "前述", "後述", "左記", "右記", "前者", "後者", "その後",
+    "同上", "同左", "同右", "同前", "同社", "同氏", "同年", "同月", "同日", "同所", "同表", "同図", "同欄",
+}
+ROLE_WORDS = {"課題", "例題", "問題", "目標", "まとめ", "要点", "目次", "結論"}
+TABLE_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$")
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})(.*)$")
+HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
+JAPANESE_RE = re.compile(r"[ぁ-ゟ゠-ヿ一-鿿々]")
+SLIDE_RE = re.compile(r"^## Slide \d+$")
 
 
 def _pos(m) -> tuple:
@@ -118,11 +154,15 @@ def _compound_particle(ms: list, i: int) -> bool:
     return v >= 1 and (ms[v - 1].surface(), ms[v].dictionary_form()) in COMPOUND_PARTICLES
 
 
+def _finding(line: int, check: str, excerpt: str, **fmt) -> dict:
+    return {"line": line, "check": check, "excerpt": excerpt, "hint": HINTS[check].format(**fmt)}
+
+
 def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
     out: list[dict] = []
 
     def add(check: str, excerpt: str, **fmt) -> None:
-        out.append({"line": line, "check": check, "excerpt": excerpt, "hint": HINTS[check].format(**fmt)})
+        out.append(_finding(line, check, excerpt, **fmt))
 
     body = strip_trailing_symbols(ms)
     if not body:
@@ -227,10 +267,107 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
     return out
 
 
+def _cells(row: str) -> list[str]:
+    """Split a Markdown table row into its cells, without <br>, emphasis or code marks."""
+    row = row.strip().removeprefix("|")
+    row = row[:-1] if row.endswith("|") and not row.endswith("\\|") else row
+    return [re.sub(r"<br\s*/?>", " ", c).replace("\\|", "|").strip().strip("*_`").strip()
+            for c in re.split(r"(?<!\\)\|", row)]
+
+
+def _header_findings(line: int, cell: str, tok, mode) -> list[dict]:
+    """Check one column header for a referring opening and a particle ending."""
+    ms = list(tok.tokenize(cell, mode)) if cell else []
+    if not ms:
+        return []
+    out = []
+    first = ms[0].surface()
+    ditto = first == "同" and (len(ms) == 1 or _pos(ms[1])[0] in {"空白", "補助記号"})
+    # その他 names a category, and これまで and これから a time.
+    named = len(ms) > 1 and (first, ms[1].surface()) in {("その", "他"), ("その", "ほか"), ("これ", "まで"), ("これ", "から")}
+    if (first in REFERRING or ditto) and not named:
+        out.append(_finding(line, "table_deixis", cell, word=first))
+    # Punctuation after the particle is dropped; a closing bracket stays, so the
+    # が of 「h2（が）」 reads as a quoted token.
+    while len(ms) > 1 and _pos(ms[-1])[0] == "補助記号" and _pos(ms[-1])[1] != "括弧閉":
+        ms.pop()
+    if _pos(ms[-1])[:2] == ("助詞", "格助詞") and ms[-1].surface() in {"が", "を", "に", "の"}:
+        out.append(_finding(line, "table_particle", cell, word=ms[-1].surface()))
+    return out
+
+
+def structure_findings(text: str, tok) -> list[dict]:
+    """Check the column headers of each table and, in a pptx_text.py extract, the slide titles."""
+    from sudachipy import SplitMode
+
+    lines = text.split("\n")
+    deck = any(SLIDE_RE.match(x) for x in lines)
+    out: list[dict] = []
+    slides: list[dict] = []
+    fence: tuple[str, int] | None = None  # the open fence's character and length, as textcore tracks it
+    for i, line in enumerate(lines):
+        if m := FENCE_RE.match(line):
+            run = m.group(1)
+            if fence is None:
+                fence = (run[0], len(run))
+            elif run[0] == fence[0] and len(run) >= fence[1] and not m.group(2).strip():
+                fence = None
+            continue
+        if fence:
+            continue
+        # The header row only: a first column often holds the 同 of a ditto or a quoted answer.
+        if "|" in line and TABLE_SEPARATOR_RE.match(line) and i > 0 and "|" in lines[i - 1]:
+            for cell in _cells(lines[i - 1]):
+                out.extend(_header_findings(i, cell, tok, SplitMode.C))
+        if not deck:
+            continue
+        heading = HEADING_RE.match(line)
+        if SLIDE_RE.match(line):
+            slides.append({"title": [], "other": False, "notes": False})
+        elif not slides or slides[-1]["notes"]:
+            continue
+        elif heading and heading.group(2) == "Notes":
+            slides[-1]["notes"] = True
+        elif heading and len(heading.group(1)) == 3:
+            slides[-1]["title"].append((i + 1, heading.group(2)))
+        elif line.strip() and not re.fullmatch(r"(- )?\d+", line.strip()):  # a page number is no content
+            slides[-1]["other"] = True
+    for s in slides:
+        if not s["title"]:
+            continue
+        no, parts = s["title"][0][0], [t for _, t in s["title"]]
+        excerpt, whole = " / ".join(parts), "".join(parts)
+        # Four letters, or three in lower case, make a word (softmax, Thank You, ask);
+        # ET, W1 and KPI are symbols. The thresholds are this skill's.
+        if not JAPANESE_RE.search(whole) and not re.search(r"[A-Za-z]{4}|[a-z]{3}", " ".join(parts)):
+            out.append(_finding(no, "title_symbol", excerpt))
+        if len(parts) > 2:
+            out.append(_finding(no, "title_lines", excerpt, n=len(parts)))
+        # A section or closing slide names its section in a noun phrase; a sentence
+        # alone on a slide leaves the reader to guess what it is.
+        ms = list(tok.tokenize(whole, SplitMode.C))
+        body = strip_trailing_symbols(ms)
+        sentence = bool(re.search("[、，]", whole)) or (body and _pos(body[-1])[0] in {"動詞", "助動詞", "形容詞"})
+        # A role word labels the slide when a colon, a は or the end follows it
+        # (課題：…, 目標は…); the 問題 of 問題なく labels nothing. A closing line of
+        # thanks says what its slide is too.
+        role = "ありがとう" in whole or any(m.surface() in ROLE_WORDS and (
+            k + 1 == len(ms) or _pos(ms[k + 1])[0] in {"補助記号", "空白"} or ms[k + 1].surface() == "は")
+            for k, m in enumerate(ms))
+        if not s["other"] and sentence and not role:
+            out.append(_finding(no, "title_only", excerpt))
+    return out
+
+
 def run(text: str, academic: bool = False) -> tuple[list[dict], dict]:
-    masked = mask_markdown_structure(text)
+    # A deck extract holds its slide text in `- ` items, which the mask blanks; read
+    # them as body text, and leave the 体言止め of a bullet, the medium's form, alone.
+    deck = any(SLIDE_RE.match(x) for x in text.split("\n"))
+    items = {no for no, x in enumerate(text.split("\n"), 1) if deck and x.startswith("- ")}
+    body_text = re.sub(r"^- ", "", text, flags=re.MULTILINE) if deck else text
+    masked = mask_markdown_structure(body_text)
     lines = iter_lines_with_no(masked)
-    raw_by_no = dict(iter_lines_with_no(text))
+    raw_by_no = dict(iter_lines_with_no(body_text))
     sentences = split_sentences_with_lines(lines, raw_by_no)
     tok = get_tokenizer()
     from sudachipy import SplitMode
@@ -245,7 +382,9 @@ def run(text: str, academic: bool = False) -> tuple[list[dict], dict]:
         next_line = raw_by_no.get(no + 1, "")
         closed = after.startswith(("。", "！", "？", "．")) or (after == "" and not next_line.strip())
         ms = list(tok.tokenize(sent, SplitMode.C))
-        findings.extend(_findings_for({"closed": closed, "academic": academic}, no, raw, ms))
+        findings.extend(f for f in _findings_for({"closed": closed, "academic": academic}, no, raw, ms)
+                        if not (f["check"] == "nominal_ending" and no in items))
+    findings = sorted(findings + structure_findings(text, tok), key=lambda f: f["line"])
     counts: dict[str, int] = {}
     for f in findings:
         counts[f["check"]] = counts.get(f["check"], 0) + 1
