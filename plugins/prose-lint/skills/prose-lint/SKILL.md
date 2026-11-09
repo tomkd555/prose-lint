@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: textlint, the register's negation row, and vale with proselint, ai-tells and three house rules. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」, "run textlint", "lint this file", "proofread this", "check this English draft", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide and award-winning papers); a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -51,17 +51,29 @@ working on. With neither, ask which text to lint. Pasted text goes to a `.md`
 file in a temporary directory first, because textlint, vale and the scripts
 all read files.
 
+A request that hands over a source and its translation, or asks for a
+translation, goes to Step 3c first. The target is the translation, and Step 2
+routes it after that step.
+
 A PowerPoint file goes to a `.md` file in a temporary directory too:
 
 ```
 prose-lint-run uv run {SKILL_DIR}/scripts/pptx_text.py <deck.pptx> <tmp>/deck.md
+prose-lint-run uv run {SKILL_DIR}/scripts/pptx_text.py --flat <deck.pptx> <tmp>/deck-flat.md
 ```
 
-Each slide becomes a `## Slide <n>` section: the title as a `### ` heading,
-every paragraph of a text box, a group or a table cell as a `- ` item, and the
-speaker notes under `### Notes`. The script names on stderr each chart or
-SmartArt whose text it could not read; say so in the report. It prints `ja` or
-`en`, and that settles Step 2 for the deck.
+Each slide becomes a `## Slide <n>` section. The title placeholder gives one
+`### ` heading per paragraph or line break; a title drawn in a text box is a
+`- ` item. Every other paragraph and line break of a shape or a group is a `- `
+item, each table a Markdown table whose first row becomes its header row, and
+the speaker notes follow under `### Notes`. A picture leaves a
+`<!-- picture -->` line on its slide, and a chart or SmartArt a
+`<!-- chart or SmartArt -->` line. `deck-flat.md` writes each paragraph of a
+table cell as a `- ` item instead and leaves the comment lines out, for textlint
+alone: textlint's sentence rules skip the cells of a Markdown table, and a
+comment line between two items splits a list for its list rules. The script names on stderr, by slide, each
+chart or SmartArt whose text it could not read; say so in the report. It prints
+`ja` or `en`, and that settles Step 2 for the deck.
 
 The layers run on that file, every fix is applied to it, and the second runs
 read it. The report gives each finding and each rewrite by its slide. The deck
@@ -148,15 +160,21 @@ around it.
 
 Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
 
-- the purpose in one line: find every sentence of one Japanese document that
-  reads as translated from English, or whose 文体 or words do not fit the
-  document's style, and propose a rewrite for each;
+- the purpose in one line: find every sentence of one Japanese document whose
+  meaning a reader cannot recover, that reads as translated from English, or
+  whose 文体 or words do not fit the document's style, every title that names
+  its subject by no word or leaves out the result its text states, and every
+  table header that needs another header or a cell to name its column, and
+  propose a rewrite for each;
 - the document's absolute path and the style line from Step 2;
 - the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
-  with "read it first and use its marker ids";
+  with "read it first, answer the questions of its section 3.4 for every
+  sentence and those of section 3.5 for every heading, slide title and table,
+  and use its marker ids";
 - the absolute path of `{SKILL_DIR}/references/exemplars-japanese.md`, with
-  "read section 0 and the groups it names for the style, and judge each
-  sentence against what those writers would have written";
+  "read section 0 and the groups it names for the style, and compare each
+  sentence with how those passages open and end their sentences, which words
+  they choose and how they join";
 - for `article` and `slides`, the absolute paths of
   `{SKILL_DIR}/references/stop-ai-slop-jp/rules.md` and of `structures.md`,
   `examples.md` and `phrases.md` beside it, with "read them after the
@@ -175,7 +193,7 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
   in one sentence;
 - "report every finding, no severity filter";
 - the scope: notation, kana, sentence length and the register's wordings belong
-  to the other layers;
+  to the other layers, and a verbatim quotation is left as it stands;
 - English as the output language, with Japanese quoted verbatim.
 
 It withholds who wrote the text, the task it served, any reason a wording was
@@ -196,8 +214,10 @@ run.
 prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.json <file>
 ```
 
-textlint exits 1 when it finds anything, so read the output and ignore the exit
-code. The findings fall in three tiers by rule id:
+For a deck, `<file>` is `<tmp>/deck-flat.md` from Step 1; its findings are
+fixed in `deck.md`, slide by slide. textlint exits 1 when it finds anything, so
+read the output and ignore the exit code. The findings fall in three tiers by
+rule id:
 
 - Blocking - fix these:
   `ja-no-weak-phrase`, `ja-no-redundant-expression`, `ja-no-abusage`,
@@ -358,8 +378,9 @@ Where this layer meets another, the rulings go this way:
   `article` and `slides` it takes the place of the hearsay row's "言い切る"
   branch: name the source where there is one, and mark hearsay as hearsay
   where there is none.
-- In `slides`, 体言止め in a `### ` title or a `- ` item is the medium's form,
-  and the morphology lint's `nominal_ending` hits there stay. Rule 9's uneven
+- In `slides`, 体言止め in a `### ` title or a `- ` item is the medium's form;
+  the morphology lint reads a deck's `- ` items as body text and leaves
+  `nominal_ending` silent on them. Rule 9's uneven
   rhythm reads per slide body; the notes read as prose.
 - The first person, the 毒 and the uneven rhythm of rules 5, 6 and 9 serve an
   article. A business deck keeps the writer's stance and drops the rest; say
@@ -442,7 +463,8 @@ This script checks rules that turn on parts of speech, which no surface-string
 linter sees. Four come from 「公用文作成の考え方」 (文化審議会建議, 2022-01-07,
 https://www.bunka.go.jp/seisaku/bunkashingikai/kokugo/hokoku/93650001_01.html);
 the rules below paraphrase its items. Five are house rules of this skill,
-marked as such, three of them leaning on an item of the 建議. It tokenises
+marked as such, and five more, below them, read table headers and slide titles;
+each names the source it leans on where it has one. It tokenises
 with sudachipy, on the same sentence split and Markdown mask lint.py uses, and
 reports one line per suspicion. Each id carries its rule and its ruling:
 
@@ -482,10 +504,43 @@ reports one line per suspicion. Each id carries its rule and its ruling:
   JTF 日本語標準スタイルガイド 1.1.2 and 1.1.3): a body sentence whose last content
   word is a noun. Headings, list items, tables and quotes are masked, so every
   hit is in running text; finish the sentence with a predicate. A label before
-  a colon or a table-like paragraph laid out on purpose stays.
+  a colon or a table-like paragraph laid out on purpose stays. In a deck
+  extract the script reads the `- ` items as body text for the other checks,
+  and this one stays silent on them.
 - `negated_predicate` (house rule: say what a thing is): the final predicate
   carries ない, ぬ or ません. This is the mechanised form of the second reading
   the register section asks for.
+
+Five more ids read what the checks above mask: the header row of each Markdown
+table, and the titles of a deck extract from Step 1. The reader's section 3.5
+questions cover the cases these leave out. No false-positive rate has been
+measured on labelled documents for these five; rule on each hit before
+rewriting.
+
+- `table_deixis` (after the Microsoft and WordPress style guides on table
+  headers): a column header that opens with a demonstrative or a referring
+  word, such as その, これ, 上記, 当該 or 同. A header names its column on its
+  own, since a cell is read by its header. Rewrite with the noun the word points
+  at. その他 as a category, and これまで and これから as times, stay.
+- `table_particle` (same grounds): a column header that ends in が, を, に or の
+  and runs on into its cells. End it with the noun for what the column holds.
+- `title_symbol` (after 「公用文作成の考え方」 Ⅲ-2 on 標題): a slide title with no
+  Japanese word, no Latin word of four letters and no lower-case word of three,
+  such as a matrix symbol or an abbreviation alone; the thresholds are this
+  skill's. Name the subject in words; the symbol may follow.
+- `title_lines` (after Garner and Alley 2013, two-line headlines, and the 建議's
+  one-line 標題): a slide title over two lines in the extract. Keep the subject
+  and the point in the title and move the rest to the body. The formal name of
+  a report on its cover stays, since the writer cannot change it; this
+  exception is this skill's.
+- `title_only` (after the 建議's 主題と文書の性格): a slide that holds only its
+  title and at most a page number, where the title is a sentence (a 読点, or a
+  predicate at its end) with no word for its role from this skill's list (課題,
+  例題, 問題, 目標, まとめ, 要点, 目次, 結論) and no line of thanks. A picture,
+  a chart or a table on the slide counts as its body, so a sentence headline
+  over a figure stays. State the role, or move the sentence to the body and put
+  its point in the title. A section slide titled with a noun phrase stays out
+  of the check.
 
 `--json` gives the same findings for the ledger.
 
@@ -530,7 +585,7 @@ keeps.
   reference says how to rule. Fix the ones that hold and say why the others
   stay.
 
-`koyobun.py --academic` adds two ids to the ten above: `tte` (って as a
+`koyobun.py --academic` adds two ids to the fourteen above: `tte` (って as a
 particle) and `tara` (the conditional たら/だら), both fixed. Rewrite って as
 は, とは or と/という, and たら as と, ば or 場合.
 
@@ -614,8 +669,34 @@ closes the run.
 
 ## Step 3b - English
 
-Three mechanical layers, then the review. Fix once all four are in, one Edit
-per paragraph that contains a fix, as in "Writing a fix".
+Settle the style first, as in Step 2: what the document is, who reads it and
+where its words come from. State it in one line at the head of the report
+(`style: technical - a README, read by developers`). Then the reader, the
+mechanical layers and the review. Fix once all are in, one Edit per paragraph
+that contains a fix, as in "Writing a fix".
+
+### The reader
+
+Launch one agent, `model: opus`, in a fresh context, in the background, before
+the mechanical layers. Its prompt carries:
+
+- the purpose in one line: find every English sentence of one document that
+  fails in meaning or carries the shape of a Japanese draft, and propose a
+  rewrite for each;
+- the document's absolute path and the style line;
+- the absolute path of `{SKILL_DIR}/references/english-reader.md`, with "read it
+  first, answer its sentence checks for every sentence and its title and table
+  checks for every heading, slide title and table";
+- the output shape, one finding per line:
+  `<line> | <check id> | "<sentence>" | <rewrite> | <reason>`, the reason in one
+  sentence;
+- "report every finding, no severity filter";
+- the scope: what vale reports belongs to the other layers, and a verbatim
+  quotation is left as it stands.
+
+It withholds who wrote the text, the task it served and the lint results. After
+the fixes, launch it once more over the paragraphs that changed, as the Japanese
+reader's second read does, and rule on what it returns in one final pass.
 
 ### textlint
 
@@ -623,7 +704,8 @@ per paragraph that contains a fix, as in "Writing a fix".
 prose-lint-run {HOME}/textlint/node_modules/.bin/textlint --config {HOME}/textlint/.textlintrc.en.json <file>
 ```
 
-The English config covers duplicated conjunctions at the start of consecutive
+For a deck, `<file>` is `<tmp>/deck-flat.md` from Step 1, as in Step 3a. The
+English config covers duplicated conjunctions at the start of consecutive
 sentences and two Markdown-shape rules of the AI-writing preset. `no-ai-list-formatting`
 reports a bullet that opens with a bold label and a colon, and an emoji
 bullet. `no-ai-emphasis-patterns` reports bold inside a heading, and an emoji
@@ -636,7 +718,14 @@ English in the report. All of these are fixed when they hold.
 prose-lint-run vale --config {HOME}/vale/.vale.ini <file>
 ```
 
-Three styles run:
+vale stops with E201 on front matter whose YAML is invalid, and it lints nothing.
+On E201, blank the front matter and pipe the text in:
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/register.py --blank-front-matter <file> | prose-lint-run vale --config {HOME}/vale/.vale.ini --ext=.md
+```
+
+Four styles run:
 
 - proselint: clichés, redundancy, corporate speak, jargon and hedging, plus
   vale's own `Vale.Repetition` for a word typed twice.
@@ -647,6 +736,12 @@ Three styles run:
   itself or a token pasted from a chat interface. `AISigns.Emoji` reports an
   emoji in a heading or list item. `AISigns.CommaCount` reports five or more
   commas in one sentence.
+- `JaEnglish`: two house rules shipped in `assets/vale/styles/JaEnglish` for
+  English shaped by a Japanese draft. `JaEnglish.Wasei` reports "hearing" for a
+  client interview; a public hearing and hearing loss stay.
+  `JaEnglish.InferenceNoun` reports "is inference" for "we infer". Each rule's
+  hits on real reports were defects, and neither fired on the 33,000 words of
+  human documentation measured.
 
 vale exits 1 on any finding. Every ai-tells rule is `error`, so the tier comes
 from the message's opening words, which name the family:
@@ -654,8 +749,6 @@ from the message's opening words, which name the family:
 - Fixed - the families that name a stock phrase, a filler or a chat artefact:
   - `AI closing`
   - `AI opening`
-  - `AI hedge`
-  - `AI stacked hedge`
   - `AI conclusion`
   - `AI vague attribution`
   - `AI copula dodge`
@@ -701,6 +794,9 @@ from the message's opening words, which name the family:
 - Advisory - the families that name a figure of speech, a sentence frame, a
   rhythm or a punctuation mark, which human writers also use:
   - `AI overused verb` (the Figurative rules)
+  - `AI hedge` and `AI stacked hedge`: both fired more often on human
+    documentation than on model output
+  - `JaEnglish.Wasei` and `JaEnglish.InferenceNoun`
   - every `AI ... metaphor`
   - `AI figurative noun`
   - `AI punctuation`: an em dash is a sign only when a paragraph holds three
@@ -773,8 +869,48 @@ and vague nouns yourself. Then read once for the signs that need a reader:
 - a document that agrees with the reader
 - a synonym cycled to avoid repeating a name
 
+## Step 3c - translation
+
+Run this step when the request hands over a source and its translation, or asks
+for a translation. With a source alone, write the translation first, then
+continue here. It covers English to Japanese and Japanese to English.
+
+Before translating, write the glossary beside the target as
+`<target>.glossary.tsv`: source term, tab, target term, one row per term the
+document repeats. A term the document already renders one way keeps that
+rendering.
+
+1. Compare by script:
+
+   ```
+   prose-lint-run uv run {SKILL_DIR}/scripts/pair_check.py <source> <target> --glossary <target>.glossary.tsv
+   ```
+
+   Each line is a suspicion: a number that differs in a section, a glossary term
+   missing there, source-language text left in the target, or a heading left in
+   the source language. A run with no glossary skips that kind; say so in the
+   report.
+2. Launch one agent, `model: opus`, in a fresh context. Its prompt carries the
+   purpose in one line (compare one translation with its source and report each
+   difference in meaning), the absolute paths of the source and the target, the
+   glossary when there is one, the absolute path of
+   `{SKILL_DIR}/references/translation-check.md` with "read it first, ask its
+   questions of every section and use its output line", "report every finding,
+   no severity filter", and English as the output language with quoted text
+   verbatim. It withholds who translated the text, the task and the script's
+   findings.
+3. Rule on the script's lines and the agent's findings together, then make one
+   rewrite pass over the target, one Edit per paragraph that contains a fix.
+   Launch the agent once more over the changed lines only, with the source
+   ranges beside them. Correct what it finds and stop: further passes move the
+   text toward the rewriter's wording, and the meaning gains nothing.
+4. Run Step 3a on a Japanese target and Step 3b on an English one. A rewrite in
+   those steps keeps every number, term and qualifier the comparison settled.
+
 ## Reporting
 
+- For a translation, open with the counts from Step 3c: the script's lines by
+  kind, the agent's findings by id and severity, and what the second read found.
 - **Report every finding as fixed, or as kept with a stated reason.** A hit is a
   suspicion, and the reason a wording stays is part of the report.
 - **Never rewrite the user's text silently, and never mass-apply the lint
@@ -791,7 +927,7 @@ and vague nouns yourself. Then read once for the signs that need a reader:
   under 35. End with the second run's resolved / new / persisting counts and
   what the second read of the rewrites returned. A score alone says nothing
   about the register hits, so it never replaces the ledger.
-- For English, open with one line: the count of ai-tells, `AISigns.Chatbot`
+- For English, open with the style line, then one line: the count of ai-tells, `AISigns.Chatbot`
   and `AISigns.Emoji` hits and the count per 1,000 words. Both come from the
   vale run before the fixes: `prose-lint-run vale --output line` piped to a count of lines
   holding `ai-tells`, `AISigns.Chatbot` or `AISigns.Emoji`, over `wc -w`. It

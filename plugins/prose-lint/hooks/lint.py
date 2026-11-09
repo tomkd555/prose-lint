@@ -132,9 +132,9 @@ def changed_lines(patch: list[dict], text: str) -> set[int]:
     return lines
 
 
-def run_json(args: list[str]):
+def run_json(args: list[str], stdin: str | None = None):
     try:
-        out = subprocess.run(args, capture_output=True, encoding="utf-8", timeout=120, check=False).stdout
+        out = subprocess.run(args, input=stdin, capture_output=True, encoding="utf-8", timeout=120, check=False).stdout
         return json.loads(out) if out.strip() else None
     except (OSError, ValueError, subprocess.SubprocessError):
         return None
@@ -159,7 +159,15 @@ def vale(path: Path) -> list[dict]:
     conf = HOME / "vale" / ".vale.ini"
     if not (exe and conf.is_file()):
         return []
-    result = run_json([exe, "--config", str(conf), "--output=JSON", str(path)])
+    args = [exe, "--config", str(conf), "--output=JSON"]
+    try:
+        run = subprocess.run(args + [str(path)], capture_output=True, encoding="utf-8", timeout=120, check=False)
+        if "E201" in run.stderr:  # invalid front matter stops vale, and it prints its error here
+            result = run_json(args + ["--ext=.md"], register.blank_front_matter(path.read_text(encoding="utf-8")))
+        else:
+            result = json.loads(run.stdout) if run.stdout.strip() else None
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return []
     try:
         return [{"line": a["Line"], "ruleId": a["Check"], "message": a["Message"]}
                 for alerts in (result or {}).values() for a in alerts]

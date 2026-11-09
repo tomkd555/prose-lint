@@ -16,9 +16,10 @@ and each hit carries it: `[Rewrite]` or `[Read in context]`, for example.
 A CSV headed Pattern,Instead,Except holds plain words: Pattern lists words
 split by 、, each matched literally and without regard to case; a word that
 starts or ends with a Latin letter matches as a whole word. Except may open
-with the flags chat (the hooks leave the row out of replies) and quote (a hit
-inside 「」, “” or "" or on a > line is dropped), each followed by a space; the
-rest is shown with each hit as the exception. A CSV saved in the Windows-31J code page also reads.
+with the flags chat (the hooks leave the row out of replies), quote (a hit
+inside 「」, “” or "" or on a > line is dropped) and solo (a hit next to a kanji
+or a katakana word is dropped), each followed by a space; the rest is shown
+with each hit as the exception. A CSV saved in the Windows-31J code page also reads.
 
 Fenced code blocks are skipped. Consecutive lines of a paragraph are joined
 before matching, because hard-wrapped Japanese puts a line break inside a word;
@@ -31,6 +32,10 @@ pattern does not compile is reported on stderr.
 
 Usage:
     uv run register.py [--register <vocabulary.md> | --academic | --translationese | --slop] [--json] <file>
+    uv run register.py --blank-front-matter <file>
+
+--blank-front-matter prints the file with its front matter as blank lines, for vale, which
+stops on front matter whose YAML is invalid; the other lines keep their numbers.
 
 The register is --register, else $PROSE_LINT_REGISTER, else
 vocabulary.md in $PROSE_LINT_HOME or ~/.prose-lint, else assets/vocabulary.sample.md next to this script.
@@ -137,13 +142,15 @@ def load_entries(text: str) -> list[dict]:
             continue
         why, flags = cells[2], []
         if words:
-            while m := regex.match(r"\s*(chat|quote)(?:\s+|$)", why):
+            while m := regex.match(r"\s*(chat|quote|solo)(?:\s+|$)", why):
                 flags.append(m.group(1))
                 why = why[m.end():]
             why = f"exception: {why.strip()}" if why.strip() else ""
         source = word_pattern(cells[0]) if words else regex.sub(r"\\([pP])\{Is", r"\\\1{In", cells[0])
         if not source:
             continue
+        if "solo" in flags:
+            source = f"(?<![\\p{{Han}}\\p{{Katakana}}ー]){source}(?![\\p{{Han}}\\p{{Katakana}}ー])"
         try:
             rx = regex.compile(source)
         except regex.error as exc:
@@ -273,6 +280,18 @@ def units(content: str, fmt: str = "md", normalize: bool = False):
     return out, quoted
 
 
+def blank_front_matter(content: str) -> str:
+    """Return content with a leading --- block as blank lines, so the other lines keep their numbers."""
+    lines = content.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return content
+    for i, line in enumerate(lines[1:], 1):
+        if line.strip() == "---":
+            blank = [line[len(line.rstrip("\r\n")):] for line in lines[:i + 1]]
+            return "".join(blank + lines[i + 1:])
+    return content
+
+
 def find_hits(content: str, entries: list[dict], fmt: str = "md") -> list[dict]:
     """Match the entries; fmt is "md" (Markdown and plain text) or "html"."""
     passes = []
@@ -307,7 +326,15 @@ def main() -> int:
     group.add_argument("--translationese", action="store_true", help="read the translationese register")
     group.add_argument("--slop", action="store_true", help="read the stop-ai-slop-jp register")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--blank-front-matter", action="store_true", help="print the file with its front matter blank")
     args = ap.parse_args()
+    if args.blank_front_matter:
+        try:
+            sys.stdout.write(blank_front_matter(Path(args.file).read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        return 0
     kind = ("academic" if args.academic else "translationese" if args.translationese
             else "slop" if args.slop else "general")
     reg = args.register or default_register(kind)
