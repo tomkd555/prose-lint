@@ -1,0 +1,9 @@
+# The mass noun where English uses the verb: "this is inference" for "we infer".
+# "is an inference" is sound English and stays out.
+extends: existence
+message: "'%s' uses the noun; write 'we infer that ...'."
+level: warning
+ignorecase: true
+nonword: true
+tokens:
+  - '\bis inference\b'

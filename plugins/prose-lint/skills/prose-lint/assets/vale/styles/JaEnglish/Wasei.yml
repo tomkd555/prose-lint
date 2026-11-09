@@ -1,0 +1,8 @@
+# English words that Japanese business usage gives a sense English lacks. A hearing
+# before a court or the public, and hearing as the sense, stay out.
+extends: substitution
+message: "'%[2]s' is the Japanese sense of this word; use '%[1]s'."
+level: warning
+ignorecase: true
+swap:
+  '(?<!public )(?<!court )(?<!congressional )(?<!committee )(?<!senate )(?<!of )hearings?(?! (?:loss|aids?|tests?|impair\w*|range|before))': client interview

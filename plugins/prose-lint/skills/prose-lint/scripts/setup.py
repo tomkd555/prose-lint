@@ -8,7 +8,7 @@ packages, and copies the sample registers to vocabulary.md, academic.md,
 translationese.md and slop.md unless they are already there. The directory
 sits outside the plugin, so an update of the plugin keeps it; a register that
 differs from the shipped sample is named so the new rows can be merged. Safe to run again: package.json, the prh rule file, the fukushi dictionary
-and the AISigns vale style are refreshed, while a config file already in place (.textlintrc*.json,
+and the AISigns and JaEnglish vale styles are refreshed, while a config file already in place (.textlintrc*.json,
 .vale.ini) is kept as edited.
 
 When vale or npm is not on PATH, the pinned release below is downloaded from
