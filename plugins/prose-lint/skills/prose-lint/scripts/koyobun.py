@@ -143,6 +143,10 @@ FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})(.*)$")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 JAPANESE_RE = re.compile(r"[ぁ-ゟ゠-ヿ一-鿿々]")
 SLIDE_RE = re.compile(r"^## Slide \d+$")
+# What can follow a sentence's predicate: a citation, a parenthesis, a note mark
+# (「と呼ぶ[1]」「という説である（同等説）[2]」「できた1）」). The predicate before it
+# decides whether the sentence ends in a noun.
+TAIL_NOTE_RE = re.compile(r"(?:\s*(?:\[[\d,\s\-–〜~]+\]|［[^［］]*］|（[^（）]*）|\([^()]*\)|(?<=[ぁ-ゖ])\d+）))+\s*$")
 
 
 def _pos(m) -> tuple:
@@ -240,7 +244,14 @@ def _findings_for(sentence, line: int, raw: str, ms: list) -> list[dict]:
 
     # nominal ending: the last content morpheme is a noun and the sentence is
     # closed (a 。, or the last line of its paragraph). A hard-wrapped line that
-    # ends mid-sentence has neither and is skipped.
+    # ends mid-sentence has neither and is skipped. A citation or a parenthesis
+    # after the predicate is set aside first.
+    text = "".join(m.surface() for m in ms)
+    core = TAIL_NOTE_RE.sub("", text)
+    if core != text and core.strip():
+        from sudachipy import SplitMode
+
+        body = strip_trailing_symbols(list(get_tokenizer().tokenize(core, SplitMode.C))) or body
     last = body[-1]
     has_letters = re.search(r"[一-鿿々ぁ-ゖァ-ヺA-Za-z0-9]", last.surface())  # emoji tag as 名詞
     if _pos(last)[0] in {"名詞", "代名詞"} and has_letters and sentence["closed"]:

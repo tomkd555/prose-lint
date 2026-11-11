@@ -13,6 +13,8 @@ lines the tool changed (the whole file for a new one). A source file (.py, .ps1,
 hold Japanese, which sits in its comments and strings. A textlint finding of the
 blocking tier or a register hit returns decision=block; advisory and vale
 findings alone go to Claude as additionalContext and leave the write in place.
+A new Japanese Markdown or text file also runs scripts/flow.py, and a file it
+marks flat gets a note in the same way, which never blocks.
 A counter per file stops reporting a set of findings after it has blocked 3
 times in a row. A file in a folder named claude-reply is a reply draft: the
 register rows flagged chat stay out, as they do for replies.
@@ -69,7 +71,7 @@ CONFIRM = re.compile("|".join(CONFIRM_MARKS), re.IGNORECASE)
 
 # The last segment of a textlint rule id, so preset prefixes do not matter.
 JA_BLOCKING = {
-    "ja-no-weak-phrase", "ja-no-redundant-expression", "ja-no-abusage", "ja-no-successive-word",
+    "ja-no-redundant-expression", "ja-no-abusage", "ja-no-successive-word",
     "no-doubled-conjunctive-particle-ga", "no-double-negative-ja", "no-dropping-the-ra",
     "no-dropping-i", "no-insert-dropping-sa", "no-filler", "no-mix-dearu-desumasu",
     "prefer-tari-tari", "ja-keishikimeishi", "ja-hiragana-hojodoushi", "ja-hiragana-daimeishi",
@@ -78,7 +80,7 @@ JA_BLOCKING = {
 JA_ADVISORY = {
     "no-doubled-joshi", "no-doubled-conjunction", "sentence-length", "max-ten",
     "max-kanji-continuous-len", "no-ai-hype-expressions", "ai-tech-writing-guideline",
-    "no-ai-words", "no-synonyms",
+    "no-ai-words", "no-synonyms", "ja-no-weak-phrase",
 }
 # A line ending in one of these ends its sentence, so the next line starts a new one.
 SENTENCE_END = ("。", "．", ".", "!", "?", "！", "？", ">", "|")
@@ -173,6 +175,20 @@ def vale(path: Path) -> list[dict]:
                 for alerts in (result or {}).values() for a in alerts]
     except (KeyError, TypeError, AttributeError):
         return []
+
+
+def flat_profile(path: Path):
+    """Return flow.py's profile of a Japanese file when it marks the file flat, else None."""
+    uv = shutil.which("uv")
+    script = ROOT / "skills" / "prose-lint" / "scripts" / "flow.py"
+    if not (uv and script.is_file()):
+        return None
+    result = run_json([uv, "run", "-q", "--no-project", str(script), "--json", str(path)])
+    try:
+        profile = result["profile"]
+        return profile if profile.get("flat") else None
+    except (KeyError, TypeError, AttributeError):
+        return None
 
 
 def register_hits(text: str, fmt: str = "md", chat: bool = False) -> list[dict]:
@@ -289,12 +305,15 @@ def lint_file(data: dict) -> int:
     if suffix in CODE:  # identifiers are ASCII: the register's Japanese hits fall in comments and strings
         hits = [h for h in hits if JAPANESE.search(h["matched"])]
         blocking, advisory, notation = [], [], 0
+        flat = None
     else:
         # Routed on the running text: markup, styles and code fences hold no hiragana.
         lang = prose_lang(content) if fmt == "md" else lang_of(" ".join(t for t, _ in register.units(content, fmt)[0]))
         blocking, advisory, notation = tiers(textlint(path, lang), lang)
         if lang == "en":
             advisory += vale(path)
+        # Read once, when the file is new: an Edit changes a few lines of a document already read.
+        flat = flat_profile(path) if lang == "ja" and fmt == "md" and lines is None else None
     if lines is not None:
         blocking, advisory, hits = ([f for f in found if f.get("line") in lines] for found in (blocking, advisory, hits))
         notation = 0
@@ -304,7 +323,7 @@ def lint_file(data: dict) -> int:
     counter = (state_dir() or Path(tempfile.gettempdir())) / f"block-{session_id(data)}-{key}"
     if not has_block:
         counter.unlink(missing_ok=True)
-        if not advisory:
+        if not (advisory or flat):
             return 0
     else:
         # The loop guard counts blocks on the same findings: a new finding is reported afresh.
@@ -334,6 +353,15 @@ def lint_file(data: dict) -> int:
         out += textlint_lines(advisory)
     if notation:
         out.append(f"{notation} notation finding(s) were also reported; leave them alone.")
+    if blocking or hits or advisory:
+        out.append("Rewrite the sentence a finding sits in, and keep what the sentence did: how sure it is, the "
+                   "reason or the contrast it carried, and its tie to the sentences around it. Add no fact.")
+    if flat:
+        out.append(f'flow.py reads this file as flat: {flat["lone_pct"]} % of its body sentences join nothing around '
+                   f'them, and a sentence holds {flat["joints_per_sentence"]} clause joints. Reread it by paragraph. Join '
+                   "sentences whose cause, contrast or condition the text already states, and end each sentence by "
+                   "what it is: a fact, its reason, a judgement, a request. Add no fact, and leave a list of steps or "
+                   "of measured values as it is. This does not block.")
     if has_block:
         out.append(f"If a finding cannot be followed, state the reason and let the user decide. After "
                    f"{MAX_BLOCKS} blocks in a row on the same findings, the hook stops reporting them.")
