@@ -96,7 +96,12 @@ established loanwords:
 〔公用文〕 Ⅱ-3. Rewrite in `business` and `paper`: the field's term in the
 form the field writes it, katakana included. In `official` and `article`, use
 the term the reader knows; where the reader may not, write the 建議's paraphrase
-or the term with a short gloss.
+or the term with a short gloss. The failure runs both ways (section 4,
+"Business documents"). A draft wrote 利用者 for the ユーザー of a company's
+notice, 内容 for コンテンツ and 遮断されず for ブロックされず; another wrote
+トランスペアレント five times where the press release has 透過的. The test is
+the same for both: the word the document already uses, and failing that the
+word documents of the reader's field use.
 
 **`katakana`** - a katakana word where an established Japanese word says the
 same to this reader. The 建議 decides case by case: 「外来語は、語の性質や使う
@@ -108,7 +113,31 @@ same to this reader. The 建議 decides case by case: 「外来語は、語の�
 paragraph 「実際には、よほど不自然でなければカタカナ語で良しとすることもある」.
 The post follows a past translation's wording and the katakana a client
 specifies, and weighs 「一般的に使われている言葉か専門分野の用語か」〔インターブックス〕.
-Rule by the style's reader (section 5, D5).
+Rule by the style's reader (section 5, D5). In `business` and `paper` this
+marker is for a katakana word the reader's field does not use. A word business
+documents share is no finding and no rewrite turns it into a 漢語: 43 business
+documents of 2021 hold 35 katakana words to 1,000 characters at the median,
+and データ, サービス, システム, チーム, メンバー, ユーザー, ソフトウェア,
+セキュリティ, アプリ, サイト, ビジネス, オンライン, サポート, コスト and ニーズ
+each stand in six of them or more (section 4).
+
+**`figure`** - a plain verb or noun used as a figure for a technical or
+business act for which the field has its own word. A design note Claude wrote
+from a brief says 「キャッシュに当たらないクエリ」 for a cache miss beside its
+own ヒット率, 「2で拾えないもの」 for cases a step fails to catch, and
+「既存Redisに同居できます」 for sharing a server. Test: read the word in its
+dictionary sense; when that sense is of bodies and places and the sentence is
+about a system or a plan, ask what the field calls the act. Rewrite with the
+field's word (ヒットしない, 検知できない, 共用できる). A figure the field itself
+has fixed stays: 踏み台 in a security alert, 切り戻す in an operations report.
+The `no-ai-words` rule of textlint lists some of these verbs.
+
+**`bare-kanji`** - a 漢語 of one kanji standing as a word of its own where the
+reader's documents write the fuller word: 語 for 言葉, 単語 or 用語. In the 43
+business documents no sentence uses 語 alone, and the one-kanji nouns that do
+stand alone are everyday words (声, 場, 形, 今, 例, 別). Rewrite with the word
+the reader's documents use. A unit, a counter and a term the document's field
+writes that way (値 in a table of settings) stay.
 
 **`comparative`** - より with an adjective and no object of comparison:
 「「より大きい」「より悪い」というのは発明された翻訳調なので日本語としては不自然
@@ -442,6 +471,36 @@ Notes on the counts:
   documents (システムに存在するすべてのドキュメント among them), so it stops at
   a kanji or katakana noun.
 
+### Business documents (1.12.0)
+
+43 documents that companies and JPCERT/CC put out in 2021 (30 press releases,
+8 posts of an engineering blog, 5 security alerts; 1,291 sentences), fetched
+on 2026-11-11 and listed in `flow-japanese.md`, section 5. Six were reduced to
+notes in English and Claude wrote each again in Japanese from its notes; five
+more documents were written from a brief of three lines. `flow-japanese.md`,
+sections 1 and 4.5, has the method and the tables.
+
+- **Katakana.** The 43 hold 34.6 katakana words to 1,000 characters at the
+  median (37.5 in the press releases, 25.1 in the blog posts). Each of the six
+  drafts holds fewer than its original, 31.1 against 29.3 at the median. The
+  words that went: ユーザー (four times, to 利用者), コンテンツ (four times, to
+  内容 and 題材), ブロック (to 遮断), ポイント (to 点), コスト and ケース.
+- **The surface forms.** The business writers use the forms this reference
+  names more than the drafts do. To 1,000 characters the 43 documents hold
+  において 1.18 times, によって or により 0.94, を行う 0.86, ことができる 0.79
+  and を可能にする 0.09; in the six pairs において stands 0.92 times in the
+  originals and 0.07 in the drafts, を行う 1.21 and 0.41. So a count of these
+  forms does not tell a draft from a person's text, as section 1 says of the
+  83 documents. What a reading found in the drafts was of the `sense`,
+  `field-term`, `have` and `figure` kinds: サービス提供者 for サービス事業者,
+  「侵害された正規のサイト」, 「攻撃者の目的は、…ことです。」, 「対応表をRedisに
+  持ちます」.
+- **One-kanji nouns.** Standing alone they come 1.7 times to 1,000 characters
+  in the 43 documents, and the six drafts hold more than their originals in
+  three pairs and fewer in three. The count separates nothing; the marker
+  `bare-kanji` is for the single words a reader of business documents never
+  meets alone.
+
 ## 5. Where the sources disagree
 
 - **D1 Passive.** The software guides turn an inanimate subject into a
@@ -476,7 +535,10 @@ Notes on the counts:
   added explanation, and the term kept as it is where its spread is wanted
   〔公用文〕 Ⅱ-2. インターブックス uses the katakana a client specifies. Ruling: the reader the style names
   decides; an engineer reads the field's katakana, a general reader the
-  建議's paraphrase.
+  建議's paraphrase. A business reader reads katakana as a matter of course
+  (section 4, "Business documents"), so in `business` the word the document
+  has stays, and a rewrite neither turns it into a 漢語 nor into a fresh
+  transliteration.
 - **D6 Dash.** Microsoft and Red Hat avoid it in Japanese; human writers keep
   it in published titles and in some essays (section 4). Ruling: a quoted
   title keeps its dash; elsewhere rewrite it, and in `article` rule by the
