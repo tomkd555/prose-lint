@@ -17,9 +17,10 @@ between the text as it was and the text as it stands.
     uv run flow.py [--before <original>] [--json] <file>
 
 Per body sentence (headings, tables, quotes and code are masked, as in
-koyobun.py). A list item that holds two or more sentences is running text and
-is read as a paragraph of its own, without a label in bold at its head; an item
-of one sentence or a phrase stays masked. A deck extract's `- ` items are read
+koyobun.py). A list item is running text when it holds two or more sentences,
+or one sentence of 60 characters or more, which is what two short sentences
+become once joined; it is read as a paragraph of its own, without a label in
+bold at its head. A shorter item, or a phrase, stays masked. A deck extract's `- ` items are read
 as body text:
 
     ending   the class of the final predicate:
@@ -89,6 +90,7 @@ from koyobun import (  # noqa: E402
 )
 
 RUN = 3  # sentences in a row that make a run
+ITEM_SENTENCE_CHARS = 60  # a one-sentence list item this long is read as prose
 LIST_ITEM_RE = re.compile(r"^(\s*)(?:[-*+]|\d+[.)])\s+(?:\*\*[^*]+\*\*[:：]?\s*)?")
 # Below these, a document is too short to call flat, and its figures say little.
 FLAT_MIN_SENTENCES = 12
@@ -183,13 +185,15 @@ def read_sentences(text: str) -> list[dict]:
     text = re.sub(r"(?<=[ぁ-ゖァ-ヺ一-鿿々）」\])])．", "。", text)
     deck = any(koyobun.SLIDE_RE.match(x) for x in text.split("\n"))
     body_text = re.sub(r"^- ", "", text, flags=re.MULTILINE) if deck else text
-    # A list item of two or more sentences is prose: drop its marker so the mask keeps the line.
+    # A list item of two or more sentences, or of one long sentence, is prose: drop its marker so
+    # the mask keeps the line.
     rows, items, fence = body_text.split("\n"), set(), False
     for i, row in enumerate(rows):
         if koyobun.FENCE_RE.match(row):
             fence = not fence
         m = None if fence else LIST_ITEM_RE.match(row)
-        if m and len(re.findall(r"[。！？]", row[m.end():])) >= 2:
+        ends = 0 if not m else len(re.findall(r"[。！？]", row[m.end():]))
+        if m and (ends >= 2 or (ends == 1 and len(re.sub(r"\s", "", row[m.end():])) >= ITEM_SENTENCE_CHARS)):
             rows[i] = row[m.end():]
             items.add(i + 1)
     body_text = "\n".join(rows)

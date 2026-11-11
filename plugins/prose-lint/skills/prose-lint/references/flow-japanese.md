@@ -257,7 +257,7 @@ What follows for a rewrite:
 
 Asked of every paragraph of two or more sentences of running text. A list
 item that holds two or more sentences is such a paragraph; an item of one
-sentence or a phrase, a table, a quotation and code stay out. Each has a YES or NO answer, and a YES is
+short sentence or a phrase, a table, a quotation and code stay out. Each has a YES or NO answer, and a YES is
 a finding, reported with the line the paragraph starts on, its first sentence
 and the whole paragraph rewritten. A rewrite uses only what the paragraph and
 its neighbours already say. Where the fix would need something the text lacks,
@@ -266,10 +266,11 @@ translationese reference, this section quotes no defect.
 
 **`flow-join`** - Read each sentence with the one before it and say how the
 two are related: cause, result, contrast, example, addition, order in time.
-Answer YES when the relation is plain from the content and no word in either
-sentence states it, for two or more pairs in the paragraph. Rewrite by joining
-the pair in one sentence or by opening the second with the word for the
-relation.
+Answer YES for each pair whose relation is plain from the content while no
+word in either sentence states it. Rewrite by joining the pair in one sentence
+or by opening the second with the word for the relation. A paragraph need not
+have every pair joined: section 2.2 gives how seldom a sentence opens with a
+connective.
 
 **`flow-ending`** - Name what each sentence does: reports a fact, gives a
 reason, judges, asks or advises, limits. Answer YES when three or more

@@ -620,8 +620,9 @@ prose-lint-run uv run {SKILL_DIR}/scripts/flow.py <file>
 
 For a deck, `<file>` is `<tmp>/deck.md`. This layer counts what the others
 leave out of the ledger: how the body sentences end, how they join, and how
-their lengths vary. A list item that holds two or more sentences is read as a
-paragraph; the other layers mask it. `{SKILL_DIR}/references/flow-japanese.md` gives the
+their lengths vary. A list item that holds two or more sentences, or one
+sentence of 60 characters or more, is read as a paragraph; the other layers
+mask it. `{SKILL_DIR}/references/flow-japanese.md` gives the
 grounds and the measurements. The script prints a profile and two kinds of
 passage:
 
@@ -659,7 +660,10 @@ A tie is added only where the text fixes the relation, in the clause form
 first (が, ので, ため, と) and as an opening word second. natural-japanese's
 guide forbids adding しかし and そのため between sentences; where the two meet,
 section 3 of the reference says how this layer rules, and the report lists
-every tie a fix added.
+every tie a fix added. A が or a ので that a flow fix writes shows up in the
+second pass as `ga_conjunction`, and a joined sentence can pass 90
+characters; each is kept under those rules as a contrast, or as a sentence
+that reads in one pass.
 
 ### Academic mode
 
@@ -730,7 +734,8 @@ Review the text from the read that settled the style in Step 2, for the
 points that need a reader: each paragraph serves the document's purpose, terms
 stay the same from start to end, and the conclusion comes first. A term is a
 word the field or the document defines. Where the document writes one term
-two ways, the form it uses more often stays.
+two ways, the form it uses more often stays; the style's word column governs
+the words a rewrite brings in.
 
 In academic mode, read also for the points of the reference's sections 1.3 to
 1.6 and 2 that need a reader:
