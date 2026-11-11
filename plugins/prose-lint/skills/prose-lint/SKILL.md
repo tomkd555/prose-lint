@@ -162,9 +162,10 @@ layers flagged 45 of the 74 sentences in this skill's own exemplar passages,
 plugin's hooks held 0.41 clause joints a sentence, where the human-written
 documents measured hold 0.75 to 1.63. And the naturalness score read 96.9 on a
 memo whose sentences ran 31 characters on average. So a ruling of "fix" means
-this: take the wording out and keep the job, as "Writing a fix" sets out. A hit
-on a sentence that reads well and does its job is kept, with that as the
-reason.
+this: take the wording out and keep the job, as "Writing a fix" sets out.
+Where a layer leaves a hit to judgement, a sentence that reads well and does
+its job is kept, with that as the reason. Where a layer says a hit is fixed
+or rewritten, that ruling stands, and the fix keeps the job.
 
 ### The reader
 
@@ -1072,7 +1073,8 @@ rendering.
   reader's five-axis score out of 50; stop-ai-slop-jp calls for a rewrite
   under 35. End with the second run's resolved / new / persisting counts,
   the figures `flow.py --before` marked `flatter` with what was corrected or
-  why each stays, the count of body sentences changed out of the total, and
+  why each stays, the count of body sentences changed out of the total by
+  `flow.py`'s count, and
   what the second read of the rewrites returned. A score alone says nothing
   about the register hits, so it never replaces the ledger.
 - For English, open with the style line, then one line: the count of ai-tells, `AISigns.Chatbot`
