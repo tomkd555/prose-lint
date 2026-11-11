@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide, a review article, an incident report and award-winning papers); a flow check that counts how the sentences end and join, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is and how it ties to the next; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a 通知, a council report, a white paper, a government technical guide, a review article, two incident reports and award-winning papers); a flow check that counts how the sentences end, join, open and vary in length, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is, how it ties to the next and how much it holds; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -125,13 +125,14 @@ The `article` and `slides` styles also run the stop-ai-slop-jp layer in Step
 3a.
 
 `{SKILL_DIR}/references/exemplars-japanese.md` quotes present-day Japanese
-that institutions and award committees hold up as well written: 公用文 for
-`official`, a council report, a government technical guide, a review
-article and an incident report for `business`, award-winning papers for
+that institutions and award committees hold up as well written: 公用文 and a
+通知 for `official`, a council report, a white paper, a government technical
+guide, a review article and two incident reports for `business`, award-winning papers for
 `academic`, and writing for the general public for `article`, and the
-business or public group for `slides`. Passages 2.4, 2.5, 4.3 and 4.4 show a
+business or public group for `slides`. Passages 2.4 to 2.7, 4.3 and 4.4 show a
 writer weighing a choice or a cause, with the endings and the joins that
-carry it. Its section 0 names the groups each style reads. Each passage names its source and the features to take from it.
+carry it; 2.6 grades certainty by a scale the report states, and 1.4 is the
+preamble of a 通知, each paragraph opening from the one before. Its section 0 names the groups each style reads. Each passage names its source and the features to take from it.
 
 A sentence off the style's 文体 is a finding. In `paper` a です・ます sentence
 gets rewritten; in the others the minority 文体 does, unless a quotation or a
@@ -167,6 +168,23 @@ Where a layer leaves a hit to judgement, a sentence that reads well and does
 its job is kept, with that as the reason. Where a layer says a hit is fixed
 or rewritten, that ruling stands, and the fix keeps the job.
 
+Three more measurements, for 1.12.0, are in sections 1 and 4 of the same
+reference. Eight documents of ministries and public bodies were reduced to
+notes and Claude wrote each again from its notes with no rule in force. The
+drafts hold a third more sentences, 46 characters long at the median against
+the originals' 66, with 1.09 clause joints against 1.73. They open a sentence
+on a topic of its own twice as often (32 % against 17 %), and next to none of
+their sentences reach 100 characters, where 15 % of the originals' do. The
+mechanical layers then flag the originals more than the drafts: 2.02 hits a
+sentence against 1.01, and `sentence-length`, `max-ten`, `clause_chain`,
+`comma_chain` and `ga_conjunction` each fire about two to six times as often on the
+human side. Over 35 such documents, 79 % of 2,513 sentences drew a hit. So
+under those five rules a hit names a place to read and the ruling starts from
+"stays": the sentence is split or its が cut only where the reading finds the
+topic changing part-way or the reader losing the thread, as each rule's
+entry below says. A count of hits cleared says nothing about how the text
+reads.
+
 ### The reader
 
 The other layers match surface forms. The translationese they leave lies in
@@ -187,7 +205,8 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
   its subject by no word or leaves out the result its text states, every
   table header that needs another header or a cell to name its column, and
   every paragraph whose sentences stand side by side with nothing to join
-  them, and propose a rewrite for each;
+  them, each on a topic of its own, or cut so that two of them make one
+  statement, and propose a rewrite for each;
 - the document's absolute path and the style line from Step 2;
 - the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
   with "read it first, answer the questions of its section 3.4 for every
@@ -619,8 +638,8 @@ prose-lint-run uv run {SKILL_DIR}/scripts/flow.py <file>
 ```
 
 For a deck, `<file>` is `<tmp>/deck.md`. This layer counts what the others
-leave out of the ledger: how the body sentences end, how they join, and how
-their lengths vary. A list item that holds two or more sentences, or one
+leave out of the ledger: how the body sentences end, how they join, how they
+open, and how their lengths vary. A list item that holds two or more sentences, or one
 sentence of 60 characters or more, is read as a paragraph; the other layers
 mask it. `{SKILL_DIR}/references/flow-japanese.md` gives the
 grounds and the measurements. The script prints a profile and two kinds of
@@ -639,6 +658,19 @@ passage:
   two of them, join them: one sentence with ので, が or と, or an opening
   word (そのため、 しかし、 このうち、). Where the relation is a guess, the
   sentences stay apart and the question goes to the author.
+
+The profile also gives four figures to read against the document's kind, in
+the table of section 4.2 of the reference: the share of sentences of 100
+characters or more and the share under 30, the share that open on a topic of
+their own (a noun with は in the opening clause, with no connective or
+demonstrative before it), and the share that hold a parenthesis. In 35
+documents of ministries and public bodies a sentence in seven runs to 100
+characters at the median, three in ten in the white papers and one in a
+hundred in a magazine for the public; a sentence in six opens on its own
+topic. A document with no long sentence where its kind holds them, or with a
+third of its sentences opening on a topic of their own, is read by paragraph
+for `flow-split` and `flow-open` (reference, section 3), whether or not the
+script lists a run.
 
 The profile's `flat` line marks a document of 12 body sentences or more in
 which 40 % or more of the sentences are lone and a sentence holds 0.6 joints
@@ -765,13 +797,27 @@ paragraph and note three things the rewrite keeps, from section 2 of
   second (このうち、 そのため、 しかし); a stock connective that closed a
   paragraph is cut only where the paragraph still reads as closed;
 - its place in the paragraph: the long sentence that carries the point stays
-  the long one, and a ground stays a clause of the sentence it supports.
+  the long one, and a ground stays a clause of the sentence it supports;
+- how it opens: a sentence that began on a connective, a demonstrative or a
+  scene (こうした中、 これを受け、 令和2年には、) still does. The subject is
+  named only where the reader cannot recover it, and the second half of a
+  split opens on a word that points back, never on a fresh noun with は
+  (section 2.5 of the reference);
+- how much it holds: a thing and what is said of it stay in one sentence. A
+  gloss or a short name in parentheses stays in its parentheses
+  (「罹災証明書（支援を受けるために被災の程度を証明する書類）」 is the 建議's
+  own form), and a concession stays beside the verdict it qualifies (section
+  2.6).
 
 Change what the finding names and leave the other words as they are. A plain
 word that reads well stays; one term per concept applies to terms, and two
 ordinary verbs for one act are no finding. No rewrite, in any layer, brings in
 a fact, a plan, a promise or an opinion the text lacks. Where the fix would
-need one, the sentence stays and the question goes in the report.
+need one, the sentence stays and the question goes in the report. No rewrite
+adds a sentence either: one that announces what the text will do, counts its
+points or sums it up (以下では…, …の三点である, このように…と言える) was not
+in the text, and two of the eight drafts of the 1.12.0 measurement added one
+that their notes never held. The text's own sentences of that kind stay.
 
 Every rewrite, from any layer, is written to the style from Step 2:
 
@@ -812,11 +858,13 @@ prose-lint-run uv run {SKILL_DIR}/scripts/flow.py --before <tmp>/original.md <fi
 ```
 
 It prints each figure for both texts and marks the ones that moved `flatter`:
-more sentences, shorter ones, more plain endings, fewer joints. For each mark,
+more sentences, shorter ones, fewer of 100 characters or more, more plain
+endings, fewer joints, more sentences opening on a topic of their own. For each mark,
 find the rewrites behind it and lay each beside its paragraph in
 `<tmp>/original.md`. A rewrite that dropped a tie, turned a judgement into a
-bare statement, or cut one thought into sentences that end alike is corrected
-in the final pass from the original's own words. A mark that the fixes had to
+bare statement, named a subject the sentence had left to the one before, made
+a gloss into a sentence, or cut one thought into sentences that end alike is
+corrected in the final pass from the original's own words. A mark that the fixes had to
 cause, such as a 190-character sentence split at its change of topic, stays,
 with that reason. The script also lists the `ending_run` and `lone_run`
 passages of the fixed file; rule on those that hold a rewritten sentence.
@@ -827,7 +875,9 @@ first read's items with the scope narrowed: the line ranges of the paragraphs
 that contain a rewritten sentence, the line of each rewritten sentence, "read
 only these ranges, with offset and limit", and "report on the sentences at
 those lines only", and "ask the questions of section 3 of the flow
-reference, `flow-cut` included, of each paragraph in these ranges". Merge
+reference, `flow-cut` included, of each paragraph in these ranges, and
+list each sentence in them that only announces or sums up". A sentence on
+that list which a fix added comes out in the final pass. Merge
 ranges under 10 lines apart; once they cover half the
 file, drop the ranges and let the reader read the file in full. The prompt
 still withholds the original wording and the reason for each change. Rule on
@@ -1085,9 +1135,10 @@ rendering.
   applying them wholesale flattens prose the user wrote deliberately. `textlint
   --fix` is off the table for the same reason.
 - For Japanese, open with the style line, then the naturalness score and its
-  band, then one line from `flow.py`: the mean sentence length, the joints
-  per sentence, the share of plain endings and of lone sentences, and
-  whether the document is marked `flat`. The score counts wordings and reads
+  band, then one line from `flow.py`: the mean sentence length, the share of
+  sentences of 100 characters or more, the joints per sentence, the share
+  of plain endings, of lone sentences and of sentences opening on a topic of
+  their own, and whether the document is marked `flat`. The score counts wordings and reads
   none of this, so a high score beside a `flat` mark means the text is clean
   and reads as a list. In academic mode, add a line under the score: that the run was in
   academic mode and why, and the academic register's hit count before and

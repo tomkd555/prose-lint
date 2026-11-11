@@ -44,7 +44,7 @@ Each passage is quoted as its source prints it. The line breaks of the PDF and
 the spaces that typesetting puts between Latin letters or digits and Japanese
 are removed, and a footnote stays as its own paragraph. （中略） marks a gap
 between two parts of one source. Every source was
-fetched on 2026-10-24, and those of 2.4, 2.5, 4.3 and 4.4 on 2026-11-11; section 5 gives its URL, the reason it was chosen and
+fetched on 2026-10-24, and those of 1.4, 2.4 to 2.7, 4.3 and 4.4 on 2026-11-11; section 5 gives its URL, the reason it was chosen and
 its licence. The key in 〔〕 after each heading names the source.
 
 ## 1. official
@@ -82,6 +82,35 @@ its licence. The key in 〔〕 after each heading names the source.
   大きく損なう, 支払われます), and the phrase becomes a sentence in です・ます.
 - It applies to text for the public in `official` and `article`. A document
   for specialists keeps the noun where it is the field's term.
+
+### 1.4 The preamble of a 通知: how things came about, then the request 〔不登校通知〕
+
+> 不登校児童生徒への支援につきましては，関係者において様々な努力がなされ，児童生徒の社会的自立に向けた支援が行われてきたところですが，不登校児童生徒数は依然として高水準で推移しており，生徒指導上の喫緊の課題となっております。
+>
+> こうした中，「義務教育の段階における普通教育に相当する教育の機会の確保等に関する法律」（以下「法」という。）が平成28年12月14日に公布され，平成29年2月14日に施行されました（ただし，法第4章は公布の日から施行。）。
+>
+> これを受け，文部科学省におきましては，法第7条に基づき，平成29年3月31日，教育機会の確保等に関する施策を総合的に推進するための基本的な指針（以下「基本指針」という。）を策定したところです。
+>
+> （中略）
+>
+> 本通知は，今回の議論のとりまとめの過程等において，過去の不登校施策に関する通知における不登校児童生徒の指導要録上の出席扱いに係る記述について，法や基本指針の趣旨との関係性について誤解を生じるおそれがあるとの指摘があったことから，当該記述を含め，これまでの不登校施策に関する通知について改めて整理し，まとめたものです。文部科学省としては，今回の議論のとりまとめを踏まえ，今後更に施策の充実に取り組むこととしておりますが，貴職におかれましても，教職員研修等を通じ，全ての教職員が法や基本指針の理解を深め，個々の不登校児童生徒の状況に応じた支援等を行うことができるよう努めるとともに，下記により不登校児童生徒に対する教育機会の確保等に関する施策の推進を図っていただくようお願いします。
+
+- Each paragraph opens from the one before: 「こうした中，」, 「これを受け，」.
+  The notice itself becomes the topic, 「本通知は，」, only once the course of
+  events is told.
+- The first sentence grants what has been done before it states the problem:
+  「…支援が行われてきたところですが，…喫緊の課題となっております。」
+- The endings say where each fact stands in the course of events:
+  なっております for the present state, 施行されました for a dated act,
+  策定したところです for the ministry's own step.
+- A short name is fixed in parentheses at first use: （以下「法」という。）,
+  （以下「基本指針」という。）.
+- The reason for the notice is one sentence of about 160 characters
+  (「本通知は，…指摘があったことから，…まとめたものです。」), and the request
+  one of about 180: what the ministry will do (取り組むこととしておりますが),
+  then what it asks of the addressee (貴職におかれましても，…お願いします).
+  Each is one thought, and neither is a sentence to split.
+- The 通知 writes 「，」 as its comma, the 公用文 convention of its time.
 
 ## 2. business
 
@@ -158,6 +187,61 @@ its licence. The key in 〔〕 after each heading names the source.
   「原因は、…ことであり、…等であった」 for the cause it established.
 - The report sets these out as three items marked ○; the mark is left out
   here.
+
+### 2.6 Grading certainty by a stated scale 〔運輸安全2019〕
+
+> ① 断定できる場合・・・「認められる」
+>
+> ② 断定できないが、ほぼ間違いない場合・・・「推定される」
+>
+> ③ 可能性が高い場合・・・「考えられる」
+>
+> ④ 可能性がある場合・・・「可能性が考えられる」「可能性があると考えられる」
+>
+> （中略）
+>
+> 2.1(3)に示した運転状況記録装置の記録及び2.1(4)に記述した映像記録装置の記録から、本件歩行者は、本件列車が接近している状況において、本件踏切の右側から本件踏切に進入し、本件踏切中央付近で本件列車と衝突したものと認められる。運転士が本件歩行者の本件踏切への進入を認めたときの本件列車の速度は約５３km/h、本件列車と本件歩行者との衝突時刻は１６時１０分ごろと推定される。
+>
+> 本件列車の運転士は、本件歩行者の本件踏切への進入を認めて直ちに非常ブレーキを操作したが、2.1(3)に記述したように、これは本件列車が本件踏切に到達する約２秒前であり、本件列車と本件歩行者との衝突を回避することはできなかったものと認められる。
+>
+> 2.7(1)に記述したように、本件踏切右側入口付近における上り列車の見通しは確保されていたと考えられること、また、2.1(4)に記述したように、本件踏切の元善光寺駅方２２ｍに位置する座光寺踏切道の踏切警報機は正常に動作していたと認められることから、本件歩行者は本件踏切に進入する前に本件列車の接近に気付くことができる状況にあったと考えられる。
+>
+> しかし、本件踏切に列車が接近している状況において本件歩行者が本件踏切に進入した理由については、本件歩行者が死亡していることから、明らかにすることはできなかった。
+
+- The report sets its four grades out before the body, and the analysis keeps
+  to them: 認められる for what the recorder and the camera show, 推定される
+  for the time of the collision, 考えられる for what the pedestrian could have
+  seen.
+- The grounds come first in each sentence, by the section that holds them:
+  「2.1(3)に示した…記録から、」, 「…と考えられること、また、…と認められる
+  ことから、」.
+- What the investigation could not find is said as such, with its reason:
+  「…理由については、本件歩行者が死亡していることから、明らかにすることは
+  できなかった。」 The sentence ends on a negative and it is the finding.
+- Each sentence is long because it holds its evidence. 認められる, 推定される
+  and 考えられる are the scale's own words, so a `passive` hit on them stays.
+- The scale is printed as a list; the line breaks of the PDF are closed up
+  here.
+
+### 2.7 Weighing what worked and what did not 〔情通白書2021〕
+
+> 政府や地方公共団体は、市民へ迅速な経済的支援を実施するため、また地域での感染状況やそのリスクの把握のため、デジタル技術を活用した様々な取組を行った。
+>
+> こうした取組は、これまでの電子政府・電子自治体における基盤整備の成果、また新しい開発手法導入の象徴的なユースケースとして評価される面も多かった一方で、制度やルール、慣習等による制約や、調達及びプロジェクトマネジメントにおける課題等が顕在化することにもなった。
+>
+> （中略）
+>
+> 特別定額給付金について、マイナポータルを利用した申請を可能としたことで、これを利用した場合には、前回の定額給付金の交付時（2009年）に比して、申請の受付が開始されるまでの期間や、申請に要する時間は大幅に短縮された。一方で、申請だけでなく給付に至るまでの手続全体のデジタル化、マイナンバーの活用に係る制度的制約、マイナンバーカードの普及等の課題がある。また、デジタル対応が可能となっているにもかかわらず、実運用するための準備不足や、対面・書面を前提とした行政運営により、デジタルが活用されず、迅速な給付等に支障が出たケースもある。
+
+- The verdict has two sides and one sentence holds both:
+  「…評価される面も多かった一方で、…課題等が顕在化することにもなった。」
+- The second and third paragraphs open from what came before: 「こうした
+  取組は、」, 「一方で、」, 「また、」.
+- A result comes with the condition and the comparison that give it its size:
+  「これを利用した場合には、前回の定額給付金の交付時（2009年）に比して、」.
+- 「…にもかかわらず、…ケースもある。」 grants what was ready before saying
+  where it failed, and も keeps the claim to some cases.
+- The footnote mark after 特別定額給付金 is left out.
 
 ## 3. academic
 
@@ -290,6 +374,10 @@ its licence. The key in 〔〕 after each heading names the source.
 | COCOA報告 | COCOA不具合調査・再発防止策検討チーム（厚生労働省）「接触確認アプリ「COCOA」の不具合の発生経緯の調査と再発防止の検討について」, ４（４）まとめ, p. 37 | 2021-04 | https://www.mhlw.go.jp/content/000769774.pdf | an incident report that weighs causes and says how sure it is of each | 厚生労働省 site terms: 公共データ利用規約（第1.0版） |
 | ぶんかる007 | 文化庁国語課「「やぶさかでない」と，ためらい」文化庁広報誌ぶんかる 連載「言葉のQ&A」007 | 2015-07-02 | https://www.bunka.go.jp/prmagazine/rensai/kotoba/kotoba_007.html | a column for the public by the office that drafted the 建議, written before generated text | as 建議 |
 | ぶんかる004 | 文化庁国語課「「耳ざわり」は「障り」か「触り」か」the same series, 004 | 2014-10-30 | https://www.bunka.go.jp/prmagazine/rensai/kotoba/kotoba_004.html | as ぶんかる007 | as 建議 |
+
+| 不登校通知 | 文部科学省初等中等教育局長「不登校児童生徒への支援の在り方について（通知）」（元文科初第698号）, 前文 | 2019-10-25 | https://www.mext.go.jp/a_menu/shotou/seitoshidou/1422155.htm | a 通知 as a ministry sends it to boards of education: the form `official` names first, which group 1 lacked | 文部科学省ウェブサイト利用規約: 公共データ利用規約（第1.0版） |
+| 運輸安全2019 | 運輸安全委員会「鉄道事故調査報告書 RA2019-2 Ⅰ 東海旅客鉄道株式会社 飯田線 元善光寺駅～伊那上郷駅間 踏切障害事故」, the note on terms before the body and ３ 分析 (1), (2) | 2019-03-28 | https://www.mlit.go.jp/jtsb/railway/rep-acci/RA2019-2-1.pdf | a report that states its scale of certainty and writes to it | 国土交通省 site terms: 公共データ利用規約（第1.0版） |
+| 情通白書2021 | 総務省「令和3年版 情報通信白書」第1部「コロナ禍における行政のデジタル活用の成果と課題」, the opening and （ア）特別定額給付金 | 2021-07 | https://www.soumu.go.jp/johotsusintokei/whitepaper/ja/r03/html/nd122110.html | a white paper weighing its own government's results against what went wrong | 総務省 site terms: 公共データ利用規約（第1.0版） |
 
 ※ Attribution for each source is the row's work, publisher and URL, and the
 passages above are excerpts of them.

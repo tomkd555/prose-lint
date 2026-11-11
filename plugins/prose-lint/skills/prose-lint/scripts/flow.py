@@ -38,17 +38,26 @@ as body text:
              demonstrative (この, その, これ, それ, こうした)
     joints   接続助詞 and 連用中止 inside the sentence, counted as koyobun.py counts them
     lone     no opener, no joint and no demonstrative: a sentence tied to nothing around it
+    topic    the sentence opens on a topic of its own: no opener, and a noun with は inside its first
+             clause (up to the first 読点). では, には and their kin set a scene and stay out
+    paren    the sentence holds a parenthesis: a gloss, a short name or a source kept inside it
 
 The profile gives, over the body sentences: their count, mean length and its
-coefficient of variation; the share of each ending class; the share that are
-lone; the share with an opener; joints per sentence; and the longest run of one
-form. A document of 12 body sentences or more is marked `flat` when 40 % of them
-or more are lone and a sentence holds 0.6 joints or fewer. Measured for 1.11.0:
+coefficient of variation; the share of 100 characters or more and the share
+under 30; the share of each ending class; the share that are lone; the share
+with an opener; the share that open on a topic of their own; the share that
+hold a parenthesis; joints per sentence; and the longest run of one form. A
+document of 12 body sentences or more is marked `flat` when 40 % of them or
+more are lone and a sentence holds 0.6 joints or fewer. Measured for 1.11.0:
 14 columns by 文化庁国語課 (2014-2018), the 建議 and a council report hold 0.75 to
 1.63 joints a sentence, and 14 % to 26 % of their sentences are lone, 53 % in
 one column; a report Claude wrote under this plugin's hooks held 0.46 and 54 %.
-references/flow-japanese.md, section 4, has the table. Two kinds of passage are
-listed with their lines:
+Measured for 1.12.0 on 35 documents of ministries and public bodies (2009-2022)
+and on drafts Claude wrote from notes of eight of them: the eight hold 15 % of
+sentences of 100 characters or more (median) and their drafts 0 %, 4 % under 30
+characters and 19 %, 17 % opening on a topic of their own and 32 %, 18 % with a
+parenthesis and 12 %. references/flow-japanese.md, section 4, has the tables.
+Two kinds of passage are listed with their lines:
 
     ending_run  three or more sentences in a row, in one paragraph, with the same form
                 and the same class
@@ -61,8 +70,9 @@ measured values is uniform by nature.
 With --before, each figure is printed for both texts, and a line is marked
 `flatter` when it moved the way a rewrite flattens a text: more plain endings,
 fewer openers, fewer joints, more lone sentences, more sentences, less variation
-in length. The marks are a direction, like the naturalness score; the thresholds
-are this skill's, set on the documents SKILL.md names.
+in length, fewer long sentences, more short ones, more sentences opening on a
+topic of their own. The marks are a direction, like the naturalness score; the
+thresholds are this skill's, set on the documents SKILL.md names.
 
 Sentence splitting and masking come from natural-japanese's textcore.py, as in
 koyobun.py. A full stop written 「．」 is read as 「。」. Exit code 0; 1 on an input
@@ -91,6 +101,9 @@ from koyobun import (  # noqa: E402
 
 RUN = 3  # sentences in a row that make a run
 ITEM_SENTENCE_CHARS = 60  # a one-sentence list item this long is read as prose
+LONG_CHARS = 100  # a sentence this long carries a ground and its claim, or a concession and a verdict
+SHORT_CHARS = 30  # a sentence under this is one clause
+TOPIC_CLAUSE_MORPHEMES = 14  # how far into a sentence with no 読点 its opening clause is read
 LIST_ITEM_RE = re.compile(r"^(\s*)(?:[-*+]|\d+[.)])\s+(?:\*\*[^*]+\*\*[:：]?\s*)?")
 # Below these, a document is too short to call flat, and its figures say little.
 FLAT_MIN_SENTENCES = 12
@@ -166,6 +179,24 @@ def ending_of(text: str, tok, mode) -> tuple[str, str]:
     return "plain", form
 
 
+def opens_on_topic(ms: list) -> bool:
+    """True when a noun with は stands in the opening clause: 「政府は、…」「この制度の対象は…」.
+
+    では, には, については and their kin put は after a particle; they set a scene and are left out.
+    """
+    head = []
+    for m in ms:
+        pos = _pos(m)
+        if pos[1] == "読点" or len(head) >= TOPIC_CLAUSE_MORPHEMES:
+            break
+        if pos[0] not in {"補助記号", "空白"}:
+            head.append(m)
+    for i, m in enumerate(head):
+        if i and m.surface() == "は" and _pos(m)[0] == "助詞" and _pos(m)[1] == "係助詞":
+            return _pos(head[i - 1])[0] != "助詞"
+    return False
+
+
 def joints_of(ms: list) -> int:
     """Count 接続助詞 and 連用中止, by koyobun.py's rule for clause_chain."""
     n = 0
@@ -226,6 +257,8 @@ def read_sentences(text: str) -> list[dict]:
             "line": no, "para": para_of.get(no, 0), "text": raw, "chars": len(re.sub(r"\s", "", sent)),
             "ending": cls, "form": form, "opener": connective or demo_open, "connective": connective,
             "joints": joints, "lone": not (connective or demo_open or joints or DEMONSTRATIVES.search(sent)),
+            "topic": not (connective or demo_open) and opens_on_topic(ms),
+            "paren": bool(re.search(r"[（(]", sent)),
         })
     return out
 
@@ -248,10 +281,14 @@ def profile(sents: list[dict]) -> dict:
         "sentences": n,
         "mean_chars": round(mean, 1),
         "length_cv": round(statistics.pstdev(lengths) / mean, 2) if mean else 0.0,
+        "long_pct": pct(sum(1 for x in lengths if x >= LONG_CHARS)),
+        "short_pct": pct(sum(1 for x in lengths if x < SHORT_CHARS)),
         "plain_pct": pct(classes["plain"]),
         "ending_pct": {c: pct(k) for c, k in classes.items()},
         "opener_pct": pct(sum(s["opener"] for s in sents)),
         "connective_pct": pct(sum(s["connective"] for s in sents)),
+        "topic_open_pct": pct(sum(s["topic"] for s in sents)),
+        "paren_pct": pct(sum(s["paren"] for s in sents)),
         "joints_per_sentence": round(sum(s["joints"] for s in sents) / n, 2),
         "lone_pct": pct(sum(s["lone"] for s in sents)),
         "longest_form_run": longest,
@@ -289,8 +326,11 @@ MOVES = (
     ("sentences", "sentences", +1, None),
     ("mean_chars", "mean length", -1, None),
     ("length_cv", "length variation (CV)", -1, 0.05),
+    ("long_pct", "sentences of 100 characters or more %", -1, 5.0),
+    ("short_pct", "sentences under 30 characters %", +1, 5.0),
     ("plain_pct", "plain endings %", +1, 5.0),
     ("opener_pct", "sentences with an opener %", -1, 5.0),
+    ("topic_open_pct", "sentences opening on a topic %", +1, 5.0),
     ("joints_per_sentence", "joints per sentence", -1, 0.15),
     ("lone_pct", "lone sentences %", +1, 5.0),
     ("longest_form_run", "longest run of one ending", +1, 1),
@@ -338,19 +378,21 @@ def main() -> int:
         print("no body sentence to profile")
         return 0
     if args.before:
-        print(f'{"":34}{"before":>9}{"after":>9}')
+        print(f'{"":40}{"before":>9}{"after":>9}')
         for row in result["moves"]:
-            print(f'{row["label"]:34}{row["before"]:>9}{row["after"]:>9}{"  flatter" if row["flatter"] else ""}')
+            print(f'{row["label"]:40}{row["before"]:>9}{row["after"]:>9}{"  flatter" if row["flatter"] else ""}')
+        print(f'{"sentences with a parenthesis %":40}{result["before"].get("paren_pct", 0):>9}{p["paren_pct"]:>9}')
         b, a = result["before"].get("ending_pct", {}), p["ending_pct"]
         for c in a:
-            print(f'{"  " + c + " %":34}{b.get(c, 0):>9}{a[c]:>9}')
+            print(f'{"  " + c + " %":40}{b.get(c, 0):>9}{a[c]:>9}')
         marked = sum(row["flatter"] for row in result["moves"])
         print(f"{marked} of {len(MOVES)} figures moved flatter")
     else:
         for key, label, _, _ in MOVES:
-            print(f"{label:34}{p[key]:>9}")
+            print(f"{label:40}{p[key]:>9}")
+        print(f'{"sentences with a parenthesis %":40}{p["paren_pct"]:>9}')
         for c, v in p["ending_pct"].items():
-            print(f'{"  " + c + " %":34}{v:>9}')
+            print(f'{"  " + c + " %":40}{v:>9}')
     if p["flat"]:
         print(f'flat: {p["lone_pct"]} % of the sentences are lone and a sentence holds {p["joints_per_sentence"]} joints '
               f"(the line is {FLAT_LONE_PCT:g} % and {FLAT_JOINTS:g})")
