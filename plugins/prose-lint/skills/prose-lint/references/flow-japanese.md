@@ -4,16 +4,17 @@ The material the flow layer and the reader in Step 3a work from. The other
 references name wordings to take out. This one names what a paragraph carries
 between and around its wordings: the ending that says what a sentence is, the
 words that join one sentence to the next, the uneven weight of its sentences,
-the writer's distance from the reader, the words a sentence opens on, and how
-much one sentence holds. A rewrite that clears every hit and
+the writer's distance from the reader, the word that ties a sentence to the
+last, and how much one sentence holds. A rewrite that clears every hit and
 drops these leaves a list of bare statements, each correct, which reads as
 written by no one.
 
 Section 1 gives the measurements behind that claim. Section 2 names the six
 things a text keeps, with the grounds for each. Section 3 holds the questions
 the reader asks of every paragraph. Section 4 is the table `scripts/flow.py`
-was set on, with the measurements of 1.12.0 on documents of ministries and
-public bodies, and section 5 lists the sources. Every source was fetched on
+was set on, with the measurements of 1.12.0 on everyday business documents
+and on documents of ministries and public bodies, and section 5 lists the
+sources. Every source was fetched on
 2026-11-11 and each quotation checked against the fetched page or PDF. Each
 carries its source's short name in 〔〕, and section 5 gives the URL.
 
@@ -50,41 +51,58 @@ Measured for 1.11.0, on the skill as it stood at 1.10.0.
    nothing around them, and none ended in a judgement or a request. The human-written documents of section 4 hold 0.75 to 1.63
    joints a sentence.
 
-Measured for 1.12.0, on the skill as it stood at 1.11.0. The documents and the
-tables are in section 4.
+Measured for 1.12.0, on the skill as it stood at 1.11.0, on two sets of
+documents. The skill's default style is `business`, so the first set leads:
+43 documents that companies and JPCERT/CC put out in 2021, press releases,
+engineering blog posts and security alerts (section 4.5). The second is 35
+documents of ministries and public bodies from 2009 to 2022 (sections 4.2 to
+4.4). What both sets show is stated as a finding; what only the second shows
+is named as such.
 
-4. **A draft has the shape before any rule touches it.** Eight documents of
-   ministries and public bodies from 2013 to 2021 (a white-paper section, a
-   通知, a governor's speech, three columns and articles for the public, a
-   consumer alert, a second white-paper section) were each reduced to notes:
-   every fact, figure and name as a keyword item, with the cause, the contrast
-   or the certainty the source states kept as a tag. Claude then wrote each
-   document again from its notes, with no rule in force and without sight of
-   the original. Read by `flow.py`, the drafts hold more sentences in 7 of the
-   8 pairs (47 against 64 at the median), and the sentences are shorter (66.4
-   characters against 45.6). Joints in a sentence fall in all 8 (1.73 against
-   1.09), and sentences that open with a connective in 7 (25.4 % against
-   12.9 %). The drafts open a sentence on a topic of its own twice as often
-   (16.7 % against 31.9 %, higher in 7), hold a parenthesis less often (18.1 %
-   against 11.8 %, lower in 7), and leave more sentences tied to nothing
-   (11.0 % against 23.9 %, higher in 7). The originals hold 15 % of sentences
-   of 100 characters or more at the median and the drafts 0 %; under 30
-   characters the figures are 4 % and 19 %. `flow.py --before`, given each
-   original and its draft, marks 5 to 10 of its 11 figures flatter.
-5. **The layers flag the human text more than the draft.** The mechanical
+4. **A draft has the shape before any rule touches it.** Six of the business
+   documents were reduced to notes in English: every fact, figure and name as
+   a keyword item, with the cause, the contrast or the certainty the source
+   states kept as a tag. Claude then wrote each document again in Japanese
+   from its notes, with no rule in force and without sight of the original.
+   Read by `flow.py`, every one of the six drafts holds more sentences (33.5
+   against 44.5 at the median) and shorter ones (73.8 characters against
+   51.4). Sentences of 100 characters or more fall from 19.5 % to 2.1 %, those
+   under 30 rise from 5.6 % to 15.9 %, and the joints in a sentence fall from
+   1.61 to 1.04, each in all six pairs. Sentences that open with a connective
+   fall in five of the six (15.3 % against 7.9 %). Eight of the administrative
+   documents, written again from notes in Japanese, moved the same way on
+   every one of these figures (section 4.3). Five more documents written from
+   a brief of three lines and no notes (an incident report, a proposal, a
+   design note, a progress report, an explainer for staff) run shorter still:
+   a mean of 33 to 47 characters, no sentence of 100, and 0.59 to 0.97 joints.
+5. **Two figures did not carry over.** In the administrative pairs the drafts
+   opened a sentence on a topic of its own twice as often as the originals
+   and held fewer parentheses. In the business pairs neither moved (22.4 %
+   against 24.8 %, and 10.0 % against 9.1 %): a press release opens a third of
+   its own sentences on 「当社は、」 or 「本ソリューションは、」. `flow.py` prints the
+   two figures and marks neither.
+6. **The layers flag the human text more than the draft.** The mechanical
    layers (textlint, the general and translationese registers, `koyobun.py`)
-   ran over the same 16 texts, one sentence to a paragraph. 77.4 % of the 407
-   human sentences drew a hit and 60.3 % of the 562 draft sentences; a human
-   sentence drew 2.02 hits by rule and a draft sentence 1.01. The rules that
-   separate the two most fire on the human side: `sentence-length` on 24.1 %
-   of the human sentences and 3.7 % of the draft's, `clause_chain` on 25.8 %
-   and 12.5 %, `comma_chain` on 19.7 % and 7.5 %, `max-ten` on 17.4 % and
-   2.7 %, `ga_conjunction` on 10.3 % and 3.0 %. Over all 35 human documents
-   79.2 % of the 2,513 sentences drew a hit, 23.3 % under a rule SKILL.md says
-   to fix, and 33 of the 35 hold a finding the write hook blocks on.
-6. **The score reads the two alike.** The naturalness score of the eight
-   originals runs from 97.1 to 98.7 (median 97.9) and that of their drafts from
-   92.4 to 99.3 (median 97.85).
+   ran over the six business pairs, one sentence to a paragraph. 70.7 % of the
+   208 human sentences drew a hit and 47.2 % of the 305 draft sentences; a
+   human sentence drew 1.56 hits by rule and a draft sentence 0.71.
+   `sentence-length` fired on 19.7 % of the human sentences and 4.6 % of the
+   drafts', `clause_chain` on 26.0 % and 9.8 %, `etc` on 19.2 % and 6.2 %.
+   Over all 43 business documents 64.2 % of the 1,291 sentences drew a hit,
+   17.2 % under a rule SKILL.md says to fix, and 37 of the 43 hold a finding
+   the write hook blocks on. The administrative set gives the same picture
+   (section 4.4), and there the naturalness score read originals and drafts
+   alike, 97.9 and 97.85 at the median.
+7. **The drafts change the words too.** Every one of the six business drafts
+   holds fewer katakana words than its original (31.1 to 1,000 characters
+   against 29.3). The originals' ユーザー (four times in one notice) came back
+   as 利用者, コンテンツ as 内容 and 題材, ブロックされず as 遮断されず, and
+   ポイント as 点. One draft went the other way and wrote トランスペアレント
+   five times where the press release has 透過的. The design note written from
+   a brief says キャッシュに当たらない for a cache miss beside its own
+   ヒット率, 「2で拾えないもの」 for cases a step fails to catch, 「既存Redisに
+   同居できます」 and 「対応表をRedisに持ちます」. The translationese reference
+   takes these up (its section 3.1).
 
 So a hit under the length, chain and comma rules is, on these texts, more
 often a mark of a person's sentence than of a defect, and a ledger cleared of
@@ -95,7 +113,7 @@ The causes, by the stage of a run where each sits:
 
 | Stage | Cause |
 | --- | --- |
-| The draft | Written from the same notes with no rule in force, Claude's sentences already run to one or two clauses of 40 to 60 characters, each on a topic of its own (item 4). The rules that follow were set against long sentences and so pull the same way. |
+| The draft | Written from the same notes with no rule in force, Claude's sentences already run to one or two clauses of 40 to 60 characters (item 4). The rules that follow were set against long sentences and so pull the same way. |
 | The target | "Good" was defined as the absence of hits: the score is 100 minus deductions. The `business` exemplars are a council report's opening, its survey figures and a definition, with no passage in which a writer weighs a choice. |
 | Detection | Every rule names a wording to remove or avoid, and each reads one sentence. Nothing reads what a sentence does in its paragraph, and nothing counted joins or endings. |
 | The ruling | The default was to fix. A kept hit needs a stated reason and a fix needs none, so the cheaper ruling is the rewrite, and with this many layers most sentences draw some hit. |
@@ -189,9 +207,9 @@ head (しかし, そのため, また, 例えば), a demonstrative that points b
 その, これ, こうした), and a subject left out because the last sentence gave
 it. The particle も does part of the same work: it marks its sentence as one
 more case of what the last one said. A quarter of the sentences in the white
-papers, speeches and columns of section 4 hold it, and the drafts of section
-1, item 4, hold it less often than their originals in 7 of the 8 pairs (21.6 %
-against 16.3 %; counted by the script named in section 4).
+papers, speeches and columns of section 4.2 hold it, and the drafts of
+section 4.3 hold it less often than their originals in 7 of the 8 pairs
+(21.6 % against 16.3 %; counted by the script named in section 4).
 
 The 建議 asks a writer to hold these back from excess, and keeps them in its
 own rewrites. Under 「一文の論点は、一つにする」 it splits a sentence and opens
@@ -268,16 +286,15 @@ The 2018 report adds the limit on cutting: 「もちろん，文を短くする�
 いって，必要な情報を落とすことがないように気を付けましょう。」 〔分かり合う〕
 p. 43.
 
-The 35 documents of section 4 put figures on this. Their mean sentence runs
-from 36 to 108 characters by document, 66 at the median, and the white papers
-and the 通知 run to 80 or 90. A sentence of 100 characters or more makes up
-15 % of a document at the median and over 30 % in a quarter of them; a
-sentence under 30 characters makes up 9 %. The share of long sentences
-follows the kind of document: 30 % in the white papers, 36 % in the 通知, 9 %
-in the speeches and the columns, 1 % in the ministry magazine for the public.
-The long sentences are where a ground, a concession or a condition sits
-beside the claim it bears on. The drafts of section 1, item 4, hold next to
-none of them.
+Business documents put figures on this. Over the 43 of section 4.5 the mean
+sentence runs from 38 to 103 characters by document, 74 at the median: 78 in
+the press releases, 66 in the security alerts, 51 in the engineering blog
+posts. A sentence of 100 characters or more makes up 19 % of a document at the
+median, 22 % in the press releases and 3 % in the blog posts; a sentence under
+30 characters makes up 8 %. The 35 administrative documents of section 4.2 run
+to 66 at the median and 15 %. The long sentences are where a ground, a
+concession or a condition sits beside the claim it bears on. The drafts of
+section 1, item 4, hold next to none of them.
 
 What follows for a rewrite:
 
@@ -321,90 +338,75 @@ What follows for a rewrite:
   言い換えない」, its §3). One term per concept applies to terms.
 - A rewrite brings in no fact, plan or promise the text lacks, in any layer.
 
-### 2.5 A sentence opens from the last one
+### 2.5 The word that ties a sentence to the last
 
-The first words of a Japanese sentence are where it meets the sentence before.
-A writer fills that place with what the reader already holds: a connective
-(しかし、 このため、), a demonstrative (この取組は、 こうした中、), a scene
-(令和2年には、 この種の言語で), or nothing, where the subject carries over.
-A new topic with は is one choice among these.
+Section 2.2 gives the grounds for a tie. This section gives what a draft does
+to one. In the business documents of section 4.5, 13 % of the sentences open
+with a connective at the median, and half of the documents sit between 8 %
+and 20 %; the six drafts hold half as many as their originals (15.3 % against
+7.9 %). A security alert and its draft show where they go. The alert writes
+「…攻撃者にアカウント情報が詐取されます。また、詐取されたアカウント情報は、
+別のフィッシングメールを送るための踏み台として攻撃者に悪用され、…」 and
+opens its next paragraph 「こうした状況から、被害の拡大を防ぐため、…」
+〔JPCERT〕. The draft written from the notes of the same passage has
+「窃取されたアカウント情報は、…」 and 「被害の拡大を防ぐため、本文書では、…」:
+また and こうした状況から are gone, and nothing stands in their place.
 
-In the 35 documents of section 4, 16 % of the sentences at the median open on
-a topic of their own (a noun with は in the opening clause, with no
-connective and no demonstrative before it), and three quarters of the
-documents stay at 25 % or under. The drafts of section 1, item 4, reach 32 %
-at the median, and their connective openers fall by half. One column and its
-draft show the difference. Five sentences of the column in a row open
-「また、会議のプログラムの中で…」, 「このような反応を見ますと、…」,
-「さらに、今回の会合では、…」, 「その際、副議長のマイケル氏（オーストラリア）
-と日本の参加者は…」 and 「このような状況をみますと、…」 〔統計Today70〕:
-each starts from the sentence before. The draft written from the notes of the
-same passage opens 「会議のプログラムの中では、…」, 「統計面の貢献によって
-日本を印象付けることは…」, 「今回はハプニングもありました。」 and
-「議長の代理はマイケル氏が務め、…」: each starts on its own subject.
-
-The grounds for leaving a subject unsaid are in section 2.2 (〔公用文〕 Ⅲ-3
-オ). A paragraph in which each sentence names its own topic reads as a list
-of items set in sentence form, and the reader has to work out how each topic
-bears on the last.
+How a sentence opens otherwise follows the kind of document. A press release
+opens a third of its sentences on its own subject (「当社は、」「本ソリューション
+は、」)
+and an engineer's blog post a fifth, so the share of such openings is no
+finding on its own (section 1, item 5).
 
 What follows for a rewrite:
 
-- A rewrite keeps the opening a sentence had. A sentence that began on a
-  connective, a demonstrative or a scene still does after the fix.
+- A rewrite keeps the tie a sentence opened on. A sentence that began with a
+  connective or a demonstrative still does after the fix.
+- A sentence cut in two gives the second half an opening that points back, as
+  section 2.2 says.
 - Naming the subject is a fix for a sentence whose subject the reader cannot
   recover, and for no other. The `subject-first` marker of the translationese
   reference names the opposite failure.
-- A sentence cut in two gives the second half an opening that points back, as
-  section 2.2 says. A second half that starts on a fresh noun with は has lost
-  the tie.
 
 ### 2.6 One statement, one sentence
 
 A person writing from knowledge puts a thing and what is said of it in one
-sentence. The drafts of section 1, item 4, spread the same content over 36 %
-more sentences, in three ways that can each be seen in a pair.
+sentence. The drafts of section 1, item 4, spread the same content over a
+third more sentences, in ways that can each be seen in a pair.
 
-- **A sentence that only puts a thing on the table.** The column writes
-  「これは英語またはフランス語の「mule」からの借用なのですが、日本語では
-  この語を、…ということさえ決めれば、それだけでこの語が使えてしまいます。」
-  〔ことば研究館〕. Its draft writes three sentences: 「…に「ミュール」が
-  あります。これは…借りた語です。日本語では、…使えるようになります。」 The
-  first two say nothing a reader can use until the third arrives.
-- **A gloss made into a sentence.** The same column defines a term in
-  passing: 「品詞（名詞、動詞、形容詞、といった、文法的機能による単語の
-  グループ分け）ごとに固有の語尾が決まっており、」. Its draft stops to
-  define: 「品詞とは、…単語をグループ分けしたものです。」 The 建議 gives the
-  parenthesis as the form for this: 「説明を付けて使う。例）罹災証明書（支援を
-  受けるために被災の程度を証明する書類）」 〔公用文〕 Ⅱ-2 イ, and
-  「（以下「基本計画」という。）」 for a short name. A parenthesis sits in 21 %
-  of the sentences of the 35 documents at the median, and in 39 % in the
-  white papers.
-- **A sentence the notes never held.** Two of the eight drafts add a
-  sentence that says what the text is about to do, where the original has
-  none: 「以下では、…四つの分野について、成果と課題の両面を整理する。」 in
-  the white-paper section and 「…を、ここでは日本語の文法の仕組みから考えて
-  みます。」 in the Q&A. The same two close a passage on a summing-up of the
-  drafter's own (「…の成果が表れた例といえる。」, 「…文法の仕組みがあると
-  言えます。」). The 建議 asks for the content itself at the head:
-  「文書の結論は、できれば最初の段落で示しておく。最後まで読まないと何を
-  言おうとしているか分からないような書き方は避ける。」 〔公用文〕 Ⅲ-4 イ.
-  People announce too, in the kinds of text that take it: four of the eight
-  originals hold such a sentence, among them a column (「そこで、今回は、…に
-  ついて、御紹介いたします。」) and a speech (「ここからは、日本銀行の金融政策
-  運営についてお話しします。」). So an announcement in the text as it was
-  given is no finding. One that a rewrite brought in is.
+- **A purpose or a ground made into a sentence of its own.** The alert writes
+  「攻撃者は、Webメールサービスのアカウント情報の詐取を目的として、サービス
+  事業者になりすましたメールを送り、メールの受信者をフィッシングサイトに誘導
+  します。」 〔JPCERT〕. Its draft writes 「攻撃者の目的は、Webメールサービスの
+  アカウント情報を窃取することです。そのために、サービス提供者を装ったメール
+  を送り、受信者をフィッシングサイトに誘導します。」 The first sentence is the
+  English frame "the attacker's goal is to…", and the reader waits for the
+  second to learn what happens.
+- **A course of events cut at each step.** A company's notice tells the review
+  and its end in one sentence: 「…公正取引委員会は…違反の疑いがあるとして審査を
+  継続していましたが、当社が申し出た改善措置の実施を確認したうえで、本件の
+  審査を終了することが発表されましたのでお知らせします。」 〔楽天〕. Its draft
+  stops after 「…審査を続けてきました。」 and starts again with 「このたび、…」.
+- **A sentence the notes never held.** Two drafts put a count in front of
+  items the original simply lists: 「方針の内容は次の三つです。第一に、…」 and
+  「oVice を選んだ理由は4つあります。まず、…」. The second draft was free to
+  keep the list, wrote it as prose, and added 「ただ、このやり方にはいくつかの
+  課題がありました。」 before it. The 建議 asks for the content itself at
+  the head: 「文書の結論は、できれば最初の段落で示しておく。最後まで読まないと
+  何を言おうとしているか分からないような書き方は避ける。」 〔公用文〕 Ⅲ-4 イ.
+  People announce too, in the kinds of text that take it: an engineer's blog
+  post says 「そこで今回は、…について紹介していきます。」 So an announcement in
+  the text as it was given is no finding. One that a rewrite brought in is.
 
 What follows for a rewrite:
 
 - A split is made at a change of topic (section 2.3) and for no other reason.
-  Two sentences of which the first only names the thing the second is about
-  go back into one.
-- A gloss or a short name in parentheses stays in its parentheses. The
-  reading-load findings on a parenthesis are for a full sentence buried in
-  one.
+  A purpose, a ground or a step of one course of events stays a clause of the
+  sentence it belongs to.
+- A list in the text stays a list. A rewrite that turns items into prose adds
+  the counting and the ordering words the list did without.
 - No rewrite adds a sentence the text did not have: one that announces,
-  counts or sums up what the text says (以下では…, …の三点である, このように
+  counts or sums up what the text says (以下では…, …は次の三つです, このように
   …と言える). The text's own sentences of that kind stay.
 
 ## 3. Questions for the reader
@@ -444,20 +446,11 @@ phrase heads three or more sentences in a row where the previous sentence
 already gave it. Rewrite with the subject left out, or with a demonstrative,
 wherever the reader still recovers it at once.
 
-**`flow-open`** - Look at the first words of each sentence. Answer YES when
-three or more sentences in a row each open on a topic of their own (a noun
-with は, with no connective, demonstrative or scene before it) and the topics
-differ, so that the paragraph reads as items set side by side. Rewrite so
-that each sentence starts from what the one before left: a demonstrative for
-what was just said, the connective for the relation the content fixes, or the
-two sentences made one. A paragraph that describes several things in turn, as
-a list of products or of members does, answers NO.
-
 **`flow-split`** - Answer YES for each pair or run of sentences that makes
-one statement between them: the first only names a thing or says that it
-exists (〜がある, 〜はその一例である, 〜は次の三点である), or one sentence only
-defines a word the next one uses. Rewrite as one sentence, with the thing as
-its topic or the definition in parentheses after the word (section 2.6).
+one statement between them: the first only names a thing, a purpose or a
+count (〜がある, 〜の目的は〜ことである, 〜は次の三つである) and the next says
+what the paragraph has to say about it, or one course of events is told a
+step to a sentence. Rewrite as one sentence (section 2.6).
 
 **`flow-cut`** - Ask only on a second read, of a paragraph that holds a
 rewritten sentence. Answer YES when a sentence opens on a conclusion, a
@@ -465,9 +458,8 @@ contrast or a result that nothing before it prepares, or when a demonstrative
 points at nothing in the sentence before. Report the sentence; the rewriter
 holds the original and restores the tie.
 
-On a second read, ask `flow-open` and `flow-split` of the rewritten sentences
-too: a fix that names a subject where the sentence had left it out, or cuts
-one statement in two, answers YES there. Report as well each sentence of the
+On a second read, ask `flow-split` of the rewritten sentences too: a fix that
+cuts one statement in two answers YES there. Report as well each sentence of the
 range that only announces or sums up; the rewriter holds the original and
 takes out the ones a fix added (section 2.6).
 
@@ -515,14 +507,17 @@ The `flatter` marks of `flow.py --before` use these least changes: 5 points
 for a percentage, 0.15 joints, 0.05 in the CV, 15 % in the count of sentences
 and in the mean length, one sentence in the longest run. They are this
 skill's, set so that the run of section 1, item 2, is marked on six of the
-eight figures 1.11.0 printed. 1.12.0 added three figures, each marked at 5
-points: the share of sentences of 100 characters or more, the share under 30,
-and the share that open on a topic of their own.
+eight figures 1.11.0 printed. 1.12.0 added two figures, each marked at 5
+points: the share of sentences of 100 characters or more and the share under
+30. It also prints the share that open on a topic of their own and the share
+with a parenthesis, unmarked (section 1, item 5).
 
 To reproduce a row, fetch the page, keep its prose paragraphs in a Markdown
 file and run `scripts/flow.py --json <file>`.
 
 ### 4.2 Documents of ministries and public bodies (1.12.0)
+
+The second set of 1.12.0. The first, business documents, is in section 4.5.
 
 35 documents published from 2009 to 2022, fetched on 2026-11-11 and listed in
 section 5: 2,513 body sentences. Each page's body was taken out by script,
@@ -567,7 +562,7 @@ cell gives the original and then the draft.
 | Parenthesis % | 35.2 > 30.1 | 38.6 > 26.7 | 30.0 > 20.7 | 12.8 > 11.1 | 15.4 > 5.7 | 16.7 > 7.7 | 19.4 > 10.0 | 5.9 > 12.5 | 18.1 > 11.8 | 7 / 1 |
 | Joints per sentence | 1.76 > 0.79 | 2.01 > 1.22 | 1.70 > 1.33 | 2.06 > 1.63 | 1.56 > 1.30 | 2.33 > 0.97 | 1.04 > 0.87 | 1.12 > 0.83 | 1.73 > 1.09 | 8 / 0 |
 | Lone % | 11.1 > 33.0 | 10.8 > 23.3 | 7.5 > 22.4 | 11.5 > 12.1 | 2.6 > 24.5 | 4.2 > 20.5 | 25.0 > 27.1 | 41.2 > 37.5 | 11.0 > 23.9 | 1 / 7 |
-| Figures `--before` marks flatter, of 11 | 10 | 9 | 9 | 8 | 8 | 10 | 5 | 5 | | |
+| Figures `--before` marks flatter, of 10 | 9 | 8 | 9 | 7 | 7 | 10 | 4 | 4 | | |
 
 `flow.py` marks none of the eight drafts `flat`: the line of 40 % and 0.6
 catches a text written under the old hooks and lets a plain draft through.
@@ -626,9 +621,86 @@ documents: `ja-no-successive-word` fired 88 times, on doubled brackets
 on 「正しく処理される」 as まさしく. `no-ai-words` fired on 検査, 事故, 経路
 and 入口 in their plain senses.
 
-The scripts that took the page bodies out, counted the features `flow.py`
-leaves out (も, the kinds of opening) and made these tables are in the
-repository under `research/20261111-human-prose/tools`.
+### 4.5 Everyday business documents (1.12.0)
+
+43 documents published in 2021 and fetched on 2026-11-11 (section 5): 30
+press releases of six companies, 8 posts of a company's engineering blog and
+5 security alerts of JPCERT/CC, 1,291 body sentences. They are what a company
+publishes; mail, minutes and reports written inside a company are not public
+and are not in the set. The bodies were taken out as in section 4.2.
+
+| Kind | Documents | Sentences | Mean length | 100 characters or more % | Under 30 characters % | Connective openers % | Topic openers % | Parenthesis % | Joints per sentence | Lone % | Katakana words per 1,000 characters |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Press releases (日立, 富士通, NEC, 楽天, ソフトバンク, NRI) | 30 | 817 | 54.2-103.4 (77.8) | 10.0-64.7 (22.2) | 0-32.6 (8.0) | 4.5-28.6 (13.6) | 6.7-50.0 (31.6) | 6.2-55.6 (25.4) | 0.58-1.76 (1.19) | 0-50.0 (27.3) | 10.7-54.0 (37.5) |
+| Engineering blog posts (サイボウズ, 2021-12) | 8 | 361 | 38.2-73.8 (51.0) | 0-19.4 (2.7) | 3.2-44.1 (10.6) | 5.0-25.8 (16.7) | 9.5-39.0 (18.1) | 0-10.0 (4.1) | 0.87-2.42 (1.41) | 9.7-35.3 (15.9) | 21.1-44.6 (25.1) |
+| Security alerts (JPCERT/CC) | 5 | 113 | 58.6-77.5 (65.6) | 3.2-30.3 (10.0) | 5.0-15.2 (6.7) | 5.0-15.2 (7.1) | 7.1-22.6 (13.3) | 0-35.7 (24.2) | 1.00-1.33 (1.15) | 16.1-50.0 (26.7) | 22.9-47.9 (26.4) |
+| All 43 | 43 | 1,291 | 38.2-103.4 (73.8) | 0-64.7 (19.4) | 0-44.1 (8.3) | 4.5-28.6 (13.3) | 6.7-50.0 (26.7) | 0-55.6 (20.0) | 0.58-2.42 (1.26) | 0-50.0 (26.7) | 10.7-54.0 (34.6) |
+
+`flow.py` marks one of the 43 `flat`, a press release that is mostly a list
+of event dates. Beside the administrative set, these documents open fewer
+sentences with a connective (13 % against 25 %), tie fewer sentences to the
+ones around them (27 % lone against 14 %) and hold fewer joints (1.26 against
+1.56). The line that marks a document `flat` sits well below all of this,
+and a figure is read against the row of the document's own kind.
+
+Six of the documents beside drafts written from notes in English (section 1,
+item 4): a 日立 press release (P1), an NEC press release (P2), two blog posts
+(B1, B2), an alert (A) and a 楽天 notice (N). Each cell gives the original and
+then the draft.
+
+| Figure | P1 | P2 | B1 | B2 | A | N | Median | Draft lower / higher |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Sentences | 36 > 48 | 24 > 41 | 36 > 78 | 63 > 72 | 31 > 40 | 18 > 26 | 33.5 > 44.5 | 0 / 6 |
+| Mean length | 81.2 > 62.7 | 97.0 > 59.8 | 69.5 > 35.6 | 49.7 > 41.2 | 58.6 > 46.0 | 78.0 > 56.8 | 73.8 > 51.4 | 6 / 0 |
+| Length CV | 0.55 > 0.44 | 0.31 > 0.41 | 0.40 > 0.37 | 0.36 > 0.40 | 0.35 > 0.32 | 0.45 > 0.49 | 0.38 > 0.41 | 3 / 3 |
+| 100 characters or more % | 27.8 > 4.2 | 33.3 > 9.8 | 16.7 > 0 | 1.6 > 0 | 3.2 > 0 | 22.2 > 7.7 | 19.5 > 2.1 | 6 / 0 |
+| Under 30 characters % | 5.6 > 12.5 | 0 > 2.4 | 5.6 > 35.9 | 11.1 > 25.0 | 6.5 > 12.5 | 5.6 > 19.2 | 5.6 > 15.9 | 0 / 6 |
+| Plain endings % | 88.9 > 95.8 | 83.3 > 95.1 | 83.3 > 89.7 | 93.7 > 90.3 | 83.9 > 87.5 | 72.2 > 88.5 | 83.6 > 90.0 | 1 / 5 |
+| Connective openers % | 13.9 > 6.2 | 25.0 > 14.6 | 16.7 > 23.1 | 19.0 > 8.3 | 9.7 > 7.5 | 5.6 > 3.8 | 15.3 > 7.9 | 5 / 1 |
+| Topic openers % | 22.2 > 41.7 | 29.2 > 36.6 | 16.7 > 15.4 | 9.5 > 26.4 | 22.6 > 22.5 | 33.3 > 23.1 | 22.4 > 24.8 | 3 / 3 |
+| Parenthesis % | 16.7 > 16.7 | 45.8 > 34.1 | 0 > 1.3 | 3.2 > 1.4 | 0 > 0 | 55.6 > 42.3 | 10.0 > 9.1 | 3 / 1 |
+| Joints per sentence | 0.97 > 0.81 | 1.67 > 1.07 | 2.19 > 0.88 | 1.56 > 1.38 | 1.29 > 1.02 | 1.67 > 1.23 | 1.61 > 1.04 | 6 / 0 |
+| Lone % | 36.1 > 27.1 | 0 > 29.3 | 13.9 > 23.1 | 15.9 > 20.8 | 16.1 > 25.0 | 33.3 > 19.2 | 16.0 > 24.1 | 2 / 4 |
+| Katakana words per 1,000 characters | 47.9 > 42.9 | 31.3 > 30.6 | 30.8 > 28.1 | 21.1 > 20.2 | 47.9 > 46.7 | 10.7 > 6.8 | 31.1 > 29.3 | 6 / 0 |
+| Figures `--before` marks flatter, of 10 | 8 | 8 | 8 | 4 | 5 | 6 | | |
+
+The layers over the same texts, counted as in section 4.4:
+
+| Text | Sentences | With a hit % | Under a rule SKILL.md fixes % | Under a rule the write hook blocks on % | Hits by rule, per sentence |
+| --- | --- | --- | --- | --- | --- |
+| The 43 documents | 1,291 | 64.2 | 17.2 | 11.4 | 1.37 |
+| The six originals | 208 | 70.7 | 16.8 | 12.0 | 1.56 |
+| Their six drafts | 305 | 47.2 | 5.2 | 5.2 | 0.71 |
+
+| Rule | % of the 1,291 sentences | % of the 208 | % of the drafts' 305 |
+| --- | --- | --- | --- |
+| `sentence-length` | 23.5 | 19.7 | 4.6 |
+| `passive` | 20.2 | 22.6 | 17.4 |
+| `clause_chain` | 15.5 | 26.0 | 9.8 |
+| `etc` | 15.3 | 19.2 | 6.2 |
+| `comma_chain` | 9.1 | 9.6 | 5.6 |
+| `max-ten` | 5.8 | 5.8 | 2.0 |
+| `max-kanji-continuous-len` | 5.3 | 7.2 | 4.3 |
+| the translationese register, read in context | 4.4 | 3.4 | 1.0 |
+| the register's row on を実現, に寄与, 最適化 | 3.0 | 2.9 | 1.3 |
+| `ga_conjunction` | 2.7 | 5.8 | 2.0 |
+| `negated_predicate` | 2.3 | 1.4 | 3.3 |
+| `no-ai-words` | 1.7 | 1.4 | 1.0 |
+| the register's negation row | 1.4 | 0.5 | 1.6 |
+
+37 of the 43 documents hold a finding of the tier the write hook blocks on.
+`no-ai-words` fired 29 times on the 43 documents, 23 of them on 検査 in its
+plain sense.
+
+The surface forms the translationese reference names are the business
+writer's own. To 1,000 characters the 43 documents hold において 1.18 times,
+によって or により 0.94, を行う 0.86 and ことができる 0.79; the six drafts hold
+fewer of each than their originals (において 0.92 against 0.07, を行う 1.21
+against 0.41). No document holds 彼, 彼女 or 彼ら.
+
+The scripts that took the page bodies out, counted what `flow.py` leaves out
+(も, the kinds of opening, katakana words, the surface forms) and made these
+tables are in the repository under `research/20261111-human-prose/tools`.
 
 ## 5. Sources
 
@@ -643,8 +715,8 @@ repository under `research/20261111-human-prose/tools`.
 - 文化庁国語課. 文化庁広報誌ぶんかる 連載「言葉のQ&A」 001-014, 2014-05 to 2018-07, measured in section 4. https://www.bunka.go.jp/prmagazine/rensai/kotoba/kotoba_001.html (the number in the URL runs to 014)
 - coji. natural-japanese, `guide.md` §1 to §3 (MIT), in `vendor/natural-japanese`. https://github.com/coji/natural-japanese
 - 〔運輸安全〕 運輸安全委員会. 「鉄道事故調査報告書 RA2019-2 Ⅰ 東海旅客鉄道株式会社 飯田線 元善光寺駅～伊那上郷駅間 踏切障害事故」, 平成31年3月28日, 「本報告書本文中に用いる分析の結果を表す用語の取扱いについて」 and 「３ 分析」. https://www.mlit.go.jp/jtsb/railway/rep-acci/RA2019-2-1.pdf
-- 〔統計Today70〕 総務省統計局. 統計Today No.70 「世界に貢献する「Statistics Japan」」, 平成25年12月13日. https://www.stat.go.jp/info/today/070.html
-- 〔ことば研究館〕 国立国語研究所. ことば研究館 「日本語で外来語が多いのはなぜですか」, 2020-10-22. https://www.kotobaken.jp/qa/yokuaru/qa-100/
+- 〔JPCERT〕 JPCERT/CC. 「Webメールサービスのアカウントを標的としたフィッシングに関する注意喚起」 (JPCERT-AT-2021-0049), 2021-11. https://www.jpcert.or.jp/at/2021/at210049.html
+- 〔楽天〕 楽天グループ株式会社. 「「楽天市場」における「共通の送料込みライン」導入にかかる 公正取引委員会による審査終了に関するお知らせ」, 2021-12-06. https://corp.rakuten.co.jp/news/press/2021/1206_01.html
 
 The 35 documents of section 4.2, all fetched on 2026-11-11:
 
@@ -663,3 +735,14 @@ The 35 documents of section 4.2, all fetched on 2026-11-11:
 - 気象庁. 知識・解説 「キキクル（危険度分布）」, the page as of 2022-06. https://www.jma.go.jp/jma/kishou/know/bosai/riskmap.html
 - 運輸安全委員会. RA2019-2 Ⅰ, as 〔運輸安全〕 above.
 - COCOA不具合調査・再発防止策検討チーム（厚生労働省）. 「接触確認アプリ「COCOA」の不具合の発生経緯の調査と再発防止の検討について」, 2021-04. https://www.mhlw.go.jp/content/000769774.pdf
+
+The 43 documents of section 4.5, all fetched on 2026-11-11:
+
+- 株式会社日立製作所. ニュースリリース, 2021-10: the releases of the 1st, 4th, 5th, 6th, 7th, 8th, 12th and 14th. https://www.hitachi.co.jp/New/cnews/month/2021/10/1005.html (the last four digits are the month and day)
+- 富士通株式会社. プレスリリース, 2021-10: numbers 1, 4, 6, 7, 8 and 11. https://pr.fujitsu.com/jp/news/2021/10/6.html
+- 日本電気株式会社. プレスリリース, 2021-10: the first release of the 4th, 7th, 8th, 11th, 12th and 13th. https://jpn.nec.com/press/202110/20211007_01.html
+- 楽天グループ株式会社. プレスリリース, 2021: `1026_02`, `1124_01` and `1206_01`. https://corp.rakuten.co.jp/news/press/2021/1206_01.html
+- ソフトバンク株式会社. プレスリリース, 2021: `20210301_01`, `20210316_01`, `20210511_01`, `20210701_01`, `20211001_01` and `20211104_01`. https://www.softbank.jp/corp/news/press/sbkk/2021/20210316_01/
+- 株式会社野村総合研究所. ニュースリリース, 2021-10-01. https://www.nri.com/jp/news/newsrelease/lst/2021/cc/1001_1
+- サイボウズ株式会社. Cybozu Inside Out, eight posts of 2021-12-02 to 2021-12-22. https://blog.cybozu.io/entry/2021/12/13/160224 (the others are listed in `research/20261111-human-prose/evidence/corpus-business.md`)
+- JPCERT/CC. 注意喚起 JPCERT-AT-2021-0041, 0043, 0047, 0049 and 0050. https://www.jpcert.or.jp/at/2021/at210049.html

@@ -2,8 +2,8 @@
 
 The scripts that produced sections 1 and 4 of
 `plugins/prose-lint/skills/prose-lint/references/flow-japanese.md`. They read a
-corpus kept outside the repository; `../evidence/corpus.md` lists its 35
-documents with their URLs.
+corpus kept outside the repository; `../evidence/corpus-business.md` and
+`../evidence/corpus.md` list its 43 and 35 documents with their URLs.
 
 | Script | Does |
 | --- | --- |
@@ -14,7 +14,9 @@ documents with their URLs.
 | `sentsplit.py` | Writes each document one body sentence to a paragraph, as `flow.py` reads its sentences. |
 | `layers_fast.py` | Runs textlint, two registers and `koyobun.py` over those files. |
 | `features.py` | Counts what `flow.py` leaves out: the kinds of opening, も, stance adverbs, paragraph sizes. |
-| `report.py` | Prints the tables from the JSON files of the others. |
+| `report.py` | Prints the tables of the administrative set from the JSON files of the others. |
+| `words.py` | Counts katakana words, one-kanji nouns standing alone and the surface forms the translationese reference names. |
+| `bizreport.py` | Prints the tables of the business set. |
 
 Order of a run, in a corpus directory with `raw/` holding the saved pages:
 
@@ -28,5 +30,5 @@ python3 report.py
 ```
 
 The drafts go through the same steps into `gen/`, `gensent/`, `layers-gen.json`,
-`gensent-layers.json` and `flow2/g_<id>.json`. `../evidence/method.md` has the
-two prompts that made them.
+`gensent-layers.json` and `flow2/g_<id>.json`. `../evidence/method.md` says how
+they were made.

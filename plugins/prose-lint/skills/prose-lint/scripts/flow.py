@@ -39,7 +39,8 @@ as body text:
     joints   接続助詞 and 連用中止 inside the sentence, counted as koyobun.py counts them
     lone     no opener, no joint and no demonstrative: a sentence tied to nothing around it
     topic    the sentence opens on a topic of its own: no opener, and a noun with は inside its first
-             clause (up to the first 読点). では, には and their kin set a scene and stay out
+             clause (up to the first 読点). では, には and their kin set a scene and stay out. A press
+             release opens a third of its sentences this way, so the share is printed and never marked
     paren    the sentence holds a parenthesis: a gloss, a short name or a source kept inside it
 
 The profile gives, over the body sentences: their count, mean length and its
@@ -52,12 +53,13 @@ more are lone and a sentence holds 0.6 joints or fewer. Measured for 1.11.0:
 14 columns by 文化庁国語課 (2014-2018), the 建議 and a council report hold 0.75 to
 1.63 joints a sentence, and 14 % to 26 % of their sentences are lone, 53 % in
 one column; a report Claude wrote under this plugin's hooks held 0.46 and 54 %.
-Measured for 1.12.0 on 35 documents of ministries and public bodies (2009-2022)
-and on drafts Claude wrote from notes of eight of them: the eight hold 15 % of
-sentences of 100 characters or more (median) and their drafts 0 %, 4 % under 30
-characters and 19 %, 17 % opening on a topic of their own and 32 %, 18 % with a
-parenthesis and 12 %. references/flow-japanese.md, section 4, has the tables.
-Two kinds of passage are listed with their lines:
+Measured for 1.12.0 on 43 business documents of 2021 (press releases, engineering
+blog posts, security alerts) and on drafts Claude wrote from notes of six of
+them: the six hold 19 % of sentences of 100 characters or more (median) and
+their drafts 2 %, 6 % under 30 characters and 16 %, 1.61 joints a sentence and
+1.04. 35 documents of ministries and public bodies and eight drafts moved the
+same way. references/flow-japanese.md, section 4, has the tables. Two kinds of
+passage are listed with their lines:
 
     ending_run  three or more sentences in a row, in one paragraph, with the same form
                 and the same class
@@ -70,9 +72,9 @@ measured values is uniform by nature.
 With --before, each figure is printed for both texts, and a line is marked
 `flatter` when it moved the way a rewrite flattens a text: more plain endings,
 fewer openers, fewer joints, more lone sentences, more sentences, less variation
-in length, fewer long sentences, more short ones, more sentences opening on a
-topic of their own. The marks are a direction, like the naturalness score; the
-thresholds are this skill's, set on the documents SKILL.md names.
+in length, fewer long sentences, more short ones. The marks are a direction,
+like the naturalness score; the thresholds are this skill's, set on the
+documents SKILL.md names.
 
 Sentence splitting and masking come from natural-japanese's textcore.py, as in
 koyobun.py. A full stop written 「．」 is read as 「。」. Exit code 0; 1 on an input
@@ -330,7 +332,6 @@ MOVES = (
     ("short_pct", "sentences under 30 characters %", +1, 5.0),
     ("plain_pct", "plain endings %", +1, 5.0),
     ("opener_pct", "sentences with an opener %", -1, 5.0),
-    ("topic_open_pct", "sentences opening on a topic %", +1, 5.0),
     ("joints_per_sentence", "joints per sentence", -1, 0.15),
     ("lone_pct", "lone sentences %", +1, 5.0),
     ("longest_form_run", "longest run of one ending", +1, 1),
@@ -381,6 +382,7 @@ def main() -> int:
         print(f'{"":40}{"before":>9}{"after":>9}')
         for row in result["moves"]:
             print(f'{row["label"]:40}{row["before"]:>9}{row["after"]:>9}{"  flatter" if row["flatter"] else ""}')
+        print(f'{"sentences opening on a topic %":40}{result["before"].get("topic_open_pct", 0):>9}{p["topic_open_pct"]:>9}')
         print(f'{"sentences with a parenthesis %":40}{result["before"].get("paren_pct", 0):>9}{p["paren_pct"]:>9}')
         b, a = result["before"].get("ending_pct", {}), p["ending_pct"]
         for c in a:
@@ -390,6 +392,7 @@ def main() -> int:
     else:
         for key, label, _, _ in MOVES:
             print(f"{label:40}{p[key]:>9}")
+        print(f'{"sentences opening on a topic %":40}{p["topic_open_pct"]:>9}')
         print(f'{"sentences with a parenthesis %":40}{p["paren_pct"]:>9}')
         for c, v in p["ending_pct"].items():
             print(f'{"  " + c + " %":40}{v:>9}')

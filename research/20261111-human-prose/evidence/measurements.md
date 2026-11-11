@@ -1,4 +1,8 @@
-# Measurements of 1.12.0
+# Measurements of 1.12.0 on administrative documents
+
+The second set of the measurement. The first, business documents, is in
+`measurements-business.md`. `flow.py` no longer marks the share of topic
+openers, so its count of `flatter` figures is now out of 10.
 
 Output of `tools/report.py` on 2026-11-11, over the corpus of `corpus.md` and
 the eight drafts of `method.md`. The ids in the tables are those of

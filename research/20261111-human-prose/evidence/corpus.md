@@ -1,4 +1,4 @@
-# The corpus of 1.12.0
+# The administrative corpus of 1.12.0
 
 35 documents written in ministries and public bodies, published from 2009 to
 2022. Each was fetched on 2026-11-11. The HTML pages went through
