@@ -16,8 +16,11 @@ between the text as it was and the text as it stands.
 
     uv run flow.py [--before <original>] [--json] <file>
 
-Per body sentence (headings, list items, tables, quotes and code are masked, as
-in koyobun.py; a deck extract's `- ` items are read as body text):
+Per body sentence (headings, tables, quotes and code are masked, as in
+koyobun.py). A list item that holds two or more sentences is running text and
+is read as a paragraph of its own, without a label in bold at its head; an item
+of one sentence or a phrase stays masked. A deck extract's `- ` items are read
+as body text:
 
     ending   the class of the final predicate:
              plain     a bare statement (する, した, だ, である, です, ます, ている)
@@ -42,7 +45,7 @@ form. A document of 12 body sentences or more is marked `flat` when 40 % of them
 or more are lone and a sentence holds 0.6 joints or fewer. Measured for 1.11.0:
 14 columns by 文化庁国語課 (2014-2018), the 建議 and a council report hold 0.75 to
 1.63 joints a sentence, and 14 % to 26 % of their sentences are lone, 53 % in
-one column; a report Claude wrote under this plugin's hooks held 0.41 and 59 %.
+one column; a report Claude wrote under this plugin's hooks held 0.46 and 54 %.
 references/flow-japanese.md, section 4, has the table. Two kinds of passage are
 listed with their lines:
 
@@ -86,6 +89,7 @@ from koyobun import (  # noqa: E402
 )
 
 RUN = 3  # sentences in a row that make a run
+LIST_ITEM_RE = re.compile(r"^(\s*)(?:[-*+]|\d+[.)])\s+(?:\*\*[^*]+\*\*[:：]?\s*)?")
 # Below these, a document is too short to call flat, and its figures say little.
 FLAT_MIN_SENTENCES = 12
 FLAT_LONE_PCT = 40.0
@@ -179,14 +183,24 @@ def read_sentences(text: str) -> list[dict]:
     text = re.sub(r"(?<=[ぁ-ゖァ-ヺ一-鿿々）」\])])．", "。", text)
     deck = any(koyobun.SLIDE_RE.match(x) for x in text.split("\n"))
     body_text = re.sub(r"^- ", "", text, flags=re.MULTILINE) if deck else text
+    # A list item of two or more sentences is prose: drop its marker so the mask keeps the line.
+    rows, items, fence = body_text.split("\n"), set(), False
+    for i, row in enumerate(rows):
+        if koyobun.FENCE_RE.match(row):
+            fence = not fence
+        m = None if fence else LIST_ITEM_RE.match(row)
+        if m and len(re.findall(r"[。！？]", row[m.end():])) >= 2:
+            rows[i] = row[m.end():]
+            items.add(i + 1)
+    body_text = "\n".join(rows)
     masked = mask_markdown_structure(body_text)
     lines = iter_lines_with_no(masked)
     raw_by_no = dict(iter_lines_with_no(body_text))
-    # A paragraph ends at a blank or masked line.
+    # A paragraph ends at a blank or masked line; a list item is a paragraph of its own.
     para_of, para, prev_blank = {}, 0, True
     for no, line in lines:
         if line.strip():
-            if prev_blank:
+            if prev_blank or no in items or (no - 1) in items:
                 para += 1
             para_of[no] = para
         prev_blank = not line.strip()

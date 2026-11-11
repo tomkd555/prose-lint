@@ -159,9 +159,9 @@ its ledger and leave a list of bare statements. Three measurements for 1.11.0
 are in `{SKILL_DIR}/references/flow-japanese.md`, section 1. The mechanical
 layers flagged 45 of the 74 sentences in this skill's own exemplar passages,
 19 of them under a rule this file said to fix. A report written under this
-plugin's hooks held 0.41 clause joints a sentence, where the human-written
+plugin's hooks held 0.46 clause joints a sentence, where the human-written
 documents measured hold 0.75 to 1.63. And the naturalness score read 96.9 on a
-memo whose sentences ran 31 characters on average. So a ruling of "fix" means
+memo whose sentences ran 30 characters on average. So a ruling of "fix" means
 this: take the wording out and keep the job, as "Writing a fix" sets out.
 Where a layer leaves a hit to judgement, a sentence that reads well and does
 its job is kept, with that as the reason. Where a layer says a hit is fixed
@@ -200,7 +200,8 @@ Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
   in shape alone, and reads well, is no finding";
 - the absolute path of `{SKILL_DIR}/references/flow-japanese.md`, with "read
   it after the exemplars and ask the questions of its section 3 of every
-  paragraph of two or more sentences of running text. Mark each finding with
+  paragraph of two or more sentences of running text, a list item of two or
+  more sentences included. Mark each finding with
   its `flow-` id, give the line the paragraph starts on, quote its first
   sentence, and write the rewrite as the whole paragraph, made only of what
   the paragraph and its neighbours already say";
@@ -619,7 +620,8 @@ prose-lint-run uv run {SKILL_DIR}/scripts/flow.py <file>
 
 For a deck, `<file>` is `<tmp>/deck.md`. This layer counts what the others
 leave out of the ledger: how the body sentences end, how they join, and how
-their lengths vary. `{SKILL_DIR}/references/flow-japanese.md` gives the
+their lengths vary. A list item that holds two or more sentences is read as a
+paragraph; the other layers mask it. `{SKILL_DIR}/references/flow-japanese.md` gives the
 grounds and the measurements. The script prints a profile and two kinds of
 passage:
 
@@ -643,6 +645,21 @@ or fewer. Put the profile in the report beside the naturalness score, which
 reads none of this. The reader's `flow-` findings cover the same ground by
 reading, and the two are ruled together, paragraph by paragraph. Every flow
 fix is made of what the text already says.
+
+Two cases make this layer lead the run: the document is marked `flat`, or the
+request is about how the text reads as a whole (無機質, 硬い, ぶつ切り,
+つながり, 流れ). Then the runs the script lists are a starting point only.
+Read every paragraph and every list item of two or more sentences against the
+questions of section 3 of the reference, in the main context as well as in the
+reader, and rule on each: a rewrite of the paragraph, or the reason it stays
+as it is, such as a list of independent facts. A document still marked `flat`
+after the fixes is reported as such, with the paragraphs that stayed and why.
+
+A tie is added only where the text fixes the relation, in the clause form
+first (が, ので, ため, と) and as an opening word second. natural-japanese's
+guide forbids adding しかし and そのため between sentences; where the two meet,
+section 3 of the reference says how this layer rules, and the report lists
+every tie a fix added.
 
 ### Academic mode
 
@@ -711,7 +728,9 @@ them (reference, section 2). The
 
 Review the text from the read that settled the style in Step 2, for the
 points that need a reader: each paragraph serves the document's purpose, terms
-stay the same from start to end, and the conclusion comes first.
+stay the same from start to end, and the conclusion comes first. A term is a
+word the field or the document defines. Where the document writes one term
+two ways, the form it uses more often stays.
 
 In academic mode, read also for the points of the reference's sections 1.3 to
 1.6 and 2 that need a reader:
@@ -1073,8 +1092,8 @@ rendering.
   reader's five-axis score out of 50; stop-ai-slop-jp calls for a rewrite
   under 35. End with the second run's resolved / new / persisting counts,
   the figures `flow.py --before` marked `flatter` with what was corrected or
-  why each stays, the count of body sentences changed out of the total by
-  `flow.py`'s count, and
+  why each stays, every tie a flow fix added, the count of body sentences
+  changed out of the total by `flow.py`'s count, and
   what the second read of the rewrites returned. A score alone says nothing
   about the register hits, so it never replaces the ledger.
 - For English, open with the style line, then one line: the count of ai-tells, `AISigns.Chatbot`

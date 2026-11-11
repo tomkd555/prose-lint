@@ -42,11 +42,10 @@ Measured for 1.11.0, on the skill as it stood at 1.10.0.
    差が小さいのは…45ポイントでした。」 into two sentences that both end
    でした. The naturalness score of the untouched column was 99.6.
 3. **No layer saw flatness.** A memo Claude drafted with no rule in force
-   scored 96.9, "natural"; its body sentences ran 31 characters on average
-   and held 0.78 joints each. A report Claude wrote with this plugin's hooks
-   on (59 sentences, list items counted) held 0.41 joints a sentence; 59 % of
-   its sentences joined nothing around them, and none ended in a judgement or
-   a request. The human-written documents of section 4 hold 0.75 to 1.63
+   scored 96.9, "natural"; its sentences ran 30 characters on average and
+   held 0.68 joints each. A report Claude wrote with this plugin's hooks on
+   (48 sentences) held 0.46 joints a sentence; 54 % of its sentences joined
+   nothing around them, and none ended in a judgement or a request. The human-written documents of section 4 hold 0.75 to 1.63
    joints a sentence.
 
 The causes, by the stage of a run where each sits:
@@ -197,7 +196,7 @@ The 建議 sets no cap on a sentence: 「単に長い短いが問題になるわ
 なっていないか意識するとよい。」 〔公用文〕 Ⅲ-3 ア. Fifty to sixty characters
 is where to check, and the test is whether the sentence still reads. The mean
 in the documents of section 4 is 41 to 55 characters with a coefficient of
-variation of 0.4 to 0.65; the memo of section 1 ran 31. A study of
+variation of 0.4 to 0.65; the memo of section 1 ran 30. A study of
 literary texts found the same of generated Japanese: 「LLM テキストの方が文長の
 ばらつきが低い，つまり，LLM は同じ長さの文を生成する傾向があると言える．」
 〔岩本2026〕
@@ -256,8 +255,9 @@ What follows for a rewrite:
 
 ## 3. Questions for the reader
 
-Asked of every paragraph of two or more sentences of running text. Lists,
-tables, quotations and code stay out. Each has a YES or NO answer, and a YES is
+Asked of every paragraph of two or more sentences of running text. A list
+item that holds two or more sentences is such a paragraph; an item of one
+sentence or a phrase, a table, a quotation and code stay out. Each has a YES or NO answer, and a YES is
 a finding, reported with the line the paragraph starts on, its first sentence
 and the whole paragraph rewritten. A rewrite uses only what the paragraph and
 its neighbours already say. Where the fix would need something the text lacks,
@@ -298,6 +298,16 @@ holds the original and restores the tie.
 A document meant to be flat answers NO throughout: a changelog, a list of
 measured values, a reference table written out as sentences.
 
+Two rules meet at `flow-join`. natural-japanese's guide forbids adding
+しかし, そのため and their kin between sentences (its §3), which guards against
+a relation the rewriter invents. This reference adds a tie only where the text
+fixes the relation: the clause that was cut carried it, or one sentence names
+the cause, the exception or the case of the other in its own words. The clause
+form the guide allows (が, ので, ため, と) comes first, and an opening word
+second. Where the two rules still meet, this one stands, and the report lists
+every tie a fix added so the author can strike any that says more than the
+text did.
+
 ## 4. Measurements
 
 `flow.py` over human-written Japanese and over text from section 1, on
@@ -312,8 +322,8 @@ lost and the last column is left blank for them.
 | the same, median of the 14 | 54.5 | 47.2 | 0.55 | 59.8 | 11.1 | 1.29 | 21.4 | |
 | 「公用文作成の考え方」 and its 解説, 2022 | 548 | 49.1 | 0.43 | 77.9 | 0.7 | 1.07 | 22.4 | |
 | 「分かり合うための言語コミュニケーション（報告）」, 2018 | 1089 | 53.8 | 0.47 | 54.5 | 17.0 | 1.36 | 18.5 | |
-| A memo Claude drafted with no rule in force, body sentences | 18 | 30.9 | 0.46 | 55.6 | 5.6 | 0.78 | 27.8 | no |
-| A report Claude wrote under the 1.10.0 hooks, list items counted | 59 | 36.7 | 0.43 | 66.1 | 0.0 | 0.41 | 59.3 | yes |
+| A memo Claude drafted with no rule in force | 22 | 29.9 | 0.44 | 54.5 | 13.6 | 0.68 | 36.4 | no |
+| A report Claude wrote under the 1.10.0 hooks | 48 | 37.3 | 0.44 | 79.2 | 0.0 | 0.46 | 54.2 | yes |
 
 The `flat` line of `flow.py` is 40 % lone sentences or more together with 0.6
 joints a sentence or fewer, in a document of 12 body sentences or more. It

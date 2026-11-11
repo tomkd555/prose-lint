@@ -44,7 +44,7 @@ The flow layer exists because a run could clear its ledger and leave a list of b
 
 - The mechanical layers flagged 45 of the 74 sentences of the skill's own exemplar passages, 19 of them under a rule the skill said to fix.
 - One run over a 2014 column by 文化庁国語課 rewrote 11 of its 35 body sentences and split 5. Its mean sentence fell from 47.6 characters to 39.6, the clause joints in a sentence from 1.71 to 1.30, and the plain endings rose from 60.7 % to 69.7 %.
-- A report Claude wrote with the hooks on held 0.41 joints a sentence, and 59 % of its sentences were tied to nothing around them. Fourteen columns by 文化庁国語課, the 建議 and a council report hold 0.75 to 1.63 joints.
+- A report Claude wrote with the hooks on held 0.46 joints a sentence, and 54 % of its sentences were tied to nothing around them. Fourteen columns by 文化庁国語課, the 建議 and a council report hold 0.75 to 1.63 joints.
 
 So each ruling of "fix" now takes the wording out and keeps what the sentence did: how sure it is, the reason or the limit it carried, and its tie to the next sentence. `ja-no-weak-phrase` moved from the tier the skill fixes to the tier it judges, a negation stays where its positive form would claim more or need a fact the text lacks, and a sentence strung on clauses is split only where its topic changes, with the tie carried into the new sentence. The 体言止め check also sets aside a citation or a parenthesis after the predicate.
 
