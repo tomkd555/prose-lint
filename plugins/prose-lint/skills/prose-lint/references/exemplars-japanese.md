@@ -21,9 +21,17 @@ Read the groups for the document's style:
 Take from a passage:
 
 - how a sentence opens: the topic, the subject and the order of the clauses;
-- how it ends, and how the endings vary from one sentence to the next;
+- what each sentence does (reports a fact, gives a reason, judges, advises,
+  limits a claim) and the ending that shows it; the endings vary from one
+  sentence to the next because the sentences differ in kind;
 - the words: 和語 or 漢語, the verb chosen, the field term;
-- the connectives, and how one paragraph carries one point.
+- how the sentences join: the clauses held in one sentence, the connectives,
+  the demonstratives that point back, and how one paragraph carries one
+  point.
+
+A passage shows a range to write within. A sentence that differs from the
+passages in shape and reads well is left as it is; `flow-japanese.md` says
+what a rewrite keeps.
 
 Endings follow the style's 文体. A passage in the other 文体 serves for its
 structure and words.
@@ -36,7 +44,7 @@ Each passage is quoted as its source prints it. The line breaks of the PDF and
 the spaces that typesetting puts between Latin letters or digits and Japanese
 are removed, and a footnote stays as its own paragraph. （中略） marks a gap
 between two parts of one source. Every source was
-fetched on 2026-10-24; section 5 gives its URL, the reason it was chosen and
+fetched on 2026-10-24, and those of 2.4, 2.5, 4.3 and 4.4 on 2026-11-11; section 5 gives its URL, the reason it was chosen and
 its licence. The key in 〔〕 after each heading names the source.
 
 ## 1. official
@@ -89,8 +97,10 @@ its licence. The key in 〔〕 after each heading names the source.
 - 常体 in the form for work carried on up to now: 審議してきた,
   検討を進めてきた.
 - The second sentence runs to about 190 characters with two parentheticals.
-  Take its order of content (body, basis, period, count) and split it in a
-  rewrite; the house target is 50 to 60 characters a sentence.
+  Take its order of content (body, basis, period, count). The 建議 asks a
+  writer to check a sentence once it passes 50 to 60 characters; a rewrite
+  that splits this one at its change of topic opens the new sentence with the
+  tie the clause carried.
 - The report writes 「，」 as its comma, the 公用文 convention of its time;
   the 建議 of 2022 makes 「、」 the rule.
 
@@ -117,6 +127,37 @@ its licence. The key in 〔〕 after each heading names the source.
 - The last two sentences end on what people do (情報を得ています,
   利用している人もいます). The third leaves its subject, 聴覚障害のある人,
   unstated after a sentence about the condition; a rewrite names it.
+
+### 2.4 Recommending a course, with its grounds 〔永崎2020〕
+
+> デジタルアーカイブ等の公開側における今後の対応としては、ビューワの状況を見据えつつ、代表的なビューワが対応した段階で準拠していくのが穏当なところだろう。ビューワだけでなく、バージョン2を前提とした様々な応用システムが世界中で稼働している状況であることから、バージョン2での公開をやめてしまうとそれらのシステムが動かなくなってしまうため、バージョン2に関しては、バージョン3.0対応後も引き続き公開していくことがデジタルアーカイブの持続可能性にとっては大切である。特にIIIF Presentation APIの場合、複数のバージョンを共存させつつ公開することにあまりコストがかからないため、そのことも見越した上での非互換な変更だったとも言えるだろう。上述のMirador 3が、バージョン2と3.0の両対応としていることも、そうした事情を反映していると言えるだろう。
+
+- The recommendation is a graded judgement, 「…のが穏当なところだろう」, and
+  the point the writer is sure of ends plain: 「…大切である」.
+- The grounds sit inside the sentence they support: 「…状況であることから、
+  …動かなくなってしまうため、…」.
+- 「特に…の場合」 narrows the claim, and 「…とも言えるだろう」 marks an
+  inference as one.
+- そのことも and そうした事情 point back, so no sentence starts from nothing.
+- The second sentence runs to about 150 characters on one line of thought; it
+  is the passage's main point and its longest sentence.
+
+### 2.5 Summing up an incident: cause, weight and certainty 〔COCOA報告〕
+
+> 以上、全体をまとめると、COCOAは、新しい複数のシステムとの連携を要する点で複雑な仕様であり、不具合が発生してしまうこと自体は避けられない面もあるが、新型コロナウイルス感染症の感染防止対策をしっかりと講じていく必要があるという点からは、発生した不具合に早く気づき、原因を突き止め、迅速に対応していくことが非常に重要である。
+>
+> 今回の不具合のシステム上の原因は、AndroidとiOSの挙動の差異であったが、実際のところ、1.1.4バージョンのリリース前後において当該挙動の差異に気が付くことは難しい面があったと考えられる。
+>
+> 不具合が発生したこと以上に、不具合が４か月にわたって見逃されたことがより大きな問題であったと考えられる。不具合が見逃された原因は、「接触通知までの一連の流れに係る結合テスト」の環境が早期に整備されず、また適切なテストが実施されなかったことであり、かつGitHubの指摘などを不具合の発見や改修に活かすことができなかったこと等であった。
+
+- A concession comes before the verdict: 「…避けられない面もあるが、…という
+  点からは、…非常に重要である」, 「…差異であったが、実際のところ、…」.
+- The problems are ranked: 「不具合が発生したこと以上に、…ことがより大きな
+  問題であった」.
+- Certainty is graded by ending: と考えられる for the team's judgement, and
+  「原因は、…ことであり、…等であった」 for the cause it established.
+- The report sets these out as three items marked ○; the mark is left out
+  here.
 
 ## 3. academic
 
@@ -211,6 +252,31 @@ its licence. The key in 〔〕 after each heading names the source.
 - 〜のです marks the explanation, twice in the second paragraph, each time at
   the close of a point.
 
+### 4.3 Reasoning to a cause, step by step 〔ぶんかる007〕
+
+> このように「やぶさかでない」は，ある物事や行動について積極的な姿勢をアピールしたいものの，一方で何かしらのためらいや留保があるような場合に用いられる傾向があるようです。消極的な言い方をしたくはないが，誰もがはっきりと分かる前向きな表現は使いづらいといったときに，古い言い回しになりつつある「やぶさかでない」が選ばれているのかもしれません。
+>
+> 「仕方なくする」という意味だと捉える人が増えているのは，「やぶさかでない」が上記のようなためらいや留保とともに用いられることが多いのと関係があると考えられます。前向きな姿勢が示されたとしても，ためらいや留保の方に重点を置いて受け取られれば，「仕方なくする」という意味で捉えられてしまうこともあるでしょう。そうなれば，伝える側としても，積極的な気持ちを示そうとする場合には，ますます使いにくい言葉になっていきます。このような傾向が重なって，元々の「喜んでする」という意味合いが理解されにくくなっていると考えられます。
+
+- Six sentences, five endings, each saying how sure the writer is: ようです,
+  のかもしれません, と考えられます, こともあるでしょう, なっていきます,
+  と考えられます.
+- Each sentence starts from the last: このように…, そうなれば…, このような
+  傾向が重なって….
+- Concessions stay inside the sentence: 「…したいものの，一方で…」,
+  「…示されたとしても，…」.
+
+### 4.4 Advice in three strengths 〔ぶんかる004〕
+
+> 以上のように，今のところ，「聞いたときの感じ」の意味で「耳ざわり」を用いることには，慎重であった方が良さそうです。例えば，「聞いた感じが良い」ということを伝えたい場合には，文章であれば「耳触りが良い」と漢字を使ったり，会話では「耳当たりが良い」など別の表現を用いたりする方が誤解されにくいかもしれません。また，漱石がそう書いているとはいえ，「障り」の方を使って「耳障りが良い」と書くのは避けておくべきでしょう。
+
+- Three recommendations, each as strong as its grounds: 「…方が良さそうです」,
+  「…誤解されにくいかもしれません」, 「…避けておくべきでしょう」.
+- 「今のところ」 limits the advice in time, and 「…とはいえ」 grants the
+  counter-example before setting it aside.
+- 「以上のように」, 「例えば」 and 「また」 move from the conclusion to a case
+  and to a second point.
+
 ## 5. Sources
 
 | Key | Work | Published | URL | Chosen because | Licence |
@@ -220,6 +286,10 @@ its licence. The key in 〔〕 after each heading names the source.
 | デジタル庁 | デジタル庁「ウェブアクセシビリティ導入ガイドブック」2.ウェブアクセシビリティの基礎, p. 11 | 2025-10-16 | https://www.digital.go.jp/resources/introduction-to-web-accessibility-guidebook | part of デジタル社会推進標準ガイドライン as an Informative document; its 2023-02-24 revision note reads 「分かりやすくなるよう日本語の表記を全般的に改訂しました。」 | デジタル庁 site terms: 公共データ利用規約（第1.0版） |
 | 川崎ほか2025 | 川崎義史, 永田亮, 高村大也, 大谷直輝「クレオールは計量的に峻別できるか？」言語処理学会第31回年次大会 E1-1, 1 はじめに, 6 考察, 7 おわりに | 2025-03 | https://www.anlp.jp/proceedings/annual_meeting/2025/pdf_dir/E1-1.pdf | 優秀賞 of the meeting (https://www.anlp.jp/nlp2025/award.html) | CC BY 4.0, stated on each page |
 | 永田ほか2024 | 永田亮, 川崎義史, 大谷直輝, 高村大也「動詞派生前置詞の文法化の定量化」言語処理学会第30回年次大会 E6-5, 2 関連研究, 4 評価実験 | 2024-03 | https://www.anlp.jp/proceedings/annual_meeting/2024/pdf_dir/E6-5.pdf | 優秀賞 of the meeting (https://www.anlp.jp/nlp2024/award.html) | CC BY 4.0, stated on each page |
+| 永崎2020 | 永崎研宣「動向レビュー：IIIFの概要と主要APIバージョン3.0の公開」カレントアウェアネス No.346 (CA1989), 国立国会図書館 | 2020-12-20 | https://current.ndl.go.jp/ca1989 | a review by a named specialist that ends in a recommendation and gives its grounds | CC BY 4.0, stated at the foot of the article |
+| COCOA報告 | COCOA不具合調査・再発防止策検討チーム（厚生労働省）「接触確認アプリ「COCOA」の不具合の発生経緯の調査と再発防止の検討について」, ４（４）まとめ, p. 37 | 2021-04 | https://www.mhlw.go.jp/content/000769774.pdf | an incident report that weighs causes and says how sure it is of each | 厚生労働省 site terms: 公共データ利用規約（第1.0版） |
+| ぶんかる007 | 文化庁国語課「「やぶさかでない」と，ためらい」文化庁広報誌ぶんかる 連載「言葉のQ&A」007 | 2015-07-02 | https://www.bunka.go.jp/prmagazine/rensai/kotoba/kotoba_007.html | a column for the public by the office that drafted the 建議, written before generated text | as 建議 |
+| ぶんかる004 | 文化庁国語課「「耳ざわり」は「障り」か「触り」か」the same series, 004 | 2014-10-30 | https://www.bunka.go.jp/prmagazine/rensai/kotoba/kotoba_004.html | as ぶんかる007 | as 建議 |
 
 ※ Attribution for each source is the row's work, publisher and URL, and the
 passages above are excerpts of them.
