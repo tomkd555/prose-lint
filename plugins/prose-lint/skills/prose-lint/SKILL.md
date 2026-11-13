@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide, a review article, an incident report and award-winning papers); a flow check that counts how the sentences end and join, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is and how it ties to the next; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a council report, a government technical guide, a review article, an incident report and award-winning papers); a flow check that counts how the sentences end and join, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is and how it ties to the next; a norm check that lays the rates of ordinary forms (clause joints, connectives, demonstratives, the passive, noun-and-する verbs) beside a baseline counted from news text and marks a text that leaves them out; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -300,7 +300,16 @@ The register is a Markdown table, or a CSV with the header `Pattern,Instead,Why`
 of rejected wordings: `$PROSE_LINT_REGISTER`, else `{HOME}/vocabulary.md`, else
 the sample in `assets/`. A CSV headed `Pattern,Instead,Except` lists plain words
 matched as written, and its `Except` column gives the exception shown with each
-hit; `register.py`'s docstring has the rules. The script prints
+hit; `register.py`'s docstring has the rules. A plain word that holds kana
+or kanji is matched on morpheme boundaries, read with sudachipy: the row 語
+matches 「この語は」 and leaves 語った alone, 置き leaves 位置 and 置き換える,
+旅 leaves 旅行, and a verb row written as its stem (述べ) matches every form
+of that verb. Measured for 1.12.0 with one user's register of 344 rows:
+substring matching flagged 92.5 % of 400 news articles, and the boundary test
+dropped 16.4 % of the hits on news text held out of the baseline, each of the
+sampled ones a different word. A word used in its literal sense still
+matches (請求 in 請求書, 事故 in 交通事故), so a row for a figurative use
+needs its `Except` text, and the ruling stays with the reader of the hit. The script prints
 which one it read. The sample carries twelve rows in three groups.
 
 - Definition by negation, two rows. The Japanese row on `ではない` also covers
@@ -664,6 +673,57 @@ every tie a fix added. A が or a ので that a flow fix writes shows up in the
 second pass as `ga_conjunction`, and a joined sentence can pass 90
 characters; each is kept under those rules as a contrast, or as a sentence
 that reads in one pass.
+
+### Norm
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/norm.py <file>
+```
+
+For a deck, `<file>` is `<tmp>/deck.md`. Every layer above names a form to
+take out, so a text can clear them all by leaving ordinary Japanese out: the
+が and ので that join clauses, the connective that opens a sentence, the
+demonstrative, the passive, the verb made of a noun and する. This layer
+counts those forms with sudachipy and lays each rate beside the same rate in
+a baseline of human-written text. The shipped baseline,
+`assets/norm-baseline.json`, was counted from the 1,405 articles of Japanese
+Wikinews (CC BY 4.0) that run to 10 sentences or more. It holds rates and no
+text.
+
+Six rates are marked, each on the side a text moves to when those forms are
+left out: `joints`, `glue` (conjunctive が, opening connectives and
+demonstratives together), `sahen` and `length` when they fall under the value
+95 % of the baseline documents reach, `negative_end` and `colon` when they
+pass the value 95 % of them stay under. Two or more marks make the text
+`off`. Measured for 1.12.0 with a baseline built from half of those articles:
+4.9 % of the 695 articles held out were marked `off`, 4.6 % of 109 science
+news articles edited by a public agency, 1.7 % of 59 sections of a government
+white paper, none of 27 human-written business and technical documents, and
+93.9 % of 297 replies Claude wrote under this plugin's hooks. Web news
+written in short sentences sits further from the baseline: 27.3 % of 982
+articles of the livedoor news corpus were marked. In those replies が joined
+clauses 6 times in 1,000 sentences, where news text holds 81 to 94.
+
+A text marked `off` is read again by paragraph, with the flow layer's
+questions: join what the text itself relates, receive the sentence before
+with この or その where it is the topic, write the verb the field writes
+(確認する, 修正する), and let a passive stand where the agent is unknown or
+beside the point. Every such fix is made of what the text already says. A
+list of steps or of measured values is short and unjoined by nature and
+stays. A document under 10 sentences gets its rates and no marks.
+
+To hold a text to another standard, build a baseline from documents you hold,
+one document a file:
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/norm.py --build {HOME}/norm-baseline.json --name "<label>" [--plain] <folder>
+```
+
+`{HOME}/norm-baseline.json`, or the file `$PROSE_LINT_NORM_BASELINE` names,
+then takes the shipped baseline's place. A folder of NHK or newspaper
+articles the user saved, or newspaper data licensed for research, makes the
+baseline the user's own standard; 20 documents of 10 sentences or more are
+the least a baseline takes.
 
 ### Academic mode
 
@@ -1089,7 +1149,9 @@ rendering.
   per sentence, the share of plain endings and of lone sentences, and
   whether the document is marked `flat`. The score counts wordings and reads
   none of this, so a high score beside a `flat` mark means the text is clean
-  and reads as a list. In academic mode, add a line under the score: that the run was in
+  and reads as a list. Then one line from `norm.py`: the baseline's name,
+  the marked rates with their values, and whether the text is `off`, before
+  the fixes and after them. In academic mode, add a line under the score: that the run was in
   academic mode and why, and the academic register's hit count before and
   after the fixes. The ledger follows by layer, with the reader's findings as
   one layer; the academic ledger comes after the register's, with each hit's
