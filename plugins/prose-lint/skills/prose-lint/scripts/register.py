@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.9"
-# dependencies = ["regex>=2023.0"]
+# dependencies = ["regex>=2023.0", "sudachipy>=0.6.8", "sudachidict-core>=20240409"]
 # ///
 """register.py - match a file against a register of rejected wordings.
 
@@ -20,6 +20,14 @@ with the flags chat (the hooks leave the row out of replies), quote (a hit
 inside 「」, “” or "" or on a > line is dropped) and solo (a hit next to a kanji
 or a katakana word is dropped), each followed by a space; the rest is shown
 with each hit as the exception. A CSV saved in the Windows-31J code page also reads.
+
+A plain word that holds kana or kanji is matched on morpheme boundaries, read
+with sudachipy in its short units: 語 matches 「この語は」 and leaves 語った alone,
+置き leaves 位置 and 置き換える, 旅 leaves 旅行. The match starts where a morpheme
+starts. It ends where one ends, or inside a particle, an auxiliary or ない
+(見せな in 見せない), or inside the row's own verb (述べ in 述べる, 置け in
+置ける). A compound keeps its parts (回帰 in 回帰テスト). Without sudachipy the
+words match as substrings.
 
 Fenced code blocks are skipped. Consecutive lines of a paragraph are joined
 before matching, because hard-wrapped Japanese puts a line break inside a word;
@@ -292,6 +300,67 @@ def blank_front_matter(content: str) -> str:
     return content
 
 
+JAPANESE = regex.compile(r"[\p{Han}\p{Hiragana}\p{Katakana}]")
+HIRAGANA = regex.compile(r"\p{Hiragana}+")
+MAX_TOKENIZE = 12000  # characters; sudachipy takes 49,149 bytes at most
+_tokenizer = None
+_tails: dict[str, tuple] = {}
+
+
+def morphemes(text: str):
+    """Return the morphemes of text as (short units, long units).
+
+    None when sudachipy is missing or the text is too long.
+    """
+    global _tokenizer
+    if _tokenizer is None:
+        try:
+            from sudachipy import Dictionary
+            _tokenizer = Dictionary().create()
+        except Exception:  # noqa: BLE001 - no morphology: the words match as substrings
+            _tokenizer = False
+    if not _tokenizer or len(text) > MAX_TOKENIZE:
+        return None
+    from sudachipy import SplitMode
+    return _tokenizer.tokenize(text, SplitMode.A), _tokenizer.tokenize(text, SplitMode.C)
+
+
+def own_verb(token, end: int, word: str) -> bool:
+    """True when the match ends inside token and token is the row's own verb: 述べ in 述べる, 置け in 置ける."""
+    part = token.surface()[:end - token.begin()]
+    if not HIRAGANA.fullmatch(token.surface()[len(part):]):
+        return False
+    if HIRAGANA.search(part[-1:]) and token.dictionary_form() == part + "る":
+        return True
+    if word not in _tails:
+        alone = morphemes(word)
+        last = alone[0][-1] if alone and len(alone[0]) else None
+        _tails[word] = (last.surface(), last.dictionary_form(), last.part_of_speech()[0]) if last else ("", "", "")
+    surface, lemma, pos = _tails[word]
+    return (pos in ("動詞", "形容詞", "助動詞") and token.begin() == end - len(surface)
+            and token.dictionary_form() == lemma)
+
+
+def on_boundary(ms, start: int, end: int, word: str) -> bool:
+    """True when the match [start, end) of a plain word sits on the morpheme boundaries of ms."""
+    short, long = ms
+    # Inside one long unit that is no noun (置き in 置き換える, 引き in 引き続き): the row's own verb or nothing.
+    for m in long:
+        if m.begin() <= start and end <= m.end() and (m.begin(), m.end()) != (start, end):
+            if m.part_of_speech()[0] in ("動詞", "形容詞", "副詞", "接続詞", "連体詞"):
+                return m.begin() == start and own_verb(m, end, word)
+            break
+    if all(m.begin() != start for m in short):
+        return False
+    inside = next((m for m in short if m.begin() < end < m.end()), None)
+    if inside is None:
+        return True
+    pos = inside.part_of_speech()[0]
+    if pos in ("助動詞", "助詞") or inside.dictionary_form() in ("ない", "無い"):
+        return True
+    return pos in ("動詞", "形容詞") and own_verb(inside, end, word)
+
+
 def find_hits(content: str, entries: list[dict], fmt: str = "md") -> list[dict]:
     """Match the entries; fmt is "md" (Markdown and plain text) or "html"."""
     passes = []
@@ -306,8 +375,13 @@ def find_hits(content: str, entries: list[dict], fmt: str = "md") -> list[dict]:
     for found, es, quoted in passes:
         for text, starts in found:
             spans = [m.span() for m in QUOTE.finditer(text)]
+            ms = None  # read once, for the first Japanese plain-word match in this unit
             for e in es:
                 for m in e["regex"].finditer(text):
+                    if e.get("words") and JAPANESE.search(m.group()):
+                        ms = morphemes(text) if ms is None else ms
+                        if ms and not on_boundary(ms, m.start(), m.end(), m.group()):
+                            continue
                     line = next(no for off, no in reversed(starts) if off <= m.start())
                     if "quote" in e.get("flags", ()) and (
                             line in quoted or any(a < m.start() and m.end() < b for a, b in spans)):
