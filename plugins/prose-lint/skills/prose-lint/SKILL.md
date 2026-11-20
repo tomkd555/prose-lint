@@ -30,7 +30,9 @@ It prints the log's path and every `skip` or `fail` line. The plugin's other
 hooks (`hooks/lint.py`) run textlint and the register on each file Claude
 writes, on each Japanese reply, and on plans and questions before they reach
 the user; this skill runs every layer. A skill copied by
-hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. A
+hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. It
+takes the plugin's `agents` folder with it, copied to `{SKILL_DIR}/../../agents`,
+where the launch fallback of Step 3a reads the reader definitions. A
 layer whose tool is still missing is reported as skipped in the final report;
 the other layers still run.
 
@@ -179,56 +181,22 @@ human-written documents the reference measured use the commonest surface forms
 too (において in 47 of 83), so the decision needs the sentence and the document
 around it.
 
-Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
+Launch `prose-lint:japanese-reader`, `model: opus`, in a fresh context. The agent file holds
+the questions, the reading order and the output line. Its prompt holds these fields and
+nothing else:
 
-- the purpose in one line: find every sentence of one Japanese document whose
-  meaning a reader cannot recover, that reads as translated from English, or
-  whose 文体 or words do not fit the document's style, every title that names
-  its subject by no word or leaves out the result its text states, every
-  table header that needs another header or a cell to name its column, and
-  every paragraph whose sentences stand side by side with nothing to join
-  them, and propose a rewrite for each;
-- the document's absolute path and the style line from Step 2;
-- the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
-  with "read it first, answer the questions of its section 3.4 for every
-  sentence and those of section 3.5 for every heading, slide title and table,
-  and use its marker ids";
-- the absolute path of `{SKILL_DIR}/references/exemplars-japanese.md`, with
-  "read section 0 and the groups it names for the style, and compare each
-  sentence with how those passages open and end their sentences, which words
-  they choose and how they join. A sentence that differs from the passages
-  in shape alone, and reads well, is no finding";
-- the absolute path of `{SKILL_DIR}/references/flow-japanese.md`, with "read
-  it after the exemplars and ask the questions of its section 3 of every
-  paragraph of two or more sentences of running text, a list item of two or
-  more sentences included. Mark each finding with
-  its `flow-` id, give the line the paragraph starts on, quote its first
-  sentence, and write the rewrite as the whole paragraph, made only of what
-  the paragraph and its neighbours already say";
-- for `article` and `slides`, the absolute paths of
-  `{SKILL_DIR}/references/stop-ai-slop-jp/rules.md` and of `structures.md`,
-  `examples.md` and `phrases.md` beside it, with "read them after the
-  reference. Find every pattern of structures.md except §4-5 and §4-6, and
-  the points of the rules' quick check under 構造レベル, 文・段落レベル and
-  強度と立場, except the one on uniform sentence endings. From phrases.md, find
-  the words it limits to a metaphorical use (装置, インフラ, 設計, 接続) and
-  full proper names repeated (§3). Mark each finding `slop-<section>`
-  (`slop-1-1` for false agency), `slop-rule-<n>` for a core rule or
-  `slop-phrases-<section>`. Close with five lines, one per axis of the rules'
-  採点 section: `score | <axis> | <1-10> | <grounds in one sentence>`";
-- the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
-  user's own notes on wordings they rejected, read after the reference;
-- the output shape, one finding per line:
-  `<line> | <marker id> | "<sentence>" | <rewrite> | <reason>`, the reason
-  in one sentence;
-- "report every finding, no severity filter";
-- the scope: notation, kana, sentence length and the register's wordings belong
-  to the other layers, and a verbatim quotation is left as it stands;
-- English as the output language, with Japanese quoted verbatim.
+- `document`: the document's absolute path.
+- `style`: the style line from Step 2.
+- `references`: the absolute path of `{SKILL_DIR}/references`.
+- `patterns`: the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file.
 
 It withholds who wrote the text, the task it served, any reason a wording was
 chosen, the lint results and any expected finding. A reader handed those reads
 the intent into each sentence and passes the English frame it sits in.
+
+When the launch returns "Agent type not found", as in a session that started before the
+plugin was updated, launch `general-purpose` on opus with a prompt made of the body of
+`{SKILL_DIR}/../../agents/japanese-reader.md` below its frontmatter, followed by the fields.
 
 Its findings join the ledger and are ruled on like any other hit.
 
@@ -882,14 +850,11 @@ with that reason. The script also lists the `ending_run` and `lone_run`
 passages of the fixed file; rule on those that hold a rewritten sentence.
 
 Then run natural-japanese's second run and launch the
-reader once more, fresh, on the fixed file. The reader's prompt carries the
-first read's items with the scope narrowed: the line ranges of the paragraphs
-that contain a rewritten sentence, the line of each rewritten sentence, "read
-only these ranges, with offset and limit", and "report on the sentences at
-those lines only", and "ask the questions of section 3 of the flow
-reference, `flow-cut` included, of each paragraph in these ranges". Merge
+reader once more, fresh, on the fixed file. Its prompt holds the first read's
+fields and `ranges`: the line ranges of the paragraphs that contain a
+rewritten sentence, and the line of each rewritten sentence. Merge
 ranges under 10 lines apart; once they cover half the
-file, drop the ranges and let the reader read the file in full. The prompt
+file, leave `ranges` out and let the reader read the file in full. The prompt
 still withholds the original wording and the reason for each change. Rule on
 both results together and apply what holds in one final pass; that pass
 closes the run.
@@ -904,26 +869,19 @@ that contains a fix, as in "Writing a fix".
 
 ### The reader
 
-Launch one agent, `model: opus`, in a fresh context, in the background, before
-the mechanical layers. Its prompt carries:
+Launch `prose-lint:english-reader`, `model: opus`, in a fresh context, in the background,
+before the mechanical layers. The agent file holds the checks and the output line. Its prompt
+holds these fields and nothing else:
 
-- the purpose in one line: find every English sentence of one document that
-  fails in meaning or carries the shape of a Japanese draft, and propose a
-  rewrite for each;
-- the document's absolute path and the style line;
-- the absolute path of `{SKILL_DIR}/references/english-reader.md`, with "read it
-  first, answer its sentence checks for every sentence and its title and table
-  checks for every heading, slide title and table";
-- the output shape, one finding per line:
-  `<line> | <check id> | "<sentence>" | <rewrite> | <reason>`, the reason in one
-  sentence;
-- "report every finding, no severity filter";
-- the scope: what vale reports belongs to the other layers, and a verbatim
-  quotation is left as it stands.
+- `document`: the document's absolute path.
+- `style`: the style line.
+- `references`: the absolute path of `{SKILL_DIR}/references`.
 
-It withholds who wrote the text, the task it served and the lint results. After
-the fixes, launch it once more over the paragraphs that changed, as the Japanese
-reader's second read does, and rule on what it returns in one final pass.
+It withholds who wrote the text, the task it served and the lint results. When the launch
+returns "Agent type not found", use the fallback of Step 3a with
+`{SKILL_DIR}/../../agents/english-reader.md`. After the fixes, launch it once more with
+`ranges`, the line ranges of the paragraphs that changed, as the Japanese reader's second read
+does, and rule on what it returns in one final pass.
 
 ### textlint
 
@@ -1117,18 +1075,16 @@ rendering.
    missing there, source-language text left in the target, or a heading left in
    the source language. A run with no glossary skips that kind; say so in the
    report.
-2. Launch one agent, `model: opus`, in a fresh context. Its prompt carries the
-   purpose in one line (compare one translation with its source and report each
-   difference in meaning), the absolute paths of the source and the target, the
-   glossary when there is one, the absolute path of
-   `{SKILL_DIR}/references/translation-check.md` with "read it first, ask its
-   questions of every section and use its output line", "report every finding,
-   no severity filter", and English as the output language with quoted text
-   verbatim. It withholds who translated the text, the task and the script's
-   findings.
+2. Launch `prose-lint:translation-comparer`, `model: opus`, in a fresh context. The agent
+   file holds the questions and the output line. Its prompt holds these fields and nothing
+   else: `source` and `target`, the absolute paths of the source and the target; `references`,
+   the absolute path of `{SKILL_DIR}/references`; and `glossary`, the glossary's absolute path
+   when there is one. It withholds who translated the text, the task and the script's
+   findings. When the launch returns "Agent type not found", use the fallback of Step 3a with
+   `{SKILL_DIR}/../../agents/translation-comparer.md`.
 3. Rule on the script's lines and the agent's findings together, then make one
    rewrite pass over the target, one Edit per paragraph that contains a fix.
-   Launch the agent once more over the changed lines only, with the source
+   Launch the agent once more with `ranges`: the changed lines of the target, with the source
    ranges beside them. Correct what it finds and stop: further passes move the
    text toward the rewriter's wording, and the meaning gains nothing.
 4. Run Step 3a on a Japanese target and Step 3b on an English one. A rewrite in
