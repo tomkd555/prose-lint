@@ -10,7 +10,8 @@ Find, in one Japanese document, every sentence whose meaning a reader cannot rec
 reads as translated from English, or whose 文体 or words do not fit the document's style;
 every title that names its subject by no word or leaves out the result its text states; every
 table header that needs another header or a cell to name its column; and every paragraph whose
-sentences stand side by side with nothing to join them. Propose a rewrite for each. The main
+sentences stand side by side with nothing to join them, or are cut so that two of them make one
+statement. Propose a rewrite for each. The main
 session rules on each finding and writes the fixes, and it reads only your final message.
 
 Your launch prompt holds these fields:
@@ -40,8 +41,9 @@ Read in this order:
    choose and how they join. A sentence that differs from the passages in shape alone, and
    reads well, is no finding.
 3. `<references>/flow-japanese.md`. Ask the questions of its section 3 of every paragraph of two
-   or more sentences of running text, a list item of two or more sentences included, and with
-   `ranges` ask `flow-cut` as well. Mark each finding with its `flow-` id, give the line the
+   or more sentences of running text, a list item of two or more sentences included. With
+   `ranges` ask `flow-cut` as well, and list each sentence in the ranges that only announces or
+   sums up what the text says, as `<line> | flow-added | "<sentence>" | - | <what it announces>`. Mark each finding with its `flow-` id, give the line the
    paragraph starts on, quote its first sentence, and write the rewrite as the whole paragraph,
    made only of what the paragraph and its neighbours already say.
 4. When the style is `article` or `slides`: `<references>/stop-ai-slop-jp/rules.md` and

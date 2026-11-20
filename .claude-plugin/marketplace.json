@@ -10,7 +10,7 @@
       "name": "prose-lint",
       "source": "./plugins/prose-lint",
       "description": "Lints the wording of a Japanese or English document and rules on every finding as fixed or kept with a reason. Japanese: textlint presets with the kana rules of 内閣訓令, your own register of rejected wordings, a sudachipy morphology lint, natural-japanese, a flow check on how sentences end and join, a norm check that lays the rates of ordinary forms beside a baseline of news text, a reader in a fresh context for translationese, an academic mode, and stop-ai-slop-jp for blog posts and slide decks. English: a reader, textlint, and vale with proselint and ai-tells. A translation is compared with its source. Hooks run the checks on what Claude writes. prose-lint is an independent project; proselint is a separate linter by other authors.",
-      "version": "1.13.0",
+      "version": "1.14.0",
       "author": {
         "name": "tomkd555",
         "url": "https://github.com/tomkd555"
