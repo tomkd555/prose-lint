@@ -53,7 +53,7 @@ more are lone and a sentence holds 0.6 joints or fewer. Measured for 1.11.0:
 14 columns by 文化庁国語課 (2014-2018), the 建議 and a council report hold 0.75 to
 1.63 joints a sentence, and 14 % to 26 % of their sentences are lone, 53 % in
 one column; a report Claude wrote under this plugin's hooks held 0.46 and 54 %.
-Measured for 1.12.0 on 43 business documents of 2021 (press releases, engineering
+Measured for 1.14.0 on 43 business documents of 2021 (press releases, engineering
 blog posts, security alerts) and on drafts Claude wrote from notes of six of
 them: the six hold 19 % of sentences of 100 characters or more (median) and
 their drafts 2 %, 6 % under 30 characters and 16 %, 1.61 joints a sentence and

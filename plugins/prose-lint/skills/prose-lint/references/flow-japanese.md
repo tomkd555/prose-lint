@@ -12,7 +12,7 @@ written by no one.
 Section 1 gives the measurements behind that claim. Section 2 names the six
 things a text keeps, with the grounds for each. Section 3 holds the questions
 the reader asks of every paragraph. Section 4 is the table `scripts/flow.py`
-was set on, with the measurements of 1.12.0 on everyday business documents
+was set on, with the measurements of 1.14.0 on everyday business documents
 and on documents of ministries and public bodies, and section 5 lists the
 sources. Every source was fetched on
 2026-11-11 and each quotation checked against the fetched page or PDF. Each
@@ -51,7 +51,7 @@ Measured for 1.11.0, on the skill as it stood at 1.10.0.
    nothing around them, and none ended in a judgement or a request. The human-written documents of section 4 hold 0.75 to 1.63
    joints a sentence.
 
-Measured for 1.12.0, on the skill as it stood at 1.11.0, on two sets of
+Measured for 1.14.0, on the skill as it stood at 1.11.0, on two sets of
 documents. The skill's default style is `business`, so the first set leads:
 43 documents that companies and JPCERT/CC put out in 2021, press releases,
 engineering blog posts and security alerts (section 4.5). The second is 35
@@ -507,7 +507,7 @@ The `flatter` marks of `flow.py --before` use these least changes: 5 points
 for a percentage, 0.15 joints, 0.05 in the CV, 15 % in the count of sentences
 and in the mean length, one sentence in the longest run. They are this
 skill's, set so that the run of section 1, item 2, is marked on six of the
-eight figures 1.11.0 printed. 1.12.0 added two figures, each marked at 5
+eight figures 1.11.0 printed. 1.14.0 added two figures, each marked at 5
 points: the share of sentences of 100 characters or more and the share under
 30. It also prints the share that open on a topic of their own and the share
 with a parenthesis, unmarked (section 1, item 5).
@@ -515,9 +515,9 @@ with a parenthesis, unmarked (section 1, item 5).
 To reproduce a row, fetch the page, keep its prose paragraphs in a Markdown
 file and run `scripts/flow.py --json <file>`.
 
-### 4.2 Documents of ministries and public bodies (1.12.0)
+### 4.2 Documents of ministries and public bodies (1.14.0)
 
-The second set of 1.12.0. The first, business documents, is in section 4.5.
+The second set of 1.14.0. The first, business documents, is in section 4.5.
 
 35 documents published from 2009 to 2022, fetched on 2026-11-11 and listed in
 section 5: 2,513 body sentences. Each page's body was taken out by script,
@@ -542,7 +542,7 @@ differs from a draft: a magazine article for the public runs on short
 sentences and the 通知 on long ones. So a figure is read against the row of
 the document's own kind, and no single line is drawn through them.
 
-### 4.3 Eight of them beside drafts from their notes (1.12.0)
+### 4.3 Eight of them beside drafts from their notes (1.14.0)
 
 The method is in section 1, item 4. The eight are 情報通信白書 (W1), 環境白書
 (W2), the 通知 on 体罰 (N), the 2021-09 speech (S), 統計Today No.70 (C1),
@@ -571,7 +571,7 @@ run copies the file before its first Edit. The share of plain endings and of
 judgements moved in no one direction, since the notes carried each source's
 certainty as a tag.
 
-### 4.4 What the mechanical layers flag in the same texts (1.12.0)
+### 4.4 What the mechanical layers flag in the same texts (1.14.0)
 
 textlint, the general register, the translationese register and `koyobun.py`
 over each text set one sentence to a paragraph. A sentence counts once per
@@ -621,7 +621,7 @@ documents: `ja-no-successive-word` fired 88 times, on doubled brackets
 on 「正しく処理される」 as まさしく. `no-ai-words` fired on 検査, 事故, 経路
 and 入口 in their plain senses.
 
-### 4.5 Everyday business documents (1.12.0)
+### 4.5 Everyday business documents (1.14.0)
 
 43 documents published in 2021 and fetched on 2026-11-11 (section 5): 30
 press releases of six companies, 8 posts of a company's engineering blog and
@@ -698,9 +698,10 @@ writer's own. To 1,000 characters the 43 documents hold において 1.18 times,
 fewer of each than their originals (において 0.92 against 0.07, を行う 1.21
 against 0.41). No document holds 彼, 彼女 or 彼ら.
 
-The scripts that took the page bodies out, counted what `flow.py` leaves out
-(も, the kinds of opening, katakana words, the surface forms) and made these
-tables are in the repository under `research/20261111-human-prose/tools`.
+The counts `flow.py` does not print (も, katakana words, the surface forms,
+the hits by rule) came from scripts kept outside the repository, with the
+texts. To reproduce a row of the `flow.py` tables, fetch the page, keep its
+prose paragraphs in a Markdown file and run `scripts/flow.py --json <file>`.
 
 ## 5. Sources
 
@@ -744,5 +745,5 @@ The 43 documents of section 4.5, all fetched on 2026-11-11:
 - 楽天グループ株式会社. プレスリリース, 2021: `1026_02`, `1124_01` and `1206_01`. https://corp.rakuten.co.jp/news/press/2021/1206_01.html
 - ソフトバンク株式会社. プレスリリース, 2021: `20210301_01`, `20210316_01`, `20210511_01`, `20210701_01`, `20211001_01` and `20211104_01`. https://www.softbank.jp/corp/news/press/sbkk/2021/20210316_01/
 - 株式会社野村総合研究所. ニュースリリース, 2021-10-01. https://www.nri.com/jp/news/newsrelease/lst/2021/cc/1001_1
-- サイボウズ株式会社. Cybozu Inside Out, eight posts of 2021-12-02 to 2021-12-22. https://blog.cybozu.io/entry/2021/12/13/160224 (the others are listed in `research/20261111-human-prose/evidence/corpus-business.md`)
+- サイボウズ株式会社. Cybozu Inside Out, eight posts of 2021-12-02 to 2021-12-22. https://blog.cybozu.io/entry/2021/12/13/160224 (the others, under the same `entry/2021/12/`: `02/094309`, `08/170000`, `14/170000`, `16/113201`, `16/170000`, `22/143508`, `22/170000`)
 - JPCERT/CC. 注意喚起 JPCERT-AT-2021-0041, 0043, 0047, 0049 and 0050. https://www.jpcert.or.jp/at/2021/at210049.html

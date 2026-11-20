@@ -1,7 +1,7 @@
 ---
 name: prose-lint
 description: >-
-  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a 通知, a council report, a white paper, a government technical guide, a review article, two incident reports and award-winning papers); a flow check that counts how the sentences end, join and vary in length, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is, how it ties to the next and how much it holds; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
+  Runs the wording linters on a file or pasted text and picks the ones the text's language calls for. For Japanese: a style settled first (genre, reader, 文体 and where the words come from, or style=<name> from a calling skill) that every rewrite is written to; a reader in a fresh context that finds translationese from a sourced reference and judges each sentence against exemplar passages of present-day Japanese for the style (公用文, a 通知, a council report, a white paper, a government technical guide, a review article, two incident reports and award-winning papers); a flow check that counts how the sentences end, join and vary in length, read by paragraph before the fixes and compared with the original after them, so a rewrite keeps how sure each sentence is, how it ties to the next and how much it holds; a norm check that lays the rates of ordinary forms (clause joints, connectives, demonstratives, the passive, noun-and-する verbs) beside a baseline counted from news text and marks a text that leaves them out; a register of 13 translationese forms; textlint with the technical-writing, JTF, AI-writing and AI-words presets, the kana rules of 内閣訓令 and い抜き・さ入れ・フィラー; a register of rejected wordings; natural-japanese's lint with its naturalness score; a sudachipy morphology lint for 公用文作成の考え方 and house rules; an academic mode for papers, theses and reports; and, for blog posts, essays and slide decks (a .pptx included), stop-ai-slop-jp's phrase register, its structure patterns read by the reader and its five-axis score. For English: a reader in a fresh context, textlint, the register's negation row, and vale with proselint, ai-tells and five house rules. For a translation in either direction: a script and a reader in a fresh context that compare the target with its source, and one rewrite pass. Triggers on 「textlint かけて」「lint して」「lint 回して」「校正して」「表記チェック」「vale かけて」「否定形を消して」「否定で定義した文を直して」「AI っぽさを消して」「論文調にして」「論文向けの表現に直して」「レポートの文体にして」「学術的な表現に」「口語表現を直して」「翻訳調を直して」「直訳っぽい」「翻訳っぽい」「英語の直訳になっている」「AI臭を消して」「ブログを直して」「スライドの文言を直して」「翻訳をチェックして」「訳文を確認して」「この翻訳を見て」「無機質な文章を直して」「文章が硬い」「ぶつ切りを直して」「文のつながりを見て」, "run textlint", "lint this file", "proofread this", "check this English draft", "check this translation", "does this read as AI-written". Use it whenever the user names a linter or asks for a wording check on a document.
 ---
 
 # Prose lint
@@ -30,7 +30,9 @@ It prints the log's path and every `skip` or `fail` line. The plugin's other
 hooks (`hooks/lint.py`) run textlint and the register on each file Claude
 writes, on each Japanese reply, and on plans and questions before they reach
 the user; this skill runs every layer. A skill copied by
-hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. A
+hand has no hook; run `uv run python {SKILL_DIR}/scripts/setup.py` there. It
+takes the plugin's `agents` folder with it, copied to `{SKILL_DIR}/../../agents`,
+where the launch fallback of Step 3a reads the reader definitions. A
 layer whose tool is still missing is reported as skipped in the final report;
 the other layers still run.
 
@@ -168,7 +170,7 @@ Where a layer leaves a hit to judgement, a sentence that reads well and does
 its job is kept, with that as the reason. Where a layer says a hit is fixed
 or rewritten, that ruling stands, and the fix keeps the job.
 
-The measurements of 1.12.0 are in sections 1 and 4 of the same reference.
+The measurements of 1.14.0 are in sections 1 and 4 of the same reference.
 The standard they were taken against is everyday business writing: 43
 documents that companies and JPCERT/CC put out in 2021 (press releases,
 engineering blog posts, security alerts), with 35 documents of ministries and
@@ -207,57 +209,22 @@ human-written documents the reference measured use the commonest surface forms
 too (において in 47 of 83), so the decision needs the sentence and the document
 around it.
 
-Launch one agent, `model: opus`, in a fresh context. Its prompt carries:
+Launch `prose-lint:japanese-reader`, `model: opus`, in a fresh context. The agent file holds
+the questions, the reading order and the output line. Its prompt holds these fields and
+nothing else:
 
-- the purpose in one line: find every sentence of one Japanese document whose
-  meaning a reader cannot recover, that reads as translated from English, or
-  whose 文体 or words do not fit the document's style, every title that names
-  its subject by no word or leaves out the result its text states, every
-  table header that needs another header or a cell to name its column, and
-  every paragraph whose sentences stand side by side with nothing to join
-  them, or cut so that two of them make one statement, and propose a rewrite
-  for each;
-- the document's absolute path and the style line from Step 2;
-- the absolute path of `{SKILL_DIR}/references/translationese-japanese.md`,
-  with "read it first, answer the questions of its section 3.4 for every
-  sentence and those of section 3.5 for every heading, slide title and table,
-  and use its marker ids";
-- the absolute path of `{SKILL_DIR}/references/exemplars-japanese.md`, with
-  "read section 0 and the groups it names for the style, and compare each
-  sentence with how those passages open and end their sentences, which words
-  they choose and how they join. A sentence that differs from the passages
-  in shape alone, and reads well, is no finding";
-- the absolute path of `{SKILL_DIR}/references/flow-japanese.md`, with "read
-  it after the exemplars and ask the questions of its section 3 of every
-  paragraph of two or more sentences of running text, a list item of two or
-  more sentences included. Mark each finding with
-  its `flow-` id, give the line the paragraph starts on, quote its first
-  sentence, and write the rewrite as the whole paragraph, made only of what
-  the paragraph and its neighbours already say";
-- for `article` and `slides`, the absolute paths of
-  `{SKILL_DIR}/references/stop-ai-slop-jp/rules.md` and of `structures.md`,
-  `examples.md` and `phrases.md` beside it, with "read them after the
-  reference. Find every pattern of structures.md except §4-5 and §4-6, and
-  the points of the rules' quick check under 構造レベル, 文・段落レベル and
-  強度と立場, except the one on uniform sentence endings. From phrases.md, find
-  the words it limits to a metaphorical use (装置, インフラ, 設計, 接続) and
-  full proper names repeated (§3). Mark each finding `slop-<section>`
-  (`slop-1-1` for false agency), `slop-rule-<n>` for a core rule or
-  `slop-phrases-<section>`. Close with five lines, one per axis of the rules'
-  採点 section: `score | <axis> | <1-10> | <grounds in one sentence>`";
-- the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file: the
-  user's own notes on wordings they rejected, read after the reference;
-- the output shape, one finding per line:
-  `<line> | <marker id> | "<sentence>" | <rewrite> | <reason>`, the reason
-  in one sentence;
-- "report every finding, no severity filter";
-- the scope: notation, kana, sentence length and the register's wordings belong
-  to the other layers, and a verbatim quotation is left as it stands;
-- English as the output language, with Japanese quoted verbatim.
+- `document`: the document's absolute path.
+- `style`: the style line from Step 2.
+- `references`: the absolute path of `{SKILL_DIR}/references`.
+- `patterns`: the absolute path in `$PROSE_LINT_PATTERNS`, when that names a file.
 
 It withholds who wrote the text, the task it served, any reason a wording was
 chosen, the lint results and any expected finding. A reader handed those reads
 the intent into each sentence and passes the English frame it sits in.
+
+When the launch returns "Agent type not found", as in a session that started before the
+plugin was updated, launch `general-purpose` on opus with a prompt made of the body of
+`{SKILL_DIR}/../../agents/japanese-reader.md` below its frontmatter, followed by the fields.
 
 Its findings join the ledger and are ruled on like any other hit.
 
@@ -329,7 +296,16 @@ The register is a Markdown table, or a CSV with the header `Pattern,Instead,Why`
 of rejected wordings: `$PROSE_LINT_REGISTER`, else `{HOME}/vocabulary.md`, else
 the sample in `assets/`. A CSV headed `Pattern,Instead,Except` lists plain words
 matched as written, and its `Except` column gives the exception shown with each
-hit; `register.py`'s docstring has the rules. The script prints
+hit; `register.py`'s docstring has the rules. A plain word that holds kana
+or kanji is matched on morpheme boundaries, read with sudachipy: the row 語
+matches 「この語は」 and leaves 語った alone, 置き leaves 位置 and 置き換える,
+旅 leaves 旅行, and a verb row written as its stem (述べ) matches every form
+of that verb. Measured for 1.12.0 with one user's register of 344 rows:
+substring matching flagged 92.5 % of 400 news articles, and the boundary test
+dropped 16.4 % of the hits on news text held out of the baseline, each of the
+sampled ones a different word. A word used in its literal sense still
+matches (請求 in 請求書, 事故 in 交通事故), so a row for a figurative use
+needs its `Except` text, and the ruling stays with the reader of the hit. The script prints
 which one it read. The sample carries twelve rows in three groups.
 
 - Definition by negation, two rows. The Japanese row on `ではない` also covers
@@ -706,6 +682,57 @@ second pass as `ga_conjunction`, and a joined sentence can pass 90
 characters; each is kept under those rules as a contrast, or as a sentence
 that reads in one pass.
 
+### Norm
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/norm.py <file>
+```
+
+For a deck, `<file>` is `<tmp>/deck.md`. Every layer above names a form to
+take out, so a text can clear them all by leaving ordinary Japanese out: the
+が and ので that join clauses, the connective that opens a sentence, the
+demonstrative, the passive, the verb made of a noun and する. This layer
+counts those forms with sudachipy and lays each rate beside the same rate in
+a baseline of human-written text. The shipped baseline,
+`assets/norm-baseline.json`, was counted from the 1,405 articles of Japanese
+Wikinews (CC BY 4.0) that run to 10 sentences or more. It holds rates and no
+text.
+
+Six rates are marked, each on the side a text moves to when those forms are
+left out: `joints`, `glue` (conjunctive が, opening connectives and
+demonstratives together), `sahen` and `length` when they fall under the value
+95 % of the baseline documents reach, `negative_end` and `colon` when they
+pass the value 95 % of them stay under. Two or more marks make the text
+`off`. Measured for 1.12.0 with a baseline built from half of those articles:
+4.9 % of the 695 articles held out were marked `off`, 4.6 % of 109 science
+news articles edited by a public agency, 1.7 % of 59 sections of a government
+white paper, none of 27 human-written business and technical documents, and
+93.9 % of 297 replies Claude wrote under this plugin's hooks. Web news
+written in short sentences sits further from the baseline: 27.3 % of 982
+articles of the livedoor news corpus were marked. In those replies が joined
+clauses 6 times in 1,000 sentences, where news text holds 81 to 94.
+
+A text marked `off` is read again by paragraph, with the flow layer's
+questions: join what the text itself relates, receive the sentence before
+with この or その where it is the topic, write the verb the field writes
+(確認する, 修正する), and let a passive stand where the agent is unknown or
+beside the point. Every such fix is made of what the text already says. A
+list of steps or of measured values is short and unjoined by nature and
+stays. A document under 10 sentences gets its rates and no marks.
+
+To hold a text to another standard, build a baseline from documents you hold,
+one document a file:
+
+```
+prose-lint-run uv run {SKILL_DIR}/scripts/norm.py --build {HOME}/norm-baseline.json --name "<label>" [--plain] <folder>
+```
+
+`{HOME}/norm-baseline.json`, or the file `$PROSE_LINT_NORM_BASELINE` names,
+then takes the shipped baseline's place. A folder of NHK or newspaper
+articles the user saved, or newspaper data licensed for research, makes the
+baseline the user's own standard; 20 documents of 10 sentences or more are
+the least a baseline takes.
+
 ### Academic mode
 
 Only in academic mode. Read `{SKILL_DIR}/references/academic-japanese.md` first:
@@ -793,7 +820,7 @@ In academic mode, read also for the points of the reference's sections 1.3 to
 ### Writing a fix
 
 The unit of a fix is the paragraph. Before rewriting a sentence, read its
-paragraph and note three things the rewrite keeps, from section 2 of
+paragraph and note five things the rewrite keeps, from section 2 of
 `{SKILL_DIR}/references/flow-japanese.md`:
 
 - what the sentence is: a fact, a reason, a judgement, a request or a limit,
@@ -809,7 +836,7 @@ paragraph and note three things the rewrite keeps, from section 2 of
   the long one, and a ground stays a clause of the sentence it supports;
 - the tie it opens on: a sentence that began with a connective or a
   demonstrative (また、 こうした状況から、 これを受け、) still does. The
-  drafts of the 1.12.0 measurement hold half the connective openers of their
+  drafts of the 1.14.0 measurement hold half the connective openers of their
   originals (section 2.5 of the reference);
 - how much it holds: a purpose, a ground or a step of one course of events
   stays a clause of its sentence, and a concession stays beside the verdict
@@ -824,7 +851,7 @@ a fact, a plan, a promise or an opinion the text lacks. Where the fix would
 need one, the sentence stays and the question goes in the report. No rewrite
 adds a sentence either: one that announces what the text will do, counts its
 points or sums it up (以下では…, …は次の三つです, このように…と言える) was not
-in the text, and drafts of the 1.12.0 measurement added such sentences that
+in the text, and drafts of the 1.14.0 measurement added such sentences that
 their notes never held. The text's own sentences of that kind stay.
 
 Every rewrite, from any layer, is written to the style from Step 2:
@@ -885,16 +912,13 @@ with that reason. The script also lists the `ending_run` and `lone_run`
 passages of the fixed file; rule on those that hold a rewritten sentence.
 
 Then run natural-japanese's second run and launch the
-reader once more, fresh, on the fixed file. The reader's prompt carries the
-first read's items with the scope narrowed: the line ranges of the paragraphs
-that contain a rewritten sentence, the line of each rewritten sentence, "read
-only these ranges, with offset and limit", and "report on the sentences at
-those lines only", and "ask the questions of section 3 of the flow
-reference, `flow-cut` included, of each paragraph in these ranges, and
-list each sentence in them that only announces or sums up". A sentence on
-that list which a fix added comes out in the final pass. Merge
+reader once more, fresh, on the fixed file. Its prompt holds the first read's
+fields and `ranges`: the line ranges of the paragraphs that contain a
+rewritten sentence, and the line of each rewritten sentence. With `ranges` the
+reader also lists each sentence in them that only announces or sums up; one
+on that list which a fix added comes out in the final pass. Merge
 ranges under 10 lines apart; once they cover half the
-file, drop the ranges and let the reader read the file in full. The prompt
+file, leave `ranges` out and let the reader read the file in full. The prompt
 still withholds the original wording and the reason for each change. Rule on
 both results together and apply what holds in one final pass; that pass
 closes the run.
@@ -909,26 +933,19 @@ that contains a fix, as in "Writing a fix".
 
 ### The reader
 
-Launch one agent, `model: opus`, in a fresh context, in the background, before
-the mechanical layers. Its prompt carries:
+Launch `prose-lint:english-reader`, `model: opus`, in a fresh context, in the background,
+before the mechanical layers. The agent file holds the checks and the output line. Its prompt
+holds these fields and nothing else:
 
-- the purpose in one line: find every English sentence of one document that
-  fails in meaning or carries the shape of a Japanese draft, and propose a
-  rewrite for each;
-- the document's absolute path and the style line;
-- the absolute path of `{SKILL_DIR}/references/english-reader.md`, with "read it
-  first, answer its sentence checks for every sentence and its title and table
-  checks for every heading, slide title and table";
-- the output shape, one finding per line:
-  `<line> | <check id> | "<sentence>" | <rewrite> | <reason>`, the reason in one
-  sentence;
-- "report every finding, no severity filter";
-- the scope: what vale reports belongs to the other layers, and a verbatim
-  quotation is left as it stands.
+- `document`: the document's absolute path.
+- `style`: the style line.
+- `references`: the absolute path of `{SKILL_DIR}/references`.
 
-It withholds who wrote the text, the task it served and the lint results. After
-the fixes, launch it once more over the paragraphs that changed, as the Japanese
-reader's second read does, and rule on what it returns in one final pass.
+It withholds who wrote the text, the task it served and the lint results. When the launch
+returns "Agent type not found", use the fallback of Step 3a with
+`{SKILL_DIR}/../../agents/english-reader.md`. After the fixes, launch it once more with
+`ranges`, the line ranges of the paragraphs that changed, as the Japanese reader's second read
+does, and rule on what it returns in one final pass.
 
 ### textlint
 
@@ -1122,18 +1139,16 @@ rendering.
    missing there, source-language text left in the target, or a heading left in
    the source language. A run with no glossary skips that kind; say so in the
    report.
-2. Launch one agent, `model: opus`, in a fresh context. Its prompt carries the
-   purpose in one line (compare one translation with its source and report each
-   difference in meaning), the absolute paths of the source and the target, the
-   glossary when there is one, the absolute path of
-   `{SKILL_DIR}/references/translation-check.md` with "read it first, ask its
-   questions of every section and use its output line", "report every finding,
-   no severity filter", and English as the output language with quoted text
-   verbatim. It withholds who translated the text, the task and the script's
-   findings.
+2. Launch `prose-lint:translation-comparer`, `model: opus`, in a fresh context. The agent
+   file holds the questions and the output line. Its prompt holds these fields and nothing
+   else: `source` and `target`, the absolute paths of the source and the target; `references`,
+   the absolute path of `{SKILL_DIR}/references`; and `glossary`, the glossary's absolute path
+   when there is one. It withholds who translated the text, the task and the script's
+   findings. When the launch returns "Agent type not found", use the fallback of Step 3a with
+   `{SKILL_DIR}/../../agents/translation-comparer.md`.
 3. Rule on the script's lines and the agent's findings together, then make one
    rewrite pass over the target, one Edit per paragraph that contains a fix.
-   Launch the agent once more over the changed lines only, with the source
+   Launch the agent once more with `ranges`: the changed lines of the target, with the source
    ranges beside them. Correct what it finds and stop: further passes move the
    text toward the rewriter's wording, and the meaning gains nothing.
 4. Run Step 3a on a Japanese target and Step 3b on an English one. A rewrite in
@@ -1155,7 +1170,9 @@ rendering.
   of plain endings and of lone sentences, and whether the document is marked
   `flat`. The score counts wordings and reads
   none of this, so a high score beside a `flat` mark means the text is clean
-  and reads as a list. In academic mode, add a line under the score: that the run was in
+  and reads as a list. Then one line from `norm.py`: the baseline's name,
+  the marked rates with their values, and whether the text is `off`, before
+  the fixes and after them. In academic mode, add a line under the score: that the run was in
   academic mode and why, and the academic register's hit count before and
   after the fixes. The ledger follows by layer, with the reader's findings as
   one layer; the academic ledger comes after the register's, with each hit's

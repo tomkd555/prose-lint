@@ -471,7 +471,7 @@ Notes on the counts:
   documents (システムに存在するすべてのドキュメント among them), so it stops at
   a kanji or katakana noun.
 
-### Business documents (1.12.0)
+### Business documents (1.14.0)
 
 43 documents that companies and JPCERT/CC put out in 2021 (30 press releases,
 8 posts of an engineering blog, 5 security alerts; 1,291 sentences), fetched

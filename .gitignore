@@ -1,7 +1,37 @@
+# Public repository: ignore every root entry, then allow the install set
+/*
+
+# The install set: what a user needs to install and run the plugin
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/LICENSE
+!/.claude-plugin/
+!/plugins/
+
+# Tests, evals and research inside the allowed folders
+tests/
+__tests__/
+evals/
+eval/
+research/
+fixtures/
+test_*.py
+*_test.py
+conftest.py
+*.test.*
+*.spec.*
+
 # Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.ruff_cache/
+
+# Local secret files
+.env
+.env.*
+!.env.example
 
 # Local harness settings
 .claude/settings.local.json
@@ -9,4 +39,4 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
-
+[Dd]esktop.ini

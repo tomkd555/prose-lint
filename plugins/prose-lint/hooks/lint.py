@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.9"
-# dependencies = ["regex>=2023.0"]
+# dependencies = ["regex>=2023.0", "sudachipy>=0.6.8", "sudachidict-core>=20240409"]
 # ///
 """lint.py - the plugin's wording-check hooks.
 
@@ -13,8 +13,9 @@ lines the tool changed (the whole file for a new one). A source file (.py, .ps1,
 hold Japanese, which sits in its comments and strings. A textlint finding of the
 blocking tier or a register hit returns decision=block; advisory and vale
 findings alone go to Claude as additionalContext and leave the write in place.
-A new Japanese Markdown or text file also runs scripts/flow.py, and a file it
-marks flat gets a note in the same way, which never blocks.
+A new Japanese Markdown or text file also runs scripts/flow.py and
+scripts/norm.py. A file flow.py marks flat, or norm.py marks off its baseline of
+human-written text, gets a note in the same way, which never blocks.
 A counter per file stops reporting a set of findings after it has blocked 3
 times in a row. A file in a folder named claude-reply is a reply draft: the
 register rows flagged chat stay out, as they do for replies.
@@ -191,6 +192,19 @@ def flat_profile(path: Path):
         return None
 
 
+def off_norm(path: Path):
+    """Return norm.py's result for a Japanese file when it marks the file off its baseline, else None."""
+    uv = shutil.which("uv")
+    script = ROOT / "skills" / "prose-lint" / "scripts" / "norm.py"
+    if not (uv and script.is_file()):
+        return None
+    result = run_json([uv, "run", "-q", "--no-project", str(script), "--json", str(path)])
+    try:
+        return result if result.get("off") else None
+    except AttributeError:
+        return None
+
+
 def register_hits(text: str, fmt: str = "md", chat: bool = False) -> list[dict]:
     """Match the register; chat leaves out the rows flagged chat, as for a reply."""
     try:
@@ -305,7 +319,7 @@ def lint_file(data: dict) -> int:
     if suffix in CODE:  # identifiers are ASCII: the register's Japanese hits fall in comments and strings
         hits = [h for h in hits if JAPANESE.search(h["matched"])]
         blocking, advisory, notation = [], [], 0
-        flat = None
+        flat = norm = None
     else:
         # Routed on the running text: markup, styles and code fences hold no hiragana.
         lang = prose_lang(content) if fmt == "md" else lang_of(" ".join(t for t, _ in register.units(content, fmt)[0]))
@@ -314,6 +328,7 @@ def lint_file(data: dict) -> int:
             advisory += vale(path)
         # Read once, when the file is new: an Edit changes a few lines of a document already read.
         flat = flat_profile(path) if lang == "ja" and fmt == "md" and lines is None else None
+        norm = off_norm(path) if lang == "ja" and fmt == "md" and lines is None else None
     if lines is not None:
         blocking, advisory, hits = ([f for f in found if f.get("line") in lines] for found in (blocking, advisory, hits))
         notation = 0
@@ -323,7 +338,7 @@ def lint_file(data: dict) -> int:
     counter = (state_dir() or Path(tempfile.gettempdir())) / f"block-{session_id(data)}-{key}"
     if not has_block:
         counter.unlink(missing_ok=True)
-        if not (advisory or flat):
+        if not (advisory or flat or norm):
             return 0
     else:
         # The loop guard counts blocks on the same findings: a new finding is reported afresh.
@@ -362,6 +377,15 @@ def lint_file(data: dict) -> int:
                    "sentences whose cause, contrast or condition the text already states, and end each sentence by "
                    "what it is: a fact, its reason, a judgement, a request. Add no fact, and leave a list of steps or "
                    "of measured values as it is. This does not block.")
+    if norm:
+        marked = [r for r in norm["rates"] if r["mark"]]
+        out.append(f'norm.py reads this file as off its baseline of human-written text ({norm["baseline"]}): '
+                   + "; ".join(f'{r["rate"]} {r["value"]}, where 95 % of the baseline documents hold '
+                               f'{r["low"] if r["mark"] == "low" else r["high"]} or {"more" if r["mark"] == "low" else "less"}'
+                               for r in marked)
+                   + ". The text leaves out forms ordinary Japanese uses. Reread it by paragraph and write the "
+                   "sentences as a news article or a business report would: " + " ".join(r["hint"] + "。" for r in marked)
+                   + " Add no fact. This does not block.")
     if has_block:
         out.append(f"If a finding cannot be followed, state the reason and let the user decide. After "
                    f"{MAX_BLOCKS} blocks in a row on the same findings, the hook stops reporting them.")
